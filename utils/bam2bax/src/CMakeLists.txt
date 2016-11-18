@@ -51,6 +51,7 @@ if (NOT APPLE)
 else()
 endif()
 target_link_libraries(bam2bax
+    ${PBBAM_LINK_FLAG}
     ${BLASR_LIBRARIES}
     ${PBIHDF_LIBRARIES}
     ${PBDATA_LIBRARIES}
@@ -67,6 +68,7 @@ set_target_properties(bam2plx PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${Bam2Bax_BinDir}
 )
 target_link_libraries(bam2plx
+    ${PBBAM_LINK_FLAG}
     ${BLASR_LIBRARIES}
     ${PBIHDF_LIBRARIES}
     ${PBDATA_LIBRARIES}

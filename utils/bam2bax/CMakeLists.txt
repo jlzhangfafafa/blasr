@@ -66,8 +66,15 @@ endif()
 
 if (NOT PacBioBAM_INCLUDE_DIRS OR NOT PacBioBAM_LIBRARIES
     OR NOT HTSLIB_INCLUDE_DIRS OR NOT HTSLIB_LIBRARIES)
-    set(PacBioBAM_RootDir ${Bam2Bax_RootDir}/../../../../../lib/cpp/pbbam)
+    set(PacBioBAM_LIBRARIES )
+    set(PacBioBAM_INCLUDE_DIRS )
+    set(HTSLIB_INCLUDE_DIRS )
+    set(HTSLIB_LIBRARIES )
+    if (NOT PacBioBAM_RootDir)
+        message ("Must either set (PacBioBAM_INCLUDE_DIRS, PacBioBAM_LIBRARIES, HTSLIB_INCLUDE_DIRS, and HTSLIB_LIBRARIES) or PacBioBAM_RootDir!")
+    endif()
     add_subdirectory(${PacBioBAM_RootDir} external/build/pbbam)
+    set(PBBAM_LINK_FLAG pbbam)
 endif()
 
 if (NOT Boost_INCLUDE_DIRS)
@@ -130,4 +137,3 @@ if(Bam2Bax_build_tests)
     add_subdirectory(${GTEST_SRC_DIR} external/gtest/build)
     add_subdirectory(tests)
 endif()
-
