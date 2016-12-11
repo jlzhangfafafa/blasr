@@ -135,8 +135,9 @@ void RegisterBlasrOptions(CommandLineParser & clp, MappingParameters & params) {
     clp.RegisterIntOption("-flankSize", &params.flankSize, "", CommandLineParser::NonNegativeInteger);
     clp.RegisterStringOption("-titleTable", &params.titleTableName, "");
     clp.RegisterFlagOption("-useSensitiveSearch", &params.doSensitiveSearch, "");
-    clp.RegisterFlagOption("-ignoreRegions", &params.useRegionTable, "");
-    clp.RegisterFlagOption("-ignoreHQRegions", &params.useHQRegionTable, "");
+    // ignoreRegions or ignoreHQRegions implies region table must exist (i.e., query is HDF).
+    clp.RegisterFlagOption("-ignoreRegions", &params.setIgnoreRegions, "");
+    clp.RegisterFlagOption("-ignoreHQRegions", &params.setIgnoreHQRegions, "");
     clp.RegisterFlagOption("-computeAlignProbability", &params.computeAlignProbability, "");
     clp.RegisterStringOption("-unaligned", &params.unalignedFileName, "");
     // Print unaligned reads names only

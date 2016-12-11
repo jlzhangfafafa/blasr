@@ -142,7 +142,9 @@ public:
     bool refineConcordantAlignments;
     int  flankSize;
     bool useRegionTable;
+    bool setIgnoreRegions;
     bool useHQRegionTable;
+    bool setIgnoreHQRegions;
     bool printUnaligned;
     bool noPrintUnalignedSeqs; // print unaligned reads names only.
     string unalignedFileName;
@@ -311,7 +313,9 @@ public:
         refineConcordantAlignments=false;
         flankSize=40;
         useRegionTable = true;
+        setIgnoreRegions = false;
         useHQRegionTable=true;
+        setIgnoreHQRegions = false;
         printUnaligned = false;
         unalignedFileName = "";
         noPrintUnalignedSeqs = false;
@@ -454,6 +458,9 @@ public:
         //
         // Fix all logical incompatibilities with parameters.
         //
+        if (setIgnoreRegions) { useRegionTable = false; }
+        if (setIgnoreHQRegions) { useHQRegionTable = false; }
+
         if (nowarp) {
             warp = false;
         }
@@ -533,6 +540,14 @@ public:
         if (regionTableFileName != "") {
             useRegionTable = true;
             readSeparateRegionTable = true;
+        }
+
+        bool isHDFFile = (queryFileType == FileType::HDFPulse or
+                          queryFileType == FileType::HDFBase or
+                          queryFileType == FileType::HDFCCSONLY);
+        if ((setIgnoreRegions or setIgnoreHQRegions) and not isHDFFile) {
+            cout << "ERROR: query must be HDF files in order to set ignoreRegions or ignoreHQRegions." << std::endl;
+            exit(1);
         }
         if (ccsFofnFileName != "") {
             readSeparateCcsFofn = true;
