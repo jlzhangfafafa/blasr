@@ -714,6 +714,11 @@ public:
             return ReadType::CCS;
         }
         if (queryFileType == FileType::PBBAM) {
+            if (not mapSubreadsSeparately) {
+                // specifal case: blasr subread.bam ref.fa --noSplitSubreads
+                // input type seems like subread while infact is polymerase
+                return ReadType::POLYMERASE;
+            }
             // Read type in BAM may be CCS, SUBREAD, HQREGION or POLYMERASE.
             // Determine it later.
             return ReadType::UNKNOWN;
@@ -721,7 +726,11 @@ public:
         if (mapSubreadsSeparately) {
             return ReadType::SUBREAD;
         } else {
-            if (useHQRegionTable) {
+            if (useHQRegionTable and
+                (queryFileType == FileType::HDFCCSONLY or
+                 queryFileType == FileType::HDFBase or
+                 queryFileType == FileType::HDFPulse)) {
+                // Only HDF files can contain region table.
                 return ReadType::HQREGION;
             } else {
                 return ReadType::POLYMERASE;
