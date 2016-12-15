@@ -16,3 +16,37 @@ Test blasr with --noSplitSubreads
   [INFO]* (glob)
   $ sort $OUTDIR/lambda_bax_noSplitSubreads_tmp_subset.m4 > $OUTDIR/lambda_bax_noSplitSubreads_subset.m4
   $ diff $OUTDIR/lambda_bax_noSplitSubreads_subset.m4 $STDDIR/lambda_bax_noSplitSubreads_subset.m4
+
+# Test key command of unrolled resequencing, check bam header and alignments in output
+  $ outbam=$OUTDIR/unrolled-4mer.bam
+  $ outsam=$OUTDIR/unrolled-4mer.sam
+  $ query=$DATDIR/unrolled/m54006_151021_185942.subreadset.xml
+  $ ref=$DATDIR/unrolled/All4mer_V2_11_V2_13_V2_15_V2_44_circular_72x_l50256.fasta
+  $ stdsam=$STDDIR/unrolled-4mer.sam
+  $ rm -rf $outbam $outsam
+  $ $EXEC $query $ref --out $outbam --noSplitSubreads --fastMaxInterval --bam
+  [INFO]* (glob)
+  [INFO]* (glob)
+  $ $SAMTOOLS view -h $outbam -o $outsam
+  $ diff $outsam $stdsam
+  $ grep '@RG' $outsam
+  @RG\tID:e6043908* (glob)
+  $ grep 'RG:Z:e6043908' $outsam |wc -l
+  4
+
+
+  $ query=$DATDIR/unrolled/m54006_151021_185942.subreads.bam
+  $ outbam=$OUTDIR/unrolled-4mer-bam-in.bam
+  $ outsam=$OUTDIR/unrolled-4mer-bam-in.sam
+  $ rm -rf $outbam $outsam
+  $ $EXEC $query $ref --out $outbam --noSplitSubreads --fastMaxInterval --bam
+  [INFO]* (glob)
+  [INFO]* (glob)
+  $ $SAMTOOLS view -h $outbam -o $outsam
+  $ grep -v '^@PG' $outsam > ${outsam}.tmp && grep -v '^@PG' $stdsam > ${stdsam}.tmp && diff ${outsam}.tmp ${stdsam}.tmp
+  $ grep '@RG' $outsam
+  @RG\tID:e6043908* (glob)
+  $ grep 'RG:Z:e6043908' $outsam |wc -l
+  4
+
+

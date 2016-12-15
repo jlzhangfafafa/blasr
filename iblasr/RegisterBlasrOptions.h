@@ -290,8 +290,8 @@ const string BlasrHelp(MappingParameters & params) {
              << "               Use no/hard/subread/soft clipping, ONLY for SAM/BAM output."<< endl
              << "   --printSAMQV (false)" << endl
              << "               Print quality values to SAM output." << endl
-             << "   --cigarUseSeqMatch (false)" << endl
-             << "               CIGAR strings in SAM/BAM output use '=' and 'X' to represent sequence match and mismatch instead of 'M'." << endl << endl
+//             << "   --cigarUseSeqMatch (false)" << endl
+//             << "               CIGAR strings in SAM/BAM output use '=' and 'X' to represent sequence match and mismatch instead of 'M'." << endl << endl
              << " Options for anchoring alignment regions. This will have the greatest effect on speed and sensitivity." << endl
              << "   --minMatch m (12) " << endl
              << "               Minimum seed length.  Higher minMatch will speed up alignment, " << endl
