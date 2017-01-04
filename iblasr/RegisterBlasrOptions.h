@@ -41,6 +41,7 @@ void RegisterBlasrOptions(CommandLineParser & clp, MappingParameters & params) {
     clp.RegisterFlagOption("-onegap", &params.separateGaps, "");
     clp.RegisterFlagOption("-allowAdjacentIndels", &params.allowAdjacentIndels, "", false);
     clp.RegisterFlagOption("-placeRepeatsRandomly", &params.placeRandomly, "");
+    clp.RegisterFlagOption("-placeGapConsistently", &params.placeGapConsistently, "");
     clp.RegisterIntOption("-randomSeed", &params.randomSeed, "", CommandLineParser::Integer);
     clp.RegisterFlagOption("-extend", &params.extendAlignments, "");
     clp.RegisterIntOption("-branchExpand", &params.anchorParameters.branchExpand, "", CommandLineParser::NonNegativeInteger);
@@ -245,6 +246,9 @@ const string BlasrHelp(MappingParameters & params) {
              << "               " << params.hitPolicy.Help(string(15, ' ')) << endl
              << "   --placeRepeatsRandomly (false)" << endl
              << "               DEPRECATED! If true, equivalent to --hitPolicy randombest." << endl
+             << "   --placeGapConsistently (false)" << endl
+             << "               Place gaps consistently in alignments of a read as alignments " << endl
+             << "               of its reverse complementary sequence." << endl
              << "   --randomSeed (0)" << endl
              << "               Seed for random number generator. By default (0), use current time as seed. " << endl
              << "   --noSortRefinedAlignments (false) " << endl

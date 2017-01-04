@@ -93,6 +93,7 @@ public:
     bool useRandomSeed;
     int  randomSeed;
     bool placeRandomly;
+    bool placeGapConsistently;
     bool printHeader;
     bool samplePaths;
     bool warp, nowarp;
@@ -278,6 +279,7 @@ public:
         useRandomSeed = false;
         randomSeed = 0;
         placeRandomly = false;
+        placeGapConsistently = false;
         samplePaths = false;
         nowarp = false;
         storeMapQV = true;
@@ -474,6 +476,12 @@ public:
             cerr << "Warning: placeRepeatsRandomly is deprecated, resetting hit policy to randombest." << endl;
             hitPolicyStr = "randombest";
         }
+
+        if (placeGapConsistently and refineBetweenAnchorsOnly) {
+            cout << "ERROR, --rbao and placeGapConsistently cannot be set at the same time." << endl;
+            exit(1);
+        }
+
         if ((hitPolicyStr == "random" or hitPolicyStr == "randombest") and nBest == 1) {
             cerr << "Warning: When attempting to select equivalently scoring reads at random " << endl
                 << "the bestn parameter should be greater than one." << endl;
