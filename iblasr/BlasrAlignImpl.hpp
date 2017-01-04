@@ -259,13 +259,9 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome,
         topIntEnd = topIntervals.end();
         if (params.verbosity > 0) {
             int topintind = 0;
-            cout << " intv: index start end qstart qend seq_boundary_start seq_boundary_end pvalue " << endl;
+            cout << "Top " << topIntervals.size() << " Intervals" << endl;
             for (topIntIt = topIntervals.begin();topIntIt != topIntEnd ; ++topIntIt) {
-                cout << " intv: " << topintind << " " << (*topIntIt).start << " "
-                    << (*topIntIt).end << " "
-                    << (*topIntIt).qStart << " " << (*topIntIt).qEnd << " "
-                    << seqBoundary((*topIntIt).start) << " " << seqBoundary((*topIntIt).end) << " "
-                    << (*topIntIt).pValue << endl;
+                cout << "top interval " << topintind << ", " << (*topIntIt) << endl;
                 if (params.verbosity > 2) {
                     for (size_t m = 0; m < (*topIntIt).matches.size(); m++) {
                         cout << " (" << (*topIntIt).matches[m].q << ", " << (*topIntIt).matches[m].t << ", " << (*topIntIt).matches[m].l << ") ";
@@ -612,10 +608,9 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         (void)(readOverlapsContigStart); (void)(readOverlapsContigEnd); (void)(startOverlappedContigIndex); (void)(endOverlappedContigIndex);
 
         if (params.verbosity > 0) {
-            cout << "aligning interval : " << read.length << " " << (*intvIt).start << " "
-                << (*intvIt).end  << " " << (*intvIt).qStart << " " << (*intvIt).qEnd
-                << " " << matchIntervalStart << " to " << matchIntervalEnd << " "
-                << params.approximateMaxInsertionRate << " "  << endl;
+            cout << "aligning interval: " << "read_length=" << read.length
+                 << "; interval=" << (*intvIt)
+                 << "; max_insertion_rate=" << params.approximateMaxInsertionRate << endl;
         }
         assert(matchIntervalEnd >= matchIntervalStart);
 
@@ -751,7 +746,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         alignment->qStrand           = 0;
 
         if (params.verbosity > 1) {
-            cout << "aligning read " << endl;
+            cout << "aligning read, qstrand is " << alignment->qStrand
+                 << ", tstrand is " << alignment->tStrand << endl;
             static_cast<DNASequence*>(&(alignment->qAlignedSeq))->PrintSeq(cout);
             cout << endl << "aligning reference" << endl;
             static_cast<DNASequence*>(&(alignment->tAlignedSeq))->PrintSeq(cout);
