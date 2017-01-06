@@ -779,7 +779,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
             // sdp alignment to define the regions of the read that map.
             //
             if (params.refineBetweenAnchorsOnly) {
-
+                // rbao && placeGapConsistently can not be set together
+                assert(not params.placeGapConsistently);
                 //
                 // Run SDP alignment only between the genomic anchors,
                 // including the genomic anchors as part of the alignment.
@@ -1005,6 +1006,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         //  specify extending alignments, try and align extra bases at
         //  the beginning and end of alignments.
         if (params.extendAlignments) {
+            // extend && placeGapConsistently can not be set together
+            assert(not params.placeGapConsistently);
 
             //
             // Modify the alignment so that the start and end of the

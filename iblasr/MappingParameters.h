@@ -477,9 +477,28 @@ public:
             hitPolicyStr = "randombest";
         }
 
-        if (placeGapConsistently and refineBetweenAnchorsOnly) {
-            cout << "ERROR, --rbao and placeGapConsistently cannot be set at the same time." << endl;
-            exit(1);
+        if (placeGapConsistently) {
+            if (concordant) {
+                cout << "ERROR, concordant and placeGapConsistently cannot be set at the same time." << endl;
+                exit(1);
+            }
+
+            if (refineBetweenAnchorsOnly) {
+                cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time." << endl;
+                exit(1);
+            }
+            if (extendAlignments) {
+                cout << "ERROR, extend and placeGapConsistently cannot be set at the same time." << endl;
+                exit(1);
+            }
+            if (not useGuidedAlign) {
+                cout << "ERROR, noUseGuidedAlign and placeGapConsistently cannot be set the same time." << endl;
+                exit(1);
+            }
+            if (affineAlign) {
+                cout << "ERROR, affineAlign and placeGapConsistently cannot be set the same time." << endl;
+                exit(1);
+            }
         }
 
         if ((hitPolicyStr == "random" or hitPolicyStr == "randombest") and nBest == 1) {

@@ -646,6 +646,8 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
     idsScoreFn.globalDeletionPrior = params.globalDeletionPrior;
 
     if (params.doGlobalAlignment) {
+        // global and placeGapConsistently can not set at the same time
+        assert(not params.placeGapConsistently);
         SMRTSequence subread;
         subread.ReferenceSubstring(*bothQueryStrands[0],
                 bothQueryStrands[0]->SubreadStart(),
@@ -701,6 +703,8 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
                     alignmentCandidate.qAlignedSeqPos + alignmentCandidate.qPos,
                     (alignmentCandidate.blocks[lastBlock].qPos +
                      alignmentCandidate.blocks[lastBlock].length));
+
+            assert(not (params.affineAlign and params.placeGapConsistently));
 
             if (!params.ignoreQualities && ReadHasMeaningfulQualityValues(alignmentCandidate.qAlignedSeq)) {
                 if (params.affineAlign) {
@@ -773,7 +777,7 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
         }
     }
     else {
-
+        assert(not params.placeGapConsistently);
 
         //
         // This assumes an SDP alignment has been performed to create 'alignmentCandidate'.
