@@ -699,7 +699,8 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
                      alignmentCandidate.blocks[0].tPos));
 
             //      qSeq.ReferenceSubstring(alignmentCandidate.qAlignedSeq,
-            qSeq.ReferenceSubstring(*bothQueryStrands[0],
+            size_t queryReadIndex = (alignmentCandidate.qStrand == Forward)?0:1;
+            qSeq.ReferenceSubstring(*bothQueryStrands[queryReadIndex],
                     alignmentCandidate.qAlignedSeqPos + alignmentCandidate.qPos,
                     (alignmentCandidate.blocks[lastBlock].qPos +
                      alignmentCandidate.blocks[lastBlock].length));
@@ -962,6 +963,11 @@ void PrintAlignment(T_AlignmentCandidate &alignment,
 #endif
                     ) {
    try {
+    // Before printing alignments, make sure query is always Forward.
+    // If query was Reverse, reverse complement both query and target 
+    // and recomputes all coordinates.
+    alignment.MakeQueryForward();
+
     if (params.printFormat == StickPrint) {
       PrintAlignmentStats(alignment, outFile);
       StickPrintAlignment(alignment,

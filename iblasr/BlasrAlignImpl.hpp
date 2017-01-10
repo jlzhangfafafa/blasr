@@ -726,6 +726,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
             alignment->tStrand = Forward;
         }
         else {
+            if (not params.placeGapConsistently) {
             DNALength rcAlignedSeqPos = genome.MakeRCCoordinate(alignment->tAlignedSeqPos + alignment->tAlignedSeqLength - 1);
             genome.CopyAsRC(alignment->tAlignedSeq, rcAlignedSeqPos, alignment->tAlignedSeqLength);
             // Map forward coordinates into reverse complement.
@@ -735,15 +736,29 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
             swap(intervalContigStartPos, intervalContigEndPos);
             alignment->tAlignedSeqPos = rcAlignedSeqPos;
             alignment->tStrand        = Reverse;
+            } else {
+            // To place gaps consistently for both forward/reverse strand alignments,
+            // reference genome is ALWAYS ALIGNED in FORWARD direction, rc query instead.
+            alignment->tAlignedSeq.Copy(genome, alignment->tAlignedSeqPos, alignment->tAlignedSeqLength);
+            alignment->tStrand        = Forward;
+            alignment->qStrand        = Reverse;
+            }
         }
 
         // Configure the part of the query that is aligned.  The entire
         // query should always be aligned.
+        if (alignment->qStrand == Forward) {
         alignment->qAlignedSeqPos    = 0;
         alignment->qAlignedSeq.ReferenceSubstring(read);
         alignment->qAlignedSeqLength = alignment->qAlignedSeq.length;
         alignment->qLength           = read.length;
-        alignment->qStrand           = 0;
+        } else { // query is reverse complemented.
+        alignment->qAlignedSeqPos    = 0;
+        alignment->qAlignedSeq.ReferenceSubstring(rcRead);
+        alignment->qAlignedSeqLength = alignment->qAlignedSeq.length;
+        assert (read.length == rcRead.length);
+        alignment->qLength           = rcRead.length;
+        }
 
         if (params.verbosity > 1) {
             cout << "aligning read, qstrand is " << alignment->qStrand
