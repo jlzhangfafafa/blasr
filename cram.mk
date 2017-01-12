@@ -6,13 +6,14 @@ ctest/multipart.t \
 ctest/affineAlign.t            ctest/bamOut.t           ctest/ccsH5.t           ctest/filtercriteria.t  ctest/m0-5.t \
 ctest/fofn.t \
 ctest/alignScore.t             ctest/hitpolicy.t       ctest/noSplitSubreads.t \
-ctest/bamIn.t                  ctest/open_fail.t       ctest/verbose.t         ctest/deterministic.t
+ctest/bamIn.t                  ctest/open_fail.t       ctest/verbose.t         ctest/deterministic.t \
+ctest/pgc-naive.t ctest/pgc-fasta.t
 
 
 MILD_CTESTS := \
 	ctest/concordant.t ctest/bug25766.t ctest/holeNumbers.t
 
-SLOW_CTESTS := ctest/bug25328.t
+SLOW_CTESTS := ctest/bug25328.t ctest/pgc-big.t
 
 # XXX: following tests sidelined, needs bam input after --sam option removed
 # MILD: ctest/useccsallBestN1.t
