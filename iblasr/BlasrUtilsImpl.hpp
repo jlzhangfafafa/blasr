@@ -699,8 +699,7 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
                      alignmentCandidate.blocks[0].tPos));
 
             //      qSeq.ReferenceSubstring(alignmentCandidate.qAlignedSeq,
-            size_t queryReadIndex = (alignmentCandidate.qStrand == Forward)?0:1;
-            qSeq.ReferenceSubstring(*bothQueryStrands[queryReadIndex],
+            qSeq.ReferenceSubstring(*bothQueryStrands[static_cast<size_t>((alignmentCandidate.qStrand==Forward)?0:1)],
                     alignmentCandidate.qAlignedSeqPos + alignmentCandidate.qPos,
                     (alignmentCandidate.blocks[lastBlock].qPos +
                      alignmentCandidate.blocks[lastBlock].length));
