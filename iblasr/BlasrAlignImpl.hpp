@@ -1416,16 +1416,28 @@ void AlignSubreadToAlignmentTarget(ReadAlignments & allReadAlignments,
     // Determine the strand to align the subread to.
     //
     T_AlignmentCandidate exploded;
-    bool sameAlignmentPassDirection = (alignment->tStrand == passDirection);
+    bool sameAlignmentPassDirection = ((alignment->tStrand == alignment->qStrand)?
+                                       (passDirection == 0):(passDirection == 1));
     bool computeProbIsFalse = false;
+
+    // Config aligned query read and aligned target read;
+    SMRTSequence rcsubread;
+    subread.MakeRC(rcsubread);
+    SMRTSequence & alignedRead = subread;
     DNASequence & alignedRefSequence = (sameAlignmentPassDirection?
             alignedForwardRefSequence:alignedReverseRefSequence);
+
+    if (params.placeGapConsistently and !sameAlignmentPassDirection) {
+        alignedRead = rcsubread;
+        alignedRefSequence = alignedForwardRefSequence;
+    }
+
     //
     // In the original code, parameters: bandSize=10, alignType=Global,
     // sdpTupleSize=4 (instead of 12, Local and 6) were used when
     // alignment & pass have different directions.
     //
-    int explodedScore = GuidedAlign(subread, alignedRefSequence,
+    int explodedScore = GuidedAlign(alignedRead, alignedRefSequence,
             idsScoreFn, 12, params.sdpIns, params.sdpDel,
             params.indelRate, mappingBuffers, exploded,
             Local, computeProbIsFalse, 6);
@@ -1442,11 +1454,11 @@ void AlignSubreadToAlignmentTarget(ReadAlignments & allReadAlignments,
             << " direction as the ccs-reference (or the "
             << "longestSubread-reference) alignment. " << endl
             << "subread: " << endl;
-        static_cast<DNASequence*>(&subread)->PrintSeq(threadOut);
+        static_cast<DNASequence*>(&alignedRead)->PrintSeq(threadOut);
         threadOut << endl;
         threadOut << "alignedRefSeq: " << endl;
         static_cast<DNASequence*>(&alignedRefSequence)->PrintSeq(threadOut);
-        StickPrintAlignment(exploded, (DNASequence&) subread,
+        StickPrintAlignment(exploded, (DNASequence&) alignedRead,
                 (DNASequence&) alignedRefSequence,
                 threadOut, exploded.qAlignedSeqPos,
                 exploded.tAlignedSeqPos);
@@ -1455,7 +1467,7 @@ void AlignSubreadToAlignmentTarget(ReadAlignments & allReadAlignments,
     if (exploded.blocks.size() > 0) {
         DistanceMatrixScoreFunction<DNASequence, FASTQSequence> distScoreFn(
                 SMRTDistanceMatrix, params.indel, params.indel);
-        ComputeAlignmentStats(exploded, subread.seq,
+        ComputeAlignmentStats(exploded, alignedRead.seq,
                 alignedRefSequence.seq,
                 distScoreFn2);
         if (exploded.score <= params.maxScore) {
@@ -1464,20 +1476,54 @@ void AlignSubreadToAlignmentTarget(ReadAlignments & allReadAlignments,
             // relative to the reference sequence (the specified chromosome,
             // not the whole genome).
             //
-            exploded.qStrand = 0;
-            exploded.tStrand = sameAlignmentPassDirection?0:1;
+            const DNALength q0 = subreadInterval.start;
+            const DNALength q1 = unrolledRead.length - subreadInterval.end;
+            const DNALength t0 = alignment->tAlignedSeqPos;
+            const DNALength t1 = alignment->tLength - alignment->tAlignedSeqPos - alignment->tAlignedSeqLength;
+
+            const auto ConfigureExploded = [&exploded]
+                                           (const int qStrand, const int tStrand,
+                                            const DNALength qasp, const DNALength tasp) {
+                exploded.qStrand = qStrand;
+                exploded.tStrand = tStrand;
+                exploded.tAlignedSeqPos = tasp;
+                exploded.qAlignedSeqPos = qasp;
+            };
+            // Illustrative table below.
+            // a - alignment, e - exploded alignment
+            // q - query, t - target, s - strand,
+            // apos - AlignedSeqPos, asl - AlignedSeqLength,
+            // P - passDirection, 0=subread has the same direction as the template read
+            // S - sameAlignmentPassDirection, true/y=subread has the same direction as target
+            // pgc - place gap consistently,
+            // F - Forward, R - Reverse, n - false, y - true
+            // q0 = subreadInterval.start, q1 = a.qLength - a.qtasp - a.qasl
+            // t0 = a.tapos, t1 = a.tLength - a.tasp - a.tasl
+            // +----------------------------------------------------------+
+            // | pgc | P | S | a.qs | a.ts | e.qs | e.ts | e.qasp |e.tasp |
+            // +----------------------------------------------------------+
+            // | n   | 0 | y | F    | F    | F    | F    | q0     | t0    |
+            // | n   | 1 | n | F    | F    | F    | R    | q0     | t1    |
+            // | n   | 0 | n | F    | R    | F    | R    | q0     | t0    |
+            // | n   | 1 | y | F    | R    | F    | F    | q0     | t1    |
+            // +----------------------------------------------------------+
+            // | y   | 0 | y | F    | F    | F    | F    | q0     | t0    |
+            // | y   | 1 | n | F    | F    | R    | F    | q1     | t0    |
+            // | y   | 0 | n | R    | F    | R    | F    | q1     | t0    |
+            // | y   | 1 | y | R    | F    | F    | F    | q0     | t0    |
+            // +----------------------------------------------------------+
+            const int eqs = (!params.placeGapConsistently || sameAlignmentPassDirection)?(Forward):(Reverse);
+            const int ets = (params.placeGapConsistently || sameAlignmentPassDirection)?(Forward):(Reverse);
+            const DNALength eqasp = (!params.placeGapConsistently || sameAlignmentPassDirection)?(q0):(q1);
+            const DNALength etasp = (params.placeGapConsistently || passDirection==0)?(t0):(t1);
+            ConfigureExploded(eqs, ets, eqasp, etasp);
+
             exploded.qLength = unrolledRead.length;
             exploded.tLength = alignment->tLength;
-            exploded.tAlignedSeq.Copy(alignedRefSequence);
-            exploded.tAlignedSeqPos = (passDirection == 0)?
-                (alignment->tAlignedSeqPos):
-                (exploded.tLength - alignment->tAlignedSeqPos
-                 - alignment->tAlignedSeqLength);
-            exploded.tAlignedSeqLength = alignment->tAlignedSeqLength;
-
-            exploded.qAlignedSeq.ReferenceSubstring(subread);
-            exploded.qAlignedSeqPos = subreadInterval.start;
             exploded.qAlignedSeqLength = subreadInterval.end - subreadInterval.start;
+            exploded.tAlignedSeqLength = alignment->tAlignedSeqLength;
+            exploded.qAlignedSeq.ReferenceSubstring(alignedRead);
+            exploded.tAlignedSeq.Copy(alignedRefSequence);
             exploded.mapQV = alignment->mapQV;
             exploded.tName = alignment->tName;
             exploded.tIndex = alignment->tIndex;
@@ -1498,6 +1544,9 @@ void AlignSubreadToAlignmentTarget(ReadAlignments & allReadAlignments,
             if (params.refineConcordantAlignments) {
                 vector<SMRTSequence*> vquery;
                 vquery.push_back(&unrolledRead);
+                SMRTSequence rcUnrolledRead;
+                unrolledRead.MakeRC(rcUnrolledRead);
+                vquery.push_back(&rcUnrolledRead);
                 RefineAlignment(vquery, alignedRefSequence, exploded, params, mappingBuffers);
             }
 

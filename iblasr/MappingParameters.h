@@ -478,11 +478,6 @@ public:
         }
 
         if (placeGapConsistently) {
-            if (concordant) {
-                cout << "ERROR, concordant and placeGapConsistently cannot be set at the same time." << endl;
-                exit(1);
-            }
-
             if (refineBetweenAnchorsOnly) {
                 cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time." << endl;
                 exit(1);
