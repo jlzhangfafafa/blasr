@@ -259,13 +259,9 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome,
         topIntEnd = topIntervals.end();
         if (params.verbosity > 0) {
             int topintind = 0;
-            cout << " intv: index start end qstart qend seq_boundary_start seq_boundary_end pvalue " << endl;
+            cout << "Top " << topIntervals.size() << " Intervals" << endl;
             for (topIntIt = topIntervals.begin();topIntIt != topIntEnd ; ++topIntIt) {
-                cout << " intv: " << topintind << " " << (*topIntIt).start << " "
-                    << (*topIntIt).end << " "
-                    << (*topIntIt).qStart << " " << (*topIntIt).qEnd << " "
-                    << seqBoundary((*topIntIt).start) << " " << seqBoundary((*topIntIt).end) << " "
-                    << (*topIntIt).pValue << endl;
+                cout << "top interval " << topintind << ", " << (*topIntIt) << endl;
                 if (params.verbosity > 2) {
                     for (size_t m = 0; m < (*topIntIt).matches.size(); m++) {
                         cout << " (" << (*topIntIt).matches[m].q << ", " << (*topIntIt).matches[m].t << ", " << (*topIntIt).matches[m].l << ") ";
@@ -612,10 +608,9 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         (void)(readOverlapsContigStart); (void)(readOverlapsContigEnd); (void)(startOverlappedContigIndex); (void)(endOverlappedContigIndex);
 
         if (params.verbosity > 0) {
-            cout << "aligning interval : " << read.length << " " << (*intvIt).start << " "
-                << (*intvIt).end  << " " << (*intvIt).qStart << " " << (*intvIt).qEnd
-                << " " << matchIntervalStart << " to " << matchIntervalEnd << " "
-                << params.approximateMaxInsertionRate << " "  << endl;
+            cout << "aligning interval: " << "read_length=" << read.length
+                 << "; interval=" << (*intvIt)
+                 << "; max_insertion_rate=" << params.approximateMaxInsertionRate << endl;
         }
         assert(matchIntervalEnd >= matchIntervalStart);
 
@@ -731,27 +726,39 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
             alignment->tStrand = Forward;
         }
         else {
-            DNALength rcAlignedSeqPos = genome.MakeRCCoordinate(alignment->tAlignedSeqPos + alignment->tAlignedSeqLength - 1);
-            genome.CopyAsRC(alignment->tAlignedSeq, rcAlignedSeqPos, alignment->tAlignedSeqLength);
-            // Map forward coordinates into reverse complement.
+            if (not params.placeGapConsistently) {
+                DNALength rcAlignedSeqPos = genome.MakeRCCoordinate(alignment->tAlignedSeqPos + alignment->tAlignedSeqLength - 1);
+                genome.CopyAsRC(alignment->tAlignedSeq, rcAlignedSeqPos, alignment->tAlignedSeqLength);
+                // Map forward coordinates into reverse complement.
 
-            intervalContigStartPos    = genome.MakeRCCoordinate(intervalContigStartPos) + 1;
-            intervalContigEndPos      = genome.MakeRCCoordinate(intervalContigEndPos - 1);
-            swap(intervalContigStartPos, intervalContigEndPos);
-            alignment->tAlignedSeqPos = rcAlignedSeqPos;
-            alignment->tStrand        = Reverse;
+                intervalContigStartPos    = genome.MakeRCCoordinate(intervalContigStartPos) + 1;
+                intervalContigEndPos      = genome.MakeRCCoordinate(intervalContigEndPos - 1);
+                swap(intervalContigStartPos, intervalContigEndPos);
+                alignment->tAlignedSeqPos = rcAlignedSeqPos;
+                alignment->tStrand        = Reverse;
+            } else {
+                // To place gaps consistently for both forward/reverse strand alignments,
+                // reference genome is ALWAYS ALIGNED in FORWARD direction, rc query instead.
+                alignment->tAlignedSeq.Copy(genome, alignment->tAlignedSeqPos, alignment->tAlignedSeqLength);
+                alignment->tStrand        = Forward;
+                alignment->qStrand        = Reverse;
+            }
         }
 
         // Configure the part of the query that is aligned.  The entire
         // query should always be aligned.
-        alignment->qAlignedSeqPos    = 0;
-        alignment->qAlignedSeq.ReferenceSubstring(read);
-        alignment->qAlignedSeqLength = alignment->qAlignedSeq.length;
-        alignment->qLength           = read.length;
-        alignment->qStrand           = 0;
+        const auto ConfigureQuery = [&alignment](T_QuerySequence & inputRead) {
+            alignment->qAlignedSeqPos = 0;
+            alignment->qAlignedSeq.ReferenceSubstring(inputRead);
+            alignment->qAlignedSeqLength = alignment->qAlignedSeq.length;
+            alignment->qLength           = inputRead.length;
+        };
+        assert (read.length == rcRead.length);
+        ConfigureQuery(alignment->qStrand == Forward ? read: rcRead);
 
         if (params.verbosity > 1) {
-            cout << "aligning read " << endl;
+            cout << "aligning read, qstrand is " << alignment->qStrand
+                 << ", tstrand is " << alignment->tStrand << endl;
             static_cast<DNASequence*>(&(alignment->qAlignedSeq))->PrintSeq(cout);
             cout << endl << "aligning reference" << endl;
             static_cast<DNASequence*>(&(alignment->tAlignedSeq))->PrintSeq(cout);
@@ -783,7 +790,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
             // sdp alignment to define the regions of the read that map.
             //
             if (params.refineBetweenAnchorsOnly) {
-
+                // rbao && placeGapConsistently can not be set together
+                assert(not params.placeGapConsistently);
                 //
                 // Run SDP alignment only between the genomic anchors,
                 // including the genomic anchors as part of the alignment.
@@ -1009,6 +1017,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         //  specify extending alignments, try and align extra bases at
         //  the beginning and end of alignments.
         if (params.extendAlignments) {
+            // extend && placeGapConsistently can not be set together
+            assert(not params.placeGapConsistently);
 
             //
             // Modify the alignment so that the start and end of the

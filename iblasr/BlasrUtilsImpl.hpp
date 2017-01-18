@@ -646,6 +646,8 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
     idsScoreFn.globalDeletionPrior = params.globalDeletionPrior;
 
     if (params.doGlobalAlignment) {
+        // global and placeGapConsistently can not set at the same time
+        assert(not params.placeGapConsistently);
         SMRTSequence subread;
         subread.ReferenceSubstring(*bothQueryStrands[0],
                 bothQueryStrands[0]->SubreadStart(),
@@ -697,10 +699,12 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
                      alignmentCandidate.blocks[0].tPos));
 
             //      qSeq.ReferenceSubstring(alignmentCandidate.qAlignedSeq,
-            qSeq.ReferenceSubstring(*bothQueryStrands[0],
+            qSeq.ReferenceSubstring(*bothQueryStrands[static_cast<size_t>((alignmentCandidate.qStrand==Forward)?0:1)],
                     alignmentCandidate.qAlignedSeqPos + alignmentCandidate.qPos,
                     (alignmentCandidate.blocks[lastBlock].qPos +
                      alignmentCandidate.blocks[lastBlock].length));
+
+            assert(not (params.affineAlign and params.placeGapConsistently));
 
             if (!params.ignoreQualities && ReadHasMeaningfulQualityValues(alignmentCandidate.qAlignedSeq)) {
                 if (params.affineAlign) {
@@ -773,7 +777,7 @@ void RefineAlignment(vector<T_Sequence*> &bothQueryStrands,
         }
     }
     else {
-
+        assert(not params.placeGapConsistently);
 
         //
         // This assumes an SDP alignment has been performed to create 'alignmentCandidate'.
@@ -958,6 +962,11 @@ void PrintAlignment(T_AlignmentCandidate &alignment,
 #endif
                     ) {
    try {
+    // Before printing alignments, make sure query is always Forward.
+    // If query was Reverse, reverse complement both query and target 
+    // and recomputes all coordinates.
+    alignment.MakeQueryForward();
+
     if (params.printFormat == StickPrint) {
       PrintAlignmentStats(alignment, outFile);
       StickPrintAlignment(alignment,
