@@ -69,3 +69,14 @@ Test bam input
   $ samtools view $O
   m54006_151021_185942/0/0_163\t0\ttarget\t1\t254\t61=2D52=50S\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tcx:i:2\tnp:i:1\tqe:i:163\tqs:i:0\tzm:i:0\trq:f:0.7\tRG:Z:a3e2f6e1\tAS:i:-555\tNM:i:2 (esc)
   m54006_151021_185942/0/200_363\t16\ttarget\t1\t254\t61=2D52=50S\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tcx:i:2\tnp:i:1\tqe:i:363\tqs:i:200\tzm:i:0\trq:f:0.7\tRG:Z:a3e2f6e1\tAS:i:-555\tNM:i:2 (esc)
+
+
+Test conflicting options
+  $ $EXEC $Q $T --bam --out $O --bestn 1 --rbao --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
+  [1]
+
+  $ $EXEC $Q $T --bam --out $O --bestn 1 --extend --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
+  [1]
+
+  $ $EXEC $Q $T --bam --out $O --bestn 1 --affine --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
+  [1]

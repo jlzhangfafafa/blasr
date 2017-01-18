@@ -7,7 +7,7 @@ ctest/affineAlign.t            ctest/bamOut.t           ctest/ccsH5.t           
 ctest/fofn.t \
 ctest/alignScore.t             ctest/hitpolicy.t       ctest/noSplitSubreads.t \
 ctest/bamIn.t                  ctest/open_fail.t       ctest/verbose.t         ctest/deterministic.t \
-ctest/pgc-naive.t ctest/pgc-fasta.t
+ctest/pgc-naive.t ctest/pgc-fasta.t ctest/pgc-concordant.t ctest/pgc-concordant-naive.t
 
 
 MILD_CTESTS := \
