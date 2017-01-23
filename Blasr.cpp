@@ -33,7 +33,7 @@ ReaderAgglomerate *reader = NULL;
 // 5.0 - a new major version number
 // 5.1 - transiotion to POSIX notation - double sashes before multi-character flags
 // 5.2 - --sam no longer supported
-// 5.3 - --sam supported via pbbam/IRecordWriter 
+// 5.3 - --sam supported via pbbam/IRecordWriter
 //
 const string GetMajorVersion() {
   return "5.3";
