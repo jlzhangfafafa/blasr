@@ -15,6 +15,10 @@ MILD_CTESTS := \
 
 SLOW_CTESTS := ctest/bug25328.t ctest/pgc-big.t
 
+# Possible value for XUNIT
+# --xunit-file=test-reports/blasr-cram_xunit.xml
+XUNIT ?=
+
 # XXX: following tests sidelined, needs bam input after --sam option removed
 # MILD: ctest/useccsallBestN1.t
 
@@ -29,16 +33,16 @@ SLOW_CTESTS := ctest/bug25328.t ctest/pgc-big.t
 
 
 cramfast:
-	cram -v --shell=/bin/bash ${FAST_CTESTS}
+	cram -v --shell=/bin/bash $(XUNIT) ${FAST_CTESTS}
 
 crammild:
-	cram -v --shell=/bin/bash ${MILD_CTESTS}
+	cram -v --shell=/bin/bash $(XUNIT) ${MILD_CTESTS}
 
 cramslow:
-	cram -v --shell=/bin/bash ${SLOW_CTESTS}
+	cram -v --shell=/bin/bash $(XUNIT) ${SLOW_CTESTS}
 
 cramtests:
-	cram -v --shell=/bin/bash ${FAST_CTESTS} ${MILD_CTESTS} ${SLOW_CTESTS}
+	cram -v --shell=/bin/bash $(XUNIT) ${FAST_CTESTS} ${MILD_CTESTS} ${SLOW_CTESTS}
 
 cramqu:
 	for test in ${FAST_CTESTS}; do \
