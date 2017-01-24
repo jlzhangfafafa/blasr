@@ -1493,7 +1493,7 @@ int main(int argc, char* argv[]) {
           }
         }
         if (threads) {
-            delete threads;
+            delete[] threads;
             threads = NULL;
         }
       }
