@@ -5,6 +5,10 @@
 #include "iblasr/BlasrAlign.hpp"
 #include "iblasr/RegisterBlasrOptions.h"
 
+#if CMAKE_BUILD
+#include "BlasrVersion.h"
+#endif
+
 //#define USE_GOOGLE_PROFILER
 #ifdef USE_GOOGLE_PROFILER
 #include "gperftools/profiler.h"
@@ -37,6 +41,9 @@ const string GetMajorVersion() {
 
 // version format is 3 numbers sparated by dots : Version.Subversion.SHA1
 const string GetVersion(void) {
+#if CMAKE_BUILD
+  return PacBio::BlasrVersion() + "." + PacBio::BlasrGitSha1();
+#else
   string gitVersionString(SHA1_7);  // gitVersionString is first 7 characters of SHA1
   string version = GetMajorVersion();
   // if (gitVersionString.size() == 7) {
@@ -44,6 +51,7 @@ const string GetVersion(void) {
     version.append(gitVersionString);
   // }
   return version;
+#endif
 }
 
 /// Checks whether a smrtRead meets the following criteria
