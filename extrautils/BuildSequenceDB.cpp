@@ -1,21 +1,23 @@
 #include <string>
-#include "utils.hpp"
-#include "metagenome/SequenceIndexDatabase.hpp"
 #include "CommandLineParser.hpp"
 #include "FASTAReader.hpp"
+#include "metagenome/SequenceIndexDatabase.hpp"
+#include "utils.hpp"
 #include "utils/FileOfFileNames.hpp"
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 
     CommandLineParser clp;
     string fastaFileName, indexFileName;
     vector<string> fastaFileNames;
     vector<string> opts;
     clp.SetProgramName("bsdb");
-    clp.SetProgramSummary("Build an index database on a file of sequences.\n"
-            " The index is used to map to reads given alignment positions.\n");
+    clp.SetProgramSummary(
+        "Build an index database on a file of sequences.\n"
+        " The index is used to map to reads given alignment positions.\n");
     clp.RegisterStringOption("fasta", &fastaFileName, "A file with sequences to build an index.");
     clp.RegisterStringOption("index", &indexFileName, "The index file.");
     clp.RegisterPreviousFlagsAsHidden();
@@ -27,8 +29,7 @@ int main(int argc, char* argv[]) {
 
     if (FileOfFileNames::IsFOFN(fastaFileName)) {
         FileOfFileNames::FOFNToList(fastaFileName, fastaFileNames);
-    }
-    else {
+    } else {
         fastaFileNames.push_back(fastaFileName);
     }
 
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
     SequenceIndexDatabase<FASTASequence> seqDB;
 
     int fileNameIndex;
-    for (fileNameIndex = 0; fileNameIndex < fastaFileNames.size(); fileNameIndex++){ 
+    for (fileNameIndex = 0; fileNameIndex < fastaFileNames.size(); fileNameIndex++) {
         FASTAReader reader;
         FASTASequence seq;
         reader.Init(fastaFileNames[fileNameIndex]);

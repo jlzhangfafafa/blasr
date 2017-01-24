@@ -1,6 +1,6 @@
 #include <assert.h>
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "FASTAReader.hpp"
@@ -13,16 +13,19 @@
 
 using namespace std;
 
-int main(int argc, char* argv[]) {
-	if (argc < 3) {
+int main(int argc, char* argv[])
+{
+    if (argc < 3) {
         cout << "usage: swMatcher query target [-indel i] [-local] [-showalign] " << endl
              << "       [-type queryfit|overlap|global] [-match m ] [-mismatch m]" << endl
              << "    or [-local] [-queryfit] [-overlap] [-fixedtarget] [-fixedquery]" << endl
-             << "       [-printmatrix]"<< endl
-             << "   Unless -showalign is specified, output is tabular and in the formt:"<<endl
-             << "   query_length target_length align_score query_start query_end target_start target_end"<<endl;
-		exit(1);
-	}
+             << "       [-printmatrix]" << endl
+             << "   Unless -showalign is specified, output is tabular and in the formt:" << endl
+             << "   query_length target_length align_score query_start query_end target_start "
+                "target_end"
+             << endl;
+        exit(1);
+    }
 
     string queryName, targetName;
     queryName = argv[1];
@@ -34,76 +37,58 @@ int main(int argc, char* argv[]) {
     int match = 0;
     int mismatch = 0;
     int fixedTarget = 0;
-    int fixedQuery  = 0;
+    int fixedQuery = 0;
     bool printMatrix = false;
     int insertion = 4;
-    int deletion  = 5;
+    int deletion = 5;
     while (argi < argc) {
         if (strcmp(argv[argi], "-insertion") == 0) {
             insertion = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-deletion") == 0) {
+        } else if (strcmp(argv[argi], "-deletion") == 0) {
             deletion = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-local") == 0) {
+        } else if (strcmp(argv[argi], "-local") == 0) {
             alignType = Local;
-        }
-        else if (strcmp(argv[argi], "-showalign") == 0) {
+        } else if (strcmp(argv[argi], "-showalign") == 0) {
             showAlign = 1;
-        }
-        else if (strcmp(argv[argi], "-fixedtarget") == 0) {
+        } else if (strcmp(argv[argi], "-fixedtarget") == 0) {
             fixedTarget = 1;
-        }
-        else if (strcmp(argv[argi], "-fixedquery") == 0) {
+        } else if (strcmp(argv[argi], "-fixedquery") == 0) {
             fixedQuery = 1;
-        }
-        else if (strcmp(argv[argi], "-type") == 0) {
+        } else if (strcmp(argv[argi], "-type") == 0) {
             ++argi;
             if (strcmp(argv[argi], "queryfit") == 0) {
                 alignType = QueryFit;
-            }
-            else if (strcmp(argv[argi], "targetfit") == 0) {
+            } else if (strcmp(argv[argi], "targetfit") == 0) {
                 alignType = TargetFit;
-            }
-            else if (strcmp(argv[argi], "overlap") == 0) {
+            } else if (strcmp(argv[argi], "overlap") == 0) {
                 alignType = Overlap;
-            }
-            else if (strcmp(argv[argi], "global") == 0) {
+            } else if (strcmp(argv[argi], "global") == 0) {
                 alignType = Global;
-            }
-            else if (strcmp(argv[argi], "tpqs") == 0) {
+            } else if (strcmp(argv[argi], "tpqs") == 0) {
                 alignType = TPrefixQSuffix;
-            }
-            else if (strcmp(argv[argi], "tsqp") == 0 ){ 
+            } else if (strcmp(argv[argi], "tsqp") == 0) {
                 alignType = TSuffixQPrefix;
-            }
-            else {
-                cout <<" ERROR, aligntype must be one of queryfit, overlap, or global" << endl;
+            } else {
+                cout << " ERROR, aligntype must be one of queryfit, overlap, or global" << endl;
                 exit(1);
             }
-        }
-        else if(strcmp(argv[argi], "-printmatrix") == 0) {
+        } else if (strcmp(argv[argi], "-printmatrix") == 0) {
             printMatrix = true;
-        }
-        else if (strcmp(argv[argi], "-local") == 0) {
+        } else if (strcmp(argv[argi], "-local") == 0) {
             alignType = Local;
-        }
-        else if (strcmp(argv[argi], "-queryfit") == 0) {
+        } else if (strcmp(argv[argi], "-queryfit") == 0) {
             alignType = QueryFit;
-        }
-        else if (strcmp(argv[argi], "-overlap") == 0) {
+        } else if (strcmp(argv[argi], "-overlap") == 0) {
             alignType = Overlap;
-        }
-        else if (strcmp(argv[argi], "-match") == 0) {
+        } else if (strcmp(argv[argi], "-match") == 0) {
             match = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-mismatch") == 0) {
+        } else if (strcmp(argv[argi], "-mismatch") == 0) {
             mismatch = atoi(argv[++argi]);
         }
         ++argi;
     }
-    DistanceMatrixScoreFunction<FASTASequence, FASTASequence> scoreFn(
-            SMRTDistanceMatrix, insertion, deletion);
+    DistanceMatrixScoreFunction<FASTASequence, FASTASequence> scoreFn(SMRTDistanceMatrix, insertion,
+                                                                      deletion);
 
     FASTASequence query, target;
     FASTAReader queryReader, targetReader;
@@ -134,22 +119,22 @@ int main(int argc, char* argv[]) {
 
     if (match != 0) {
         int i;
-        for (i = 0; i < 4; i++ ) {
+        for (i = 0; i < 4; i++) {
             LocalAlignLowMutationMatrix[i][i] = match;
         }
     }
 
-    int i,j;
+    int i, j;
     for (i = 0; i < 5; i++) {
-        for (j = 0; j < 5 ; j++) {
+        for (j = 0; j < 5; j++) {
             if (i == j) continue;
             SMRTDistanceMatrix[i][j] += 3;
         }
     }
 
     cout << "qlen tlen score" << endl;
-    while ((fixedQuery or queryReader.GetNext(query)) and 
-            (fixedTarget or targetReader.GetNext(target))) {
+    while ((fixedQuery or queryReader.GetNext(query)) and
+           (fixedTarget or targetReader.GetNext(target))) {
         alignment.qName.assign(query.title, query.titleLength);
         alignment.tName.assign(target.title, target.titleLength);
         alignment.blocks.clear();
@@ -157,20 +142,19 @@ int main(int argc, char* argv[]) {
         alignment.tPos = 0;
         alignment.qStart = 0;
         alignment.tStart = 0;
-        if (query.length == 0 or target.length == 0)
-            continue;
+        if (query.length == 0 or target.length == 0) continue;
 
-        alignScore = SWAlign(query, target, scoreMat, pathMat, 
-                alignment, scoreFn, alignType, false, printMatrix);
+        alignScore = SWAlign(query, target, scoreMat, pathMat, alignment, scoreFn, alignType, false,
+                             printMatrix);
 
         cout << query.length << " " << target.length << " " << alignScore << endl;
-        cout << alignment.qPos << " " << alignment.QEnd() 
-            << " " << alignment.tPos << " " << alignment.TEnd() << endl;
+        cout << alignment.qPos << " " << alignment.QEnd() << " " << alignment.tPos << " "
+             << alignment.TEnd() << endl;
 
         if (showAlign) {
             ComputeAlignmentStats(alignment, query.seq, target.seq, scoreFn);
             //SMRTDistanceMatrix, indelCost, indelCost);
-            PrintAlignmentStats(alignment, cout);			
+            PrintAlignmentStats(alignment, cout);
             StickPrintAlignment(alignment, query, target, cout);
         }
         ++seqIndex;

@@ -1,31 +1,31 @@
 // Author: Mark Chaisson
 #pragma once
 
-#include <vector>
-#include <tuples/DNATuple.hpp>
-#include <tuples/TupleList.hpp>
 #include <algorithms/alignment/sdp/SDPFragment.hpp>
 #include <algorithms/anchoring/BasicEndpoint.hpp>
 #include <datastructures/anchoring/ClusterList.hpp>
 #include <datastructures/anchoring/MatchPos.hpp>
+#include <tuples/DNATuple.hpp>
+#include <tuples/TupleList.hpp>
+#include <vector>
 
 using namespace std;
-
 
 //
 // Define a list of buffers that are meant to grow to high-water
 // marks, and not shrink down past that.   The memory is reused rather
 // than having multiple calls to new.
 //
-class MappingBuffers {
+class MappingBuffers
+{
 public:
     vector<int> hpInsScoreMat, insScoreMat;
     vector<int> kbandScoreMat;
     vector<Arrow> hpInsPathMat, insPathMat;
     vector<Arrow> kbandPathMat;
-    vector<int>   scoreMat;
+    vector<int> scoreMat;
     vector<Arrow> pathMat;
-    vector<int>  affineScoreMat;
+    vector<int> affineScoreMat;
     vector<Arrow> affinePathMat;
     vector<ChainedMatchPos> matchPosList;
     vector<ChainedMatchPos> rcMatchPosList;
@@ -37,19 +37,19 @@ public:
     std::vector<int> sdpCachedMaxFragmentChain;
     vector<double> probMat;
     vector<double> optPathProbMat;
-    vector<float>  lnSubPValueMat;
-    vector<float>  lnInsPValueMat;
-    vector<float>  lnDelPValueMat;
-    vector<float>  lnMatchPValueMat;
-    vector<int>    clusterNumBases;
-    ClusterList    clusterList;
-    ClusterList    revStrandClusterList;
+    vector<float> lnSubPValueMat;
+    vector<float> lnInsPValueMat;
+    vector<float> lnDelPValueMat;
+    vector<float> lnMatchPValueMat;
+    vector<int> clusterNumBases;
+    ClusterList clusterList;
+    ClusterList revStrandClusterList;
 
     void Reset(void);
 };
 
-
-inline void MappingBuffers::Reset(void) {
+inline void MappingBuffers::Reset(void)
+{
     vector<int>().swap(hpInsScoreMat);
     vector<int>().swap(insScoreMat);
     vector<int>().swap(kbandScoreMat);

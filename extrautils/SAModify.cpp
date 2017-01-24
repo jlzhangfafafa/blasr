@@ -1,21 +1,22 @@
-#include <vector>
 #include <string>
-#include "NucConversion.hpp"
-#include "FASTASequence.hpp"
+#include <vector>
 #include "FASTAReader.hpp"
+#include "FASTASequence.hpp"
+#include "NucConversion.hpp"
+#include "algorithms/sorting/qsufsort.hpp"
 #include "suffixarray/SuffixArray.hpp"
 #include "suffixarray/SuffixArrayTypes.hpp"
 #include "suffixarray/ssort.hpp"
-#include "algorithms/sorting/qsufsort.hpp"
 
-
-void PrintUsage() {
+void PrintUsage()
+{
     cout << "samodify changes word size of input suffix array." << endl;
-	cout << "Usage: samodify in.sa genome.fasta out.sa [-blt p]" << endl;
-	cout << "       -blt p  Build a lookup table on prefixes of length 'p' " << endl;
+    cout << "Usage: samodify in.sa genome.fasta out.sa [-blt p]" << endl;
+    cout << "       -blt p  Build a lookup table on prefixes of length 'p' " << endl;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 
     if (argc < 4) {
         PrintUsage();
@@ -37,12 +38,10 @@ int main(int argc, char* argv[]) {
         if (strcmp(argv[argi], "-blt") == 0) {
             doBLT = 1;
             bltPrefixLength = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-blcp") == 0) {
+        } else if (strcmp(argv[argi], "-blcp") == 0) {
             doBLCP = 1;
             lcpLength = atoi(argv[++argi]);
-        }
-        else {
+        } else {
             PrintUsage();
             cout << "Bad option: " << argv[argi] << endl;
             exit(1);
@@ -54,14 +53,13 @@ int main(int argc, char* argv[]) {
     // Read the suffix array to modify.
     //
 
-    DNASuffixArray  sa;
+    DNASuffixArray sa;
     sa.Read(saInFile);
 
     FASTAReader reader;
     reader.Initialize(genomeFileName);
     FASTASequence seq;
     reader.ReadAllSequencesIntoOne(seq);
-
 
     if (doBLT) {
         sa.BuildLookupTable(seq.seq, seq.length, bltPrefixLength);
@@ -72,6 +70,4 @@ int main(int argc, char* argv[]) {
     }
 
     sa.Write(saOutFile);
-
 }
-
