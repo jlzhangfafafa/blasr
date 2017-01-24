@@ -18,7 +18,7 @@ Test m4 output
   $ O=$OUTDIR/pgc-concordant-zmw-0.m4
   $ $EXEC $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:55 [blasr] ended.
+  [INFO]* (glob)
   0
   $ cat $O
   m54006_151021_185942/0/0_163 target -555 98.2609 0 0 113 763 0 0 115 115 254
@@ -30,7 +30,7 @@ Test m5 output
   $ O=$OUTDIR/pgc-concordant-zmw-0.m5
   $ $EXEC $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:55 [blasr] ended.
+  [INFO]* (glob)
   0
   $ cat $O
   m54006_151021_185942/0/0_163 763 0 113 +  target 115 0 115 + -555 113 0 0 2 254 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTT--AACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||**|||||||||||||||||||||||||||||||||||||||||||||||||||| CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -42,7 +42,7 @@ Test sam output
   $ O=$OUTDIR/pgc-concordant-zmw-0.sam
   $ $EXEC $Q $T --sam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:55 [blasr] ended.
+  [INFO]* (glob)
   0
   $ cat $O |grep -v '^@'
   m54006_151021_185942/0/0_163\t0\ttarget\t1\t254\t61=2D52=50S600H\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tcx:i:2\tnp:i:1\tqe:i:163\tqs:i:0\tzm:i:0\trq:f:0.7\tRG:Z:a3e2f6e1\tAS:i:-555\tNM:i:2 (esc)
@@ -54,7 +54,7 @@ Test bam output
   $ O=$OUTDIR/pgc-concordant-zmw-0.bam
   $ $EXEC $Q $T --bam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:56 [blasr] ended.
+  [INFO]* (glob)
   0
 Test zmw-1 bam
   $ Q=$DATDIR/test-pgc/pgc-query-concordant-zmw-1.bam
@@ -64,7 +64,7 @@ Test m4 output
   $ O=$OUTDIR/pgc-concordant-zmw-1.m4
   $ $EXEC $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:57 [blasr] ended.
+  [INFO]* (glob)
   0
   $ cat $O
   m54006_151021_185942/1/200_363 target -555 98.2609 0 250 363 963 1 0 115 115 254
@@ -76,7 +76,7 @@ Test m5 output
   $ O=$OUTDIR/pgc-concordant-zmw-1.m5
   $ $EXEC $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:57 [blasr] ended.
+  [INFO]* (glob)
   0
   $ cat $O
   m54006_151021_185942/1/200_363 963 250 363 +  target 115 0 115 - -555 113 0 0 2 254 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTT--AACTGCTTACAGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG ||||||||||||||||||||||||||||||||||||||||||||||||||||**||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||| GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGTTTTAACTGCTTACAGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
@@ -88,7 +88,7 @@ Test sam output
   $ O=$OUTDIR/pgc-concordant-zmw-1.sam
   $ $EXEC $Q $T --sam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:57 [blasr] ended.
+  [INFO]* (glob)
   0
   $ cat $O |grep -v '^@'
   m54006_151021_185942/1/200_363\t16\ttarget\t1\t254\t600H61=2D52=50S200H\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tcx:i:2\tnp:i:1\tqe:i:363\tqs:i:200\tzm:i:1\trq:f:0.7\tRG:Z:a3e2f6e1\tAS:i:-555\tNM:i:2 (esc)
@@ -101,6 +101,6 @@ Test bam output
   $ O=$OUTDIR/pgc-concordant-zmw-1.bam
   $ $EXEC $Q $T --bam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
-  [INFO] 2017-01-18T06:26:57 [blasr] ended.
+  [INFO]* (glob)
   0
 

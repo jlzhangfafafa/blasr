@@ -68,6 +68,17 @@ makeutils:
 makeextrautils:
 	${MAKE} -C extrautils
 
+# BLASR cram tests
+cramblasrfast: blasr
+	${MAKE} -f cram.mk cramfast
+
+cramblasrmild: blasr
+	${MAKE} -f cram.mk crammild
+
+cramblasrtests: blasr
+	${MAKE} -f cram.mk cramtests
+
+# ALL cram tests, including blasr and other utils
 cramtests: blasr utils
 	${MAKE} -f cram.mk cramtests
 	${MAKE} -C utils cramtests
