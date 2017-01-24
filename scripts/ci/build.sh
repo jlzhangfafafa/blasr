@@ -9,7 +9,7 @@ module load git gcc/4.9.2 ccache boost ninja cmake/3.7.2 hdf5-tools/1.8.16 zlib/
 echo "#############################"
 echo "# PRE-BUILD HOOK"
 echo "## Check formatting"
-# ./tools/check-formatting --all
+./tools/check-formatting --all
 
 echo "#############################"
 echo "# BUILD"

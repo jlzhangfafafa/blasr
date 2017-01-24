@@ -1,37 +1,42 @@
-#include "files/ReaderAgglomerate.hpp"
+#include "HDFCmpFile.hpp"
 #include "SMRTSequence.hpp"
-#include "utils/FileOfFileNames.hpp"
+#include "datastructures/alignment/CmpFile.hpp"
+#include "files/ReaderAgglomerate.hpp"
+#include "format/StickAlignmentPrinter.hpp"
 #include "simulator/ContextSet.hpp"
 #include "simulator/OutputSampleListSet.hpp"
-#include "datastructures/alignment/CmpFile.hpp"
-#include "HDFCmpFile.hpp"
-#include "format/StickAlignmentPrinter.hpp"
+#include "utils/FileOfFileNames.hpp"
 
-class ScoredLength {
+class ScoredLength
+{
 public:
     int score, length;
-    int operator<(const ScoredLength &rhs) const { 
-        return score < rhs.score;
-    }
+    int operator<(const ScoredLength& rhs) const { return score < rhs.score; }
     ScoredLength(int s, int l) : score(s), length(l) {}
     ScoredLength() {}
 };
 
-void PrintUsage() {
-    cout << "cmpH5StoreQualityByContext - grab quality values from cmp.h5 files until minimum requirements for the number of times a context has been sampled are met." << endl;
-    cout << "usage: cmpH5StoreQualityByContext aligned_reads.cmp.h5  output.qbc  [options] " << endl;
+void PrintUsage()
+{
+    cout << "cmpH5StoreQualityByContext - grab quality values from cmp.h5 files until minimum "
+            "requirements for the number of times a context has been sampled are met."
+         << endl;
+    cout << "usage: cmpH5StoreQualityByContext aligned_reads.cmp.h5  output.qbc  [options] "
+         << endl;
     cout << "options: " << endl
-        << " -contextLength L   The length of the context to sample (default: 5) " << endl 
-        << " -minSamples S(500) Report pass if all contexts are sampled" << endl
-        << "                    at least S times." << endl
-        << " -maxSamples S(1000) Stop sampling a context once it has reached" << endl
-        << "                    S samples." << endl
-        << " -onlyMaxLength" <<endl
-        << "                     Whether or not to store only the length of the" << endl
-        << "                     longest subread as part of the length model." << endl << endl;
+         << " -contextLength L   The length of the context to sample (default: 5) " << endl
+         << " -minSamples S(500) Report pass if all contexts are sampled" << endl
+         << "                    at least S times." << endl
+         << " -maxSamples S(1000) Stop sampling a context once it has reached" << endl
+         << "                    S samples." << endl
+         << " -onlyMaxLength" << endl
+         << "                     Whether or not to store only the length of the" << endl
+         << "                     longest subread as part of the length model." << endl
+         << endl;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     string outFileName;
     int contextLength = 5;
     int minSamples = 500;
@@ -44,24 +49,20 @@ int main(int argc, char* argv[]) {
     int argi = 1;
     string cmpH5FileName;
     cmpH5FileName = argv[argi++];
-    outFileName   = argv[argi++];
+    outFileName = argv[argi++];
     int minAverageQual = 0;
     bool onlyMaxLength = false;
 
     while (argi < argc) {
         if (strcmp(argv[argi], "-contextLength") == 0) {
             contextLength = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-minSamples") == 0) {
+        } else if (strcmp(argv[argi], "-minSamples") == 0) {
             minSamples = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-maxSamples") == 0) {
+        } else if (strcmp(argv[argi], "-maxSamples") == 0) {
             maxSamples = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-onlyMaxLength") == 0) {
+        } else if (strcmp(argv[argi], "-onlyMaxLength") == 0) {
             onlyMaxLength = true;
-        }
-        else {
+        } else {
             PrintUsage();
             cout << "ERROR, bad option: " << argv[argi] << endl;
             exit(1);
@@ -73,11 +74,11 @@ int main(int argc, char* argv[]) {
     SMRTSequence read;
 
     ofstream sampleOut;
-    CrucialOpen(outFileName, sampleOut, std::ios::out|std::ios::binary);
+    CrucialOpen(outFileName, sampleOut, std::ios::out | std::ios::binary);
     int fileNameIndex;
 
     int numContextsReached = 0;
-    int numContexts = 1 << (contextLength*2);
+    int numContexts = 1 << (contextLength * 2);
     ReaderAgglomerate reader;
     samples.keyLength = contextLength;
     HDFCmpFile<CmpAlignment> cmpReader;
@@ -101,15 +102,13 @@ int main(int argc, char* argv[]) {
 
     cmpReader.ReadAlignmentDescriptions(cmpFile);
     cmpReader.ReadStructure(cmpFile);
-    cout << "done reading structure."<<endl;
+    cout << "done reading structure." << endl;
     int alignmentIndex;
     int nAlignments = cmpReader.alnInfoGroup.GetNAlignments();
     vector<int> alignmentToBaseMap;
 
-    for (alignmentIndex = 0; 
-            alignmentIndex < nAlignments and
-            !samples.Sufficient();
-            alignmentIndex++) {
+    for (alignmentIndex = 0; alignmentIndex < nAlignments and !samples.Sufficient();
+         alignmentIndex++) {
         //
         // For ease of use, store the length of the alignment to make another model.
         //
@@ -124,13 +123,13 @@ int main(int argc, char* argv[]) {
         DNASequence readDNA, refDNA;
 
         ByteAlignmentToQueryString(&alignmentArray[0], alignmentArray.size(), &readSequence[0]);
-        ByteAlignmentToRefString(&alignmentArray[0], alignmentArray.size(), &refSequence[0]);				
+        ByteAlignmentToRefString(&alignmentArray[0], alignmentArray.size(), &refSequence[0]);
         RemoveGaps(readSequence, readSequence);
         RemoveGaps(refSequence, refSequence);
 
-        readDNA.seq = (Nucleotide*) readSequence.c_str();
+        readDNA.seq = (Nucleotide*)readSequence.c_str();
         readDNA.length = readSequence.size();
-        refDNA.seq = (Nucleotide*) refSequence.c_str();
+        refDNA.seq = (Nucleotide*)refSequence.c_str();
         refDNA.length = refSequence.size();
         CmpAlignment cmpAlignment;
 
@@ -141,16 +140,13 @@ int main(int argc, char* argv[]) {
         if (read.length < contextLength) {
             continue;
         }
-        int subreadLength = (cmpFile.alnInfo.alignments[alignmentIndex].GetQueryEnd() - 
-                cmpFile.alnInfo.alignments[alignmentIndex].GetQueryStart());
+        int subreadLength = (cmpFile.alnInfo.alignments[alignmentIndex].GetQueryEnd() -
+                             cmpFile.alnInfo.alignments[alignmentIndex].GetQueryStart());
         if (onlyMaxLength == false) {
             samples.lengths.push_back(subreadLength);
-        }
-        else {
-            int score = (cmpAlignment.GetNMatch() - 
-                    cmpAlignment.GetNMismatch() - 
-                    cmpAlignment.GetNInsertions() - 
-                    cmpAlignment.GetNDeletions());
+        } else {
+            int score = (cmpAlignment.GetNMatch() - cmpAlignment.GetNMismatch() -
+                         cmpAlignment.GetNInsertions() - cmpAlignment.GetNDeletions());
             stringstream nameStrm;
             nameStrm << cmpAlignment.GetMovieId() << "_" << cmpAlignment.GetHoleNumber();
             string nameStr = nameStrm.str();
@@ -159,27 +155,28 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        int sampleEnd = alignmentArray.size() - contextLength/2;
+        int sampleEnd = alignmentArray.size() - contextLength / 2;
         int a;
-        for (a = contextLength/2; a < sampleEnd; a++) {
+        for (a = contextLength / 2; a < sampleEnd; a++) {
 
             // Make sure the context begins on a real nucleotide.
-            while (a < sampleEnd and 
-                    ((RefChar[alignmentArray[a]] == ' '))) {a++;}
+            while (a < sampleEnd and ((RefChar[alignmentArray[a]] == ' '))) {
+                a++;
+            }
 
             //
             // Move ab back to an index where there are contextLength/2 non-gap
             // characters, counted by nb
             //
-            int ab; //num bases
-            int ae; //alignment end
-            ab = a-1;
+            int ab;  //num bases
+            int ae;  //alignment end
+            ab = a - 1;
             int nb = 0, ne = 0;
             while (true) {
                 if (RefChar[alignmentArray[ab]] != ' ') {
                     nb++;
                 }
-                if (ab == 0 or nb == contextLength/2) break;
+                if (ab == 0 or nb == contextLength / 2) break;
                 ab--;
             }
 
@@ -188,7 +185,7 @@ int main(int argc, char* argv[]) {
             // characters, counted by ne.
             //
             ae = a + 1;
-            while (ae < alignmentArray.size() and ne < contextLength/ 2) {
+            while (ae < alignmentArray.size() and ne < contextLength / 2) {
                 if (RefChar[alignmentArray[ae]] != ' ') {
                     ne++;
                 }
@@ -224,28 +221,24 @@ int main(int argc, char* argv[]) {
             //
             // Look to see if the previous aligned position was an
             // insertion, and move back as far as the insertion extends.
-            int aq = a-1;
+            int aq = a - 1;
             int sampleLength;
 
             if (QueryChar[alignmentArray[a]] == ' ') {
                 sample.type = OutputSample::Deletion;
                 sampleLength = 0;
-            }
-            else if (RefChar[alignmentArray[aq]] == ' ') {
+            } else if (RefChar[alignmentArray[aq]] == ' ') {
 
-                while (aq > 0 
-                        and RefChar[alignmentArray[aq]] == ' ' 
-                        and QueryChar[alignmentArray[aq]] != ' ') {
+                while (aq > 0 and RefChar[alignmentArray[aq]] == ' ' and
+                       QueryChar[alignmentArray[aq]] != ' ') {
                     aq--;
                 }
                 sample.type = OutputSample::Insertion;
                 sampleLength = a - aq;
-            }
-            else if (QueryChar[alignmentArray[a]] == RefChar[alignmentArray[aq]]) {
+            } else if (QueryChar[alignmentArray[a]] == RefChar[alignmentArray[aq]]) {
                 sample.type = OutputSample::Match;
                 sampleLength = 1;
-            }
-            else {
+            } else {
                 sample.type = OutputSample::Substitution;
                 sampleLength = 1;
             }
@@ -257,10 +250,10 @@ int main(int argc, char* argv[]) {
                     sample.CopyFromSeq(read, seqPos, sampleLength);
                     string nucs;
                     int n;
-                    for (n = 0; n < sample.nucleotides.size(); n++) { 
+                    for (n = 0; n < sample.nucleotides.size(); n++) {
                         char c = sample.nucleotides[n];
                         assert(c == 'A' or c == 'T' or c == 'G' or c == 'C');
-                        nucs.push_back(sample.nucleotides[n]); 
+                        nucs.push_back(sample.nucleotides[n]);
                     }
                 }
             }
@@ -273,7 +266,7 @@ int main(int argc, char* argv[]) {
         map<string, ScoredLength>::iterator maxScoreIt;
         for (maxScoreIt = maxLengthMap.begin(); maxScoreIt != maxLengthMap.end(); ++maxScoreIt) {
             cout << maxScoreIt->second.length << endl;
-            samples.lengths.push_back(maxScoreIt->second.length); 
+            samples.lengths.push_back(maxScoreIt->second.length);
         }
     }
 

@@ -1,22 +1,23 @@
 #pragma once
 
 #define REQUIRE_PBBAM_ERROR() \
-assert("blasr must be compiled with lib pbbam to perform IO on bam." == 0);
+    assert("blasr must be compiled with lib pbbam to perform IO on bam." == 0);
 
 #include <vector>
 
+#include <algorithms/alignment/AlignmentFormats.hpp>
+#include <datastructures/alignment/FilterCriteria.hpp>
+#include <datastructures/anchoring/AnchorParameters.hpp>
+#include <files/BaseSequenceIO.hpp>
+#include <format/SAMPrinter.hpp>
+#include <qvs/QualityValue.hpp>
 #include <reads/ReadType.hpp>
+#include <tuples/TupleMetrics.hpp>
 #include <utils/FileOfFileNames.hpp>
 #include <utils/RangeUtils.hpp>
-#include <tuples/TupleMetrics.hpp>
-#include <datastructures/anchoring/AnchorParameters.hpp>
-#include <qvs/QualityValue.hpp>
-#include <format/SAMPrinter.hpp>
-#include <algorithms/alignment/AlignmentFormats.hpp>
-#include <files/BaseSequenceIO.hpp>
-#include <datastructures/alignment/FilterCriteria.hpp>
 
-class MappingParameters {
+class MappingParameters
+{
 public:
     //
     // Parameters for global substitution, insertion, and deletion priors.
@@ -42,9 +43,10 @@ public:
     SAMOutput::Clipping clipping;
     string clippingString;
     QVScale qvScaleType;
-    vector<string> readsFileNames; // = queryFileNames, genomeFileName
+    vector<string> readsFileNames;  // = queryFileNames, genomeFileName
     vector<string> queryFileNames;
-    vector<string> scrapsFileNames; // needed for noSplitSubread flag in PBBAM, deriived from queryFileNames 
+    vector<string>
+        scrapsFileNames;  // needed for noSplitSubread flag in PBBAM, deriived from queryFileNames
     string genomeFileName;
     // Query file type: FASTA/FASTQ/HDF*/PBBAM,
     // Note that mixed query file types is not allowed.
@@ -88,10 +90,10 @@ public:
     bool printSAM;
     bool cigarUseSeqMatch;
     bool printBAM;
-    bool sam_via_bam;    // for SAM output via pbbam using IRecordWriter
+    bool sam_via_bam;  // for SAM output via pbbam using IRecordWriter
     bool storeMapQV;
     bool useRandomSeed;
-    int  randomSeed;
+    int randomSeed;
     bool placeRandomly;
     bool placeGapConsistently;
     bool printHeader;
@@ -115,18 +117,18 @@ public:
     bool ignoreQualities;
     bool extendFrontAlignment;
     bool extendAlignments;
-    int  maxExtendDropoff;
-    int  minReadLength;
-    int  maxReadLength;
-    int  minSubreadLength;
-    int  minRawSubreadScore;
-    int  minAvgQual;
+    int maxExtendDropoff;
+    int minReadLength;
+    int maxReadLength;
+    int minSubreadLength;
+    int minRawSubreadScore;
+    int minAvgQual;
     bool overlap;
     bool advanceHalf;
     int advanceExactMatches;
     float approximateMaxInsertionRate;
-    float minPctSimilarity; // [0, 100]
-    float minPctAccuracy; // [0, 100]
+    float minPctSimilarity;  // [0, 100]
+    float minPctAccuracy;    // [0, 100]
     bool refineAlignments;
     int nCandidates;
     bool doGlobalAlignment;
@@ -141,13 +143,13 @@ public:
     bool mapSubreadsSeparately;
     bool concordant;
     bool refineConcordantAlignments;
-    int  flankSize;
+    int flankSize;
     bool useRegionTable;
     bool setIgnoreRegions;
     bool useHQRegionTable;
     bool setIgnoreHQRegions;
     bool printUnaligned;
-    bool noPrintUnalignedSeqs; // print unaligned reads names only.
+    bool noPrintUnalignedSeqs;  // print unaligned reads names only.
     string unalignedFileName;
     string metricsFileName;
     string lcpBoundsFileName;
@@ -157,14 +159,14 @@ public:
     bool useAllSubreadsInCcs;
     bool useCcsOnly;
     bool detailedSDPAlignment, nouseDetailedSDPAlignment;
-    int  chunkSize;
-    int  sdpFilterType;
+    int chunkSize;
+    int sdpFilterType;
     bool useGuidedAlign;
-    int  guidedAlignBandSize;
-    int  bandSize;
-    int  extendBandSize;
+    int guidedAlignBandSize;
+    int bandSize;
+    int extendBandSize;
     bool useQVScore;
-    int  scoreType;
+    int scoreType;
     bool printVerboseHelp;
     bool printDiscussion;
     float sdpBypassThreshold;
@@ -174,23 +176,23 @@ public:
     float qvInsWeight;
     float qvDelWeight;
     float readAccuracyPrior;
-    bool  printVersion;
-    int   substitutionPrior;
-    int   globalDeletionPrior;
-    bool  outputByThread;
-    int   recurseOver;
-    bool  allowAdjacentIndels;
-    bool  separateGaps;
+    bool printVersion;
+    int substitutionPrior;
+    int globalDeletionPrior;
+    bool outputByThread;
+    int recurseOver;
+    bool allowAdjacentIndels;
+    bool separateGaps;
     string scoreMatrixString;
-    bool  printDotPlots;
-    bool  preserveReadTitle;
-    bool  forwardOnly;
-    bool  printOnlyBest;
-    bool  affineAlign;
-    int   affineExtend;
-    int   affineOpen;
-    bool  scaleMapQVByNumSignificantClusters;
-    int   limsAlign;
+    bool printDotPlots;
+    bool preserveReadTitle;
+    bool forwardOnly;
+    bool printOnlyBest;
+    bool affineAlign;
+    int affineExtend;
+    int affineOpen;
+    bool scaleMapQVByNumSignificantClusters;
+    int limsAlign;
     string holeNumberRangesStr;
     Ranges holeNumberRanges;
     int minAlnLength;
@@ -207,7 +209,8 @@ public:
     HitPolicy hitPolicy;
     bool enableHiddenPaths;
 
-    void Init() {
+    void Init()
+    {
         qvMatchWeight = 1.0;
         qvMismatchWeight = 1.0;
         qvInsWeight = 1.0;
@@ -215,13 +218,13 @@ public:
         minFractionToBeConsideredOverlapping = 0.75;
         minRatio = 0.25;
         indelRate = 0.3;
-        indel    = 5;
-        insertion = 4; // asymmetric indel parameters
-        deletion  = 5;
+        indel = 5;
+        insertion = 4;  // asymmetric indel parameters
+        deletion = 5;
         idsIndel = 15;
         sdpIndel = 5;
-        sdpIns   = 5;
-        sdpDel   = 10;
+        sdpIns = 5;
+        sdpDel = 10;
         sdpTupleSize = 11;
         match = 0;
         mismatch = 0;
@@ -237,7 +240,7 @@ public:
         queryFileType = FileType::None;
         tupleListName = "";
         posTableName = "";
-        suffixArrayFileName= "";
+        suffixArrayFileName = "";
         bwtFileName = "";
         indexFileName = "";
         anchorFileName = "";
@@ -245,8 +248,8 @@ public:
         nBest = 10;
         nCandidates = 10;
         printWindow = 0;
-        doCondense  = 0;
-        do4BitComp  = 0;
+        doCondense = 0;
+        do4BitComp = 0;
         pValueType = 0;
         cutoff = 0;
         useSuffixArray = 0;
@@ -263,7 +266,7 @@ public:
         maxExpand = 0;
         minExpand = 0;
         startRead = 0;
-        stride    = 1;
+        stride = 1;
         subsample = 1.1;
         listTupleSize = 6;
         sortRefinedAlignments = 1;
@@ -291,9 +294,9 @@ public:
         extendAlignments = false;
         maxExtendDropoff = 10;
         minReadLength = 50;
-        maxReadLength = 0; // means no max read length
+        maxReadLength = 0;  // means no max read length
         minSubreadLength = 0;
-        minRawSubreadScore = -1; // raw subread score in region table should be in range [0, 1000].
+        minRawSubreadScore = -1;  // raw subread score in region table should be in range [0, 1000].
         minAvgQual = 0;
         overlap = false;
         advanceHalf = false;
@@ -305,18 +308,18 @@ public:
         doGlobalAlignment = false;
         tempDirectory = "";
         useTitleTable = false;
-        titleTableName  = "";
+        titleTableName = "";
         readSeparateRegionTable = false;
         readSeparateCcsFofn = false;
         regionTableFileName = "";
         ccsFofnFileName = "";
-        mapSubreadsSeparately=true;
-        concordant=false;
-        refineConcordantAlignments=false;
-        flankSize=40;
+        mapSubreadsSeparately = true;
+        concordant = false;
+        refineConcordantAlignments = false;
+        flankSize = 40;
         useRegionTable = true;
         setIgnoreRegions = false;
-        useHQRegionTable=true;
+        useHQRegionTable = true;
         setIgnoreHQRegions = false;
         printUnaligned = false;
         unalignedFileName = "";
@@ -330,7 +333,7 @@ public:
         printSubreadTitle = true;
         detailedSDPAlignment = true;
         nouseDetailedSDPAlignment = false;
-        useCcs     = false;
+        useCcs = false;
         useCcsOnly = false;
         useAllSubreadsInCcs = false;
         chunkSize = 10000000;
@@ -378,12 +381,12 @@ public:
         fastMaxInterval = false;
         aggressiveIntervalCut = false;
         fastSDP = false;
-        concordantTemplate = "mediansubread"; // typicalsubread or longestsubread
+        concordantTemplate = "mediansubread";  // typicalsubread or longestsubread
         concordantAlignBothDirections = false;
 
         hitPolicyStr = "all";
         ResetFilterAndHit();
-        enableHiddenPaths = false; //turn off hidden paths.
+        enableHiddenPaths = false;  //turn off hidden paths.
     }
 
     MappingParameters()
@@ -393,13 +396,14 @@ public:
         Init();
     }
 
-    void MakeSane() {
+    void MakeSane()
+    {
         // Expand FOFN
         FileOfFileNames::ExpandFileNameList(readsFileNames);
 
         // Must have at least a query and a genome
         if (readsFileNames.size() <= 1) {
-            cout << "Error, you must provide at least one reads file and a genome file." <<endl;
+            cout << "Error, you must provide at least one reads file and a genome file." << endl;
             exit(1);
         }
 
@@ -420,31 +424,30 @@ public:
             }
         }
 
-        // if unrolled(Polymerase) read mode, and extension is .bam, need to derive scraps file name 
-        // rules 
+        // if unrolled(Polymerase) read mode, and extension is .bam, need to derive scraps file name
+        // rules
         // 1. string.subreads.bam -> string.scraps.bam substitute subreads to scraps
         // 2. string.bam ->  string.scraps.bam   insert .scraps before .bam
         // TODO loop over query check for each
         // not needed for xml since scraps specified explicetely
         //
-        if (not mapSubreadsSeparately && (queryFileType == FileType::PBBAM) ) {
+        if (not mapSubreadsSeparately && (queryFileType == FileType::PBBAM)) {
             const string dsubdb = ".subreads.bam";
-            const string dbam = ".bam"; 
+            const string dbam = ".bam";
             // loop over all subread files and fill the vector or scraps files
             for (size_t i = 0; i < queryFileNames.size(); i++) {
-                scrapsFileNames.push_back(queryFileNames[i]); 
-                size_t dsubdb_pos = scrapsFileNames[i].find(dsubdb); // find .subreads.bam 
-                if (dsubdb_pos != std::string::npos) {  
+                scrapsFileNames.push_back(queryFileNames[i]);
+                size_t dsubdb_pos = scrapsFileNames[i].find(dsubdb);  // find .subreads.bam
+                if (dsubdb_pos != std::string::npos) {
                     // TODO check that .subreads.bam is LAST occurence
                     // replace subreads.bam with scraps.bam
-                    scrapsFileNames[i].replace(dsubdb_pos,dsubdb.length(),".scraps.bam");
-                }
-                else { 
+                    scrapsFileNames[i].replace(dsubdb_pos, dsubdb.length(), ".scraps.bam");
+                } else {
                     // insert scraps before .bam"
                     // actually we can just replace last 4 characters
                     // fix later
-                    size_t dbam_pos = scrapsFileNames[0].find(dbam); // find .bam  
-                    scrapsFileNames[i].replace(dbam_pos,dbam.length(),".scraps.bam");
+                    size_t dbam_pos = scrapsFileNames[0].find(dbam);  // find .bam
+                    scrapsFileNames[i].replace(dbam_pos, dbam.length(), ".scraps.bam");
                 }
             }
         }
@@ -452,7 +455,9 @@ public:
         // -useQuality can not be used in combination with a fasta input
         if (!ignoreQualities) {
             if (queryFileType == FileType::Fasta) {
-                cout<<"ERROR, you can not use -useQuality option when any of the input reads files are in multi-fasta format."<<endl;
+                cout << "ERROR, you can not use -useQuality option when any of the input reads "
+                        "files are in multi-fasta format."
+                     << endl;
                 exit(1);
             }
         }
@@ -460,8 +465,12 @@ public:
         //
         // Fix all logical incompatibilities with parameters.
         //
-        if (setIgnoreRegions) { useRegionTable = false; }
-        if (setIgnoreHQRegions) { useHQRegionTable = false; }
+        if (setIgnoreRegions) {
+            useRegionTable = false;
+        }
+        if (setIgnoreHQRegions) {
+            useHQRegionTable = false;
+        }
 
         if (nowarp) {
             warp = false;
@@ -473,51 +482,63 @@ public:
         }
 
         if (placeRandomly and hitPolicyStr != "randombest") {
-            cerr << "Warning: placeRepeatsRandomly is deprecated, resetting hit policy to randombest." << endl;
+            cerr << "Warning: placeRepeatsRandomly is deprecated, resetting hit policy to "
+                    "randombest."
+                 << endl;
             hitPolicyStr = "randombest";
         }
 
         if (placeGapConsistently) {
             if (refineBetweenAnchorsOnly) {
-                cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time." << endl;
+                cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time."
+                     << endl;
                 exit(1);
             }
             if (extendAlignments) {
-                cout << "ERROR, extend and placeGapConsistently cannot be set at the same time." << endl;
+                cout << "ERROR, extend and placeGapConsistently cannot be set at the same time."
+                     << endl;
                 exit(1);
             }
             if (not useGuidedAlign) {
-                cout << "ERROR, noUseGuidedAlign and placeGapConsistently cannot be set the same time." << endl;
+                cout << "ERROR, noUseGuidedAlign and placeGapConsistently cannot be set the same "
+                        "time."
+                     << endl;
                 exit(1);
             }
             if (affineAlign) {
-                cout << "ERROR, affineAlign and placeGapConsistently cannot be set the same time." << endl;
+                cout << "ERROR, affineAlign and placeGapConsistently cannot be set the same time."
+                     << endl;
                 exit(1);
             }
         }
 
         if ((hitPolicyStr == "random" or hitPolicyStr == "randombest") and nBest == 1) {
-            cerr << "Warning: When attempting to select equivalently scoring reads at random " << endl
-                << "the bestn parameter should be greater than one." << endl;
+            cerr << "Warning: When attempting to select equivalently scoring reads at random "
+                 << endl
+                 << "the bestn parameter should be greater than one." << endl;
         }
 
         if (concordant) {
             if (useCcs) {
                 concordant = false;
             } else {
-                useRegionTable   = true;
+                useRegionTable = true;
                 useHQRegionTable = true;
             }
-            if (concordantTemplate != "longestsubread" and concordantTemplate != "typicalsubread" and concordantTemplate != "mediansubread") {
+            if (concordantTemplate != "longestsubread" and
+                concordantTemplate != "typicalsubread" and concordantTemplate != "mediansubread") {
                 cout << "ERROR, unsupported concordantTemplate: " << concordantTemplate << endl;
                 exit(1);
             }
-            if (refineConcordantAlignments) {refineAlignments = true;}
+            if (refineConcordantAlignments) {
+                refineAlignments = true;
+            }
         }
 
         if (sdpFilterType > 1) {
-            cerr << "Warning: using new filter method for SDP alignments.  The parameter is " << endl
-                << "either 0 or 1, but " << sdpFilterType << " was specified." << endl;
+            cerr << "Warning: using new filter method for SDP alignments.  The parameter is "
+                 << endl
+                 << "either 0 or 1, but " << sdpFilterType << " was specified." << endl;
             sdpFilterType = 1;
         }
         if (sdpFilterType == 0) {
@@ -564,11 +585,13 @@ public:
             readSeparateRegionTable = true;
         }
 
-        bool isHDFFile = (queryFileType == FileType::HDFPulse or
-                          queryFileType == FileType::HDFBase or
-                          queryFileType == FileType::HDFCCSONLY);
+        bool isHDFFile =
+            (queryFileType == FileType::HDFPulse or queryFileType == FileType::HDFBase or
+             queryFileType == FileType::HDFCCSONLY);
         if ((setIgnoreRegions or setIgnoreHQRegions) and not isHDFFile) {
-            cout << "ERROR: query must be HDF files in order to set ignoreRegions or ignoreHQRegions." << std::endl;
+            cout << "ERROR: query must be HDF files in order to set ignoreRegions or "
+                    "ignoreHQRegions."
+                 << std::endl;
             exit(1);
         }
         if (ccsFofnFileName != "") {
@@ -580,14 +603,15 @@ public:
         if (nouseDetailedSDPAlignment == false) {
             detailedSDPAlignment = true;
         }
-        if (anchorParameters.maxLCPLength != 0 and int(anchorParameters.maxLCPLength) < int(anchorParameters.minMatchLength)) {
-            cerr << "ERROR: maxLCPLength is less than minLCPLength, which will result in no hits." << endl;
+        if (anchorParameters.maxLCPLength != 0 and
+            int(anchorParameters.maxLCPLength) < int(anchorParameters.minMatchLength)) {
+            cerr << "ERROR: maxLCPLength is less than minLCPLength, which will result in no hits."
+                 << endl;
         }
         if (subsample < 1 and stride > 1) {
             cout << "ERROR, subsample and stride must be used independently." << endl;
             exit(1);
         }
-
 
         if (emulateNucmer) {
             SetEmulateNucmer();
@@ -601,30 +625,26 @@ public:
         //
         if (clippingString == "soft") {
             clipping = SAMOutput::soft;
-        }
-        else if (clippingString == "hard") {
+        } else if (clippingString == "hard") {
             clipping = SAMOutput::hard;
-        }
-        else if (clippingString == "none") {
+        } else if (clippingString == "none") {
             clipping = SAMOutput::none;
-        }
-        else if (clippingString == "subread") {
+        } else if (clippingString == "subread") {
             clipping = SAMOutput::subread;
-        }
-        else if (clippingString != "") {
+        } else if (clippingString != "") {
             cout << "ERROR, clipping should either be soft, hard, or none." << endl;
             exit(1);
         }
 
-        if (printSAM) {         // since sam is printed via bam we need to use ifndef USE_PBBAM here
+        if (printSAM) {  // since sam is printed via bam we need to use ifndef USE_PBBAM here
 #ifndef USE_PBBAM
             REQUIRE_PBBAM_ERROR();
 #else
             printSAM = false;
             printBAM = true;
-            sam_via_bam = true; // set to true for constructors and to avoid entering if (printBAM
-            cigarUseSeqMatch = true; // ALWAYS true for BAM
-            printFormat = BAM;               // Not sure for sam_via_bam
+            sam_via_bam = true;  // set to true for constructors and to avoid entering if (printBAM
+            cigarUseSeqMatch = true;  // ALWAYS true for BAM
+            printFormat = BAM;        // Not sure for sam_via_bam
             samQVList.SetDefaultQV();
             printSAMQV = true;
             if (clipping != SAMOutput::soft) {
@@ -652,11 +672,11 @@ public:
 #endif
         }
 
-        if (printBAM && !sam_via_bam) { // Need to check settings for SAM, 
+        if (printBAM && !sam_via_bam) {  // Need to check settings for SAM,
 #ifndef USE_PBBAM
             REQUIRE_PBBAM_ERROR();
 #else
-            cigarUseSeqMatch = true; // ALWAYS true for BAM
+            cigarUseSeqMatch = true;  // ALWAYS true for BAM
             printFormat = BAM;
             printSAM = false;
             samQVList.SetDefaultQV();
@@ -693,8 +713,8 @@ public:
 
         if (holeNumberRangesStr.size() > 0) {
             if (not holeNumberRanges.setRanges(holeNumberRangesStr)) {
-                cout << "ERROR, could not parse hole number ranges: "
-                    << holeNumberRangesStr << "." << endl;
+                cout << "ERROR, could not parse hole number ranges: " << holeNumberRangesStr << "."
+                     << endl;
                 exit(1);
             }
         }
@@ -702,8 +722,7 @@ public:
         if (printSAMQV) {
             if (samQV.size() == 0) {
                 samQVList.SetDefaultQV();
-            }
-            else {
+            } else {
                 samQVList.UseQV(samQV);
             }
         }
@@ -724,14 +743,15 @@ public:
         // Set filter criteria and hit policy
         ResetFilterAndHit();
     }
-    void ResetFilterAndHit(void) {
-        filterCriteria = FilterCriteria(minAlnLength, minPctSimilarity,
-                                        minPctAccuracy, true,
+    void ResetFilterAndHit(void)
+    {
+        filterCriteria = FilterCriteria(minAlnLength, minPctSimilarity, minPctAccuracy, true,
                                         Score(static_cast<float>(maxScore), ScoreSign::NEGATIVE));
         hitPolicy = HitPolicy(hitPolicyStr, ScoreSign::NEGATIVE);
     }
 
-    ReadType::ReadTypeEnum DetermineQueryReadType() {
+    ReadType::ReadTypeEnum DetermineQueryReadType()
+    {
         if (useCcsOnly or queryFileType == FileType::HDFCCSONLY) {
             return ReadType::CCS;
         }
@@ -749,8 +769,7 @@ public:
             return ReadType::SUBREAD;
         } else {
             if (useHQRegionTable and
-                (queryFileType == FileType::HDFCCSONLY or
-                 queryFileType == FileType::HDFBase or
+                (queryFileType == FileType::HDFCCSONLY or queryFileType == FileType::HDFBase or
                  queryFileType == FileType::HDFPulse)) {
                 // Only HDF files can contain region table.
                 return ReadType::HQREGION;
@@ -760,18 +779,20 @@ public:
         }
     }
 
-    void SetEmulateNucmer() {
+    void SetEmulateNucmer()
+    {
         anchorParameters.stopMappingOnceUnique = true;
-        anchorParameters.advanceExactMatches   = 30;
+        anchorParameters.advanceExactMatches = 30;
         anchorParameters.maxAnchorsPerPosition = 1;
-        sdpBypassThreshold                     = 0.75;
-        sdpTupleSize                           = 15;
-        anchorParameters.minMatchLength        = 30;
-        useGuidedAlign                         = true;
-        refineAlignments                       = false;
+        sdpBypassThreshold = 0.75;
+        sdpTupleSize = 15;
+        anchorParameters.minMatchLength = 30;
+        useGuidedAlign = true;
+        refineAlignments = false;
     }
 
-    void SetForSensitivity() {
+    void SetForSensitivity()
+    {
         advanceExactMatches = 0;
         anchorParameters.numBranches = 1;
         anchorParameters.maxAnchorsPerPosition = 10000;
