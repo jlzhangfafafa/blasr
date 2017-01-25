@@ -16,7 +16,6 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # Build-time options
 option(BLASR_build_bin    "Build binaries." ON)
 option(BLASR_build_tests  "Build BLASR's unit tests." ON)
-option(BLASR_inc_coverage "Include BLASR's coverage script." OFF)
 option(BLASR_use_ccache   "Build BLASR using ccache, if available." ON)
 
 # Main project paths
@@ -44,6 +43,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}/generated
 )
 
+# Dependencies
 file(GLOB HDF5_CPP  "${BLASR_RootDir}/libcpp/hdf/*.cpp")
 file(GLOB_RECURSE ALIGNMENT_CPP  "${BLASR_RootDir}/libcpp/alignment/*.cpp")
 file(GLOB_RECURSE PBDATA_CPP  "${BLASR_RootDir}/libcpp/pbdata/*.cpp")
@@ -56,9 +56,29 @@ add_library(deps STATIC
 
 target_link_libraries(deps ${PacBioBAM_LIBRARIES})
 
-add_executable(blasr Blasr.cpp)
-target_link_libraries(blasr
-    deps
-    hdf5
-    hdf5_cpp
-)
+# Binaries
+function(create_exe exe_name exe_cpp)
+    add_executable(${exe_name} ${exe_cpp})
+
+    set_target_properties(${exe_name} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
+    target_link_libraries(${exe_name} deps)
+    if (ARGV2)
+        target_link_libraries(${exe_name} hdf5 hdf5_cpp)
+        GET_PROPERTY(HDF5_LINKER_FLAG_LOCAL GLOBAL PROPERTY HDF5_LINKER_FLAG_GLOBAL)
+        if (HDF5_LINKER_FLAG_LOCAL)
+            set_target_properties(${exe_name} PROPERTIES LINK_FLAGS ${HDF5_LINKER_FLAG_LOCAL})
+        endif()
+    endif()
+
+    install(TARGETS ${exe_name} RUNTIME DESTINATION bin)
+endfunction()
+
+## BLASR
+create_exe(blasr ${BLASR_RootDir}/Blasr.cpp T)
+
+## utils
+create_exe(sawriter ${BLASR_RootDir}/utils/SAWriter.cpp)
+create_exe(toAfg ${BLASR_RootDir}/utils/ToAfg.cpp T)
