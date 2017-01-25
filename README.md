@@ -8,9 +8,9 @@
 ## Documentation
 
  - Compile from source
-    - [BLASR only (cmake)](doc/INSTALL_CMAKE.md)
-    - [BLASR suite (pitchfork)](https://github.com/PacificBiosciences/pitchfork/wiki/Installing-blasr-with-pitchfork)
-    - [BLASR suite (make)](doc/INSTALL_MAKE.md)
+    - [BLASR + utils (cmake)](doc/INSTALL_CMAKE.md)
+    - [BLASR + utils + bax2bam/bax2bam (pitchfork)](https://github.com/PacificBiosciences/pitchfork/wiki/Installing-blasr-with-pitchfork)
+    - [BLASR + utils + bax2bam/bax2bam (make)](doc/INSTALL_MAKE.md)
  - [Running BLASR](doc/EXAMPLES.md)
  - [Developer environment](doc/DEVELOPER.md)
 

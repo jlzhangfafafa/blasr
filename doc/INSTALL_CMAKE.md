@@ -1,4 +1,4 @@
-## Compile BLASR binary using cmake
+## Compile BLASR and util binaries using cmake
 
 Make sure that you are using cmake >=3.7 and
 always start from an empty build subdirectory!
@@ -15,6 +15,10 @@ Where is the binary?
 Want to build MUCH faster? Install ninja and execute
 
     cmake -GNinja .. && ninja
+
+Can I install all binaries to a custom location?
+
+    cmake -GNinja -DCMAKE_INSTALL_PREFIX=/my/path .. && ninja install
 
 Is your HDF5 in a custom location?
 
@@ -34,3 +38,7 @@ Are you on MacOS? Install homebrew and install following dependencies and
 use the default instructions above:
 
     brew install ninja hdf5 cmake
+
+Can I install bax2bam or bam2bax with this approach?
+
+    Not yet.
