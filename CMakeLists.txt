@@ -64,9 +64,16 @@ function(create_exe exe_name exe_cpp)
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
-    target_link_libraries(${exe_name} deps)
+    target_link_libraries(${exe_name}
+        deps
+        ${CMAKE_DL_LIBS}
+        Threads::Threads
+    )
     if (ARGV2)
-        target_link_libraries(${exe_name} hdf5 hdf5_cpp)
+        target_link_libraries(${exe_name}
+            hdf5
+            hdf5_cpp
+        )
         GET_PROPERTY(HDF5_LINKER_FLAG_LOCAL GLOBAL PROPERTY HDF5_LINKER_FLAG_GLOBAL)
         if (HDF5_LINKER_FLAG_LOCAL)
             set_target_properties(${exe_name} PROPERTIES LINK_FLAGS ${HDF5_LINKER_FLAG_LOCAL})

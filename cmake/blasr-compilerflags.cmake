@@ -11,7 +11,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug" AND APPLE)
 
 # static linking
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(BLASR_LINKER_FLAGS "${BLASR_LINKER_FLAGS} -static-libgcc -static-libstdc++")
+    set(BLASR_LINKER_FLAGS "${BLASR_LINKER_FLAGS} -static-libstdc++")
 ENDIF()
 
 # NOTE: quash clang warnings w/ Boost
