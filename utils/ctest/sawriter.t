@@ -19,7 +19,7 @@ Make OUTDIR
   $ echo $?
   0
 
-  $ $EXEC $OUTDIR/ecoli_welter.sa $DATDIR/ecoli_reference.fasta -blt 11 -welter 2>$OUTDIR/sawriter.log
+  $ $EXEC $OUTDIR/ecoli_welter.sa $DATDIR/ecoli_reference.fasta -blt 11 -welter 2>&1 >$OUTDIR/sawriter.log 
   $ echo $?
   0
 
