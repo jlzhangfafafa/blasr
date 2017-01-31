@@ -1,6 +1,6 @@
 Set up directories
   $ CURDIR=$TESTDIR
-  $ REMOTEDIR=/mnt/secondary-siv/testdata/BlasrTestData/ctest
+  $ REMOTEDIR=/pbi/dept/secondary/siv/testdata/BlasrTestData/ctest
   $ DATDIR=$REMOTEDIR/data
   $ OUTDIR=$CURDIR/out
   $ STDDIR=$REMOTEDIR/stdout
