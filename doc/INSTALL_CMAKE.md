@@ -39,6 +39,3 @@ use the default instructions above:
 
     brew install ninja hdf5 cmake
 
-Can I install bax2bam or bam2bax with this approach?
-
-    Not yet.
