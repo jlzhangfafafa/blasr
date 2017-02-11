@@ -10,8 +10,8 @@
  - [Wiki: all you need to know](https://github.com/PacificBiosciences/blasr/wiki)
  - Compile from source
     - [BLASR + utils (cmake)](doc/INSTALL_CMAKE.md)
-    - [BLASR + utils + bax2bam/bax2bam (pitchfork)](https://github.com/PacificBiosciences/pitchfork/wiki/Installing-blasr-with-pitchfork)
-    - [BLASR + utils + bax2bam/bax2bam (make)](doc/INSTALL_MAKE.md)
+    - [BLASR + utils (pitchfork)](https://github.com/PacificBiosciences/pitchfork/wiki/Installing-blasr-with-pitchfork)
+    - [BLASR + utils (make)](doc/INSTALL_MAKE.md)
  - [Running BLASR](doc/EXAMPLES.md)
  - [Developer environment](doc/DEVELOPER.md)
 
