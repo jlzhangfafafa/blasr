@@ -1352,7 +1352,7 @@ int main(int argc, char* argv[]) {
         if ( reader->GetFileType() == FileType::PBBAM ) {
             reader->SetScrapsFileName(params.scrapsFileNames[params.readsFileIndex]);
         }
-        initReturnValue = reader->Initialize(true);
+        initReturnValue = reader->Initialize(true, params.polymeraseMode);
     }
     else {
         initReturnValue = reader->Initialize();
