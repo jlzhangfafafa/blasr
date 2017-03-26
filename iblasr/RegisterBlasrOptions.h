@@ -629,7 +629,7 @@ const string BlasrConciseHelp(void)
     ss << "blasr - a program to map reads to a genome" << endl
        << " usage: blasr reads genome " << endl
        << " Run with -h for a list of commands " << endl
-       << "          -help for verbose discussion of how to run blasr." << endl
+       << "          --help for verbose discussion of how to run blasr." << endl
        << endl
        << "In release v5.1 of BLASR, command-line options will use the " << endl
        << "single dash/double dash convention: " << endl
