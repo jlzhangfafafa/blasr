@@ -17,8 +17,8 @@ module load ccache/3.2.3
 
 cat > pitchfork/settings.mk << EOF
 PREFIX            = $PWD/deployment
-CCACHE_DIR        = /net/flash/localdisk/scratch/bamboo.ccache
-SCCACHE_DIR       = /mnt/secondary/Share/tmp/bamboo.sccache
+CCACHE_DIR        = /mnt/secondary/Share/tmp/bamboo.mobs.ccachedir
+#SCCACHE_DIR       = /mnt/secondary/Share/tmp/bamboo.sccache
 DISTFILES         = $PWD/.distfiles
 # from Herb
 HAVE_OPENSSL      = /mnt/software/o/openssl/1.0.2a
@@ -39,7 +39,7 @@ blasr_libcpp_REPO = $PWD/repos/blasr_libcpp
 HAVE_HTSLIB       = $HAVE_HTSLIB
 #htslib_REPO       = $PWD/repos/htslib
 EOF
-
+echo y|make -C pitchfork _startover
 make -j -C pitchfork blasr cram
 mkdir -p tarballs
 
