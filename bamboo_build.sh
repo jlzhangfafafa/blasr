@@ -1,8 +1,9 @@
 #!/bin/bash -e
 rm -rf prebuilt
 rm -rf deployment
-mkdir -p prebuilts
-HTSLIB=`/bin/ls -t tarballs/htslib-*-bin.tgz|head -1`
+mkdir -p prebuilts tarballs
+curl -s -L http://nexus/repository/maven-snapshots/pacbio/sat/htslib/htslib-1.1-SNAPSHOT.tgz -o tarballs/htslib-1.1-SNAPSHOT.tgz
+HTSLIB=`/bin/ls -t tarballs/htslib-*.tgz|head -1`
 PBBAM=`/bin/ls -t tarballs/pbbam*-x86_64.tgz|head -1`
 HAVE_HTSLIB=$PWD/prebuilts/`basename $HTSLIB .tgz`
 mkdir -p $HAVE_HTSLIB
