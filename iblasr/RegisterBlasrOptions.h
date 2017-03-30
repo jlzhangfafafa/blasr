@@ -102,6 +102,8 @@ void RegisterBlasrOptions(CommandLineParser& clp, MappingParameters& params)
 #ifdef USE_PBBAM
     clp.RegisterFlagOption("-sam", &params.printSAM, "");
     clp.RegisterFlagOption("-bam", &params.printBAM, "");
+    // BAM read manipulations
+    clp.RegisterFlagOption("-polymerase", &params.polymeraseMode, "", false);
 #endif
     clp.RegisterStringOption("-clipping", &params.clippingString, "");
     clp.RegisterIntOption("-sdpTupleSize", &params.sdpTupleSize, "",
@@ -265,7 +267,25 @@ const string BlasrHelp(MappingParameters& params)
         << endl
         << "               the reads.plx.h5 or reads.bax.h5 files are ignored." << endl
         << endl
-        << "(DEPRECATED) Options for modifying reads." << endl
+
+        << " Options for modifying reads." << endl
+        << "   --noSplitSubreads" << endl
+        << "               Do not split subreads at adapters. This is typically only " << endl
+        << "               useful when the genome in an unrolled version of a known template, and "
+        << endl
+        << "               contains template-adapter-reverse_template sequence." << endl
+#ifdef USE_PBBAM
+        << "               For BAM input it reconstitutes full ZMW reads." << endl
+        << endl
+        << " Option for modifying BAM reads with --noSplitSubreads." << endl
+        << "   --polymerase" << endl
+        << "               Instead of reconstituting ZMW reads," << endl
+        << "               this option reconstitutes polymerase reads, omitting LQ regions." << endl
+        << "               Polymerase reads are aligned, if at least one subread is present."
+        << endl
+        << endl
+#endif
+        << "(DEPRECATED) Options for modifying HDF reads." << endl
         << "               There is ancilliary information about substrings of reads " << endl
         << "               that is stored in a 'region table' for each read file.  Because " << endl
         << "               HDF is used, the region table may be part of the .bax.h5 or .plx.h5 "
@@ -305,11 +325,6 @@ const string BlasrHelp(MappingParameters& params)
         << "               Align the circular consensus, and report only the alignment of the ccs"
         << endl
         << "               sequence." << endl
-        << "   --noSplitSubreads (false)" << endl
-        << "               Do not split subreads at adapters.  This is typically only " << endl
-        << "               useful when the genome in an unrolled version of a known template, and "
-        << endl
-        << "               contains template-adapter-reverse_template sequence." << endl
         << "   --ignoreRegions(false)" << endl
         << "               Ignore any information in the region table." << endl
         << "   --ignoreHQRegions (false)Ignore any hq regions in the region table." << endl
@@ -614,7 +629,7 @@ const string BlasrConciseHelp(void)
     ss << "blasr - a program to map reads to a genome" << endl
        << " usage: blasr reads genome " << endl
        << " Run with -h for a list of commands " << endl
-       << "          -help for verbose discussion of how to run blasr." << endl
+       << "          --help for verbose discussion of how to run blasr." << endl
        << endl
        << "In release v5.1 of BLASR, command-line options will use the " << endl
        << "single dash/double dash convention: " << endl

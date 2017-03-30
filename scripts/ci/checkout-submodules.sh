@@ -10,4 +10,6 @@ module load git
 # submodules.  Override the remote here.
 git remote set-url origin ssh://git@bitbucket.nanofluidics.com:7999/sat/blasr.git
 
-git submodule update --init --remote
+rm -rf pbbam libcpp
+git submodule update --init
+git submodule foreach git pull origin develop

@@ -208,6 +208,7 @@ public:
     string hitPolicyStr;
     HitPolicy hitPolicy;
     bool enableHiddenPaths;
+    bool polymeraseMode;
 
     void Init()
     {
@@ -387,6 +388,8 @@ public:
         hitPolicyStr = "all";
         ResetFilterAndHit();
         enableHiddenPaths = false;  //turn off hidden paths.
+
+        polymeraseMode = false;
     }
 
     MappingParameters()
@@ -398,6 +401,12 @@ public:
 
     void MakeSane()
     {
+#ifndef USE_PBBAM
+        if (polymeraseMode && !mapSubreadsSeparately) {
+            cout << "ERROR, --polymerase can only be used with --noSplitSubreads." << endl;
+            exit(1);
+        }
+#endif
         // Expand FOFN
         FileOfFileNames::ExpandFileNameList(readsFileNames);
 

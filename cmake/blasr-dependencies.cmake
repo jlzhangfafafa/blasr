@@ -13,6 +13,15 @@ endif()
 
 # ZLIB
 if (NOT ZLIB_INCLUDE_DIRS OR NOT ZLIB_LIBRARIES)
+    if (DEFINED ENV{ZLIB_ROOT})
+        if (DEFINED ENV{ZLIB_LIBRARY})
+            unset(ENV{ZLIB_LIBRARY})
+        endif()
+        if (DEFINED ENV{ZLIB_INCLUDE_DIR})
+            unset(ENV{ZLIB_INCLUDE_DIR})
+        endif()
+        set(ZLIB_ROOT $ENV{ZLIB_ROOT})
+    endif()
     find_package(ZLIB REQUIRED)
 endif()
 
