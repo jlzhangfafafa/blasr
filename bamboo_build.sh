@@ -1,15 +1,13 @@
 #!/bin/bash -e
 rm -rf prebuilt
-rm -rf deployment
-mkdir -p prebuilts tarballs
-curl -s -L http://nexus/repository/maven-snapshots/pacbio/sat/htslib/htslib-1.1-SNAPSHOT.tgz -o tarballs/htslib-1.1-SNAPSHOT.tgz
-HTSLIB=`/bin/ls -t tarballs/htslib-*.tgz|head -1`
-PBBAM=`/bin/ls -t tarballs/pbbam*-x86_64.tgz|head -1`
-HAVE_HTSLIB=$PWD/prebuilts/`basename $HTSLIB .tgz`
-mkdir -p $HAVE_HTSLIB
-tar zxvf $HTSLIB -C $HAVE_HTSLIB
-tar zxvf $PBBAM -C prebuilts
-HAVE_PBBAM=`/bin/ls -d $PWD/prebuilts/pbbam-*|head -1`
+mkdir -p prebuilts/libbzip2-1.0.6
+curl -sL http://ossnexus/repository/unsupported/pitchfork/gcc-4.9.2/libbzip2-1.0.6.tgz \
+| tar zxf - -C prebuilts/libbzip2-1.0.6
+if [ ! -e .distfiles/gtest/release-1.7.0.tar.gz ]; then
+  mkdir -p .distfiles/gtest
+  curl -sL http://ossnexus/repository/unsupported/distfiles/googletest/release-1.7.0.tar.gz \
+    -o .distfiles/gtest/release-1.7.0.tar.gz
+fi
 
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
 module load gcc/4.9.2
@@ -32,13 +30,12 @@ HAVE_NCURSES      = /mnt/software/n/ncurses/5.9
 HAVE_HDF5         = /mnt/software/a/anaconda2/4.2.0
 HAVE_OPENBLAS     = /mnt/software/o/openblas/0.2.14
 HAVE_CMAKE        = /mnt/software/c/cmake/3.2.2/bin/cmake
+HAVE_LIBBZIP2     = $PWD/prebuilts/libbzip2-1.0.6
 #
-HAVE_PBBAM        = $HAVE_PBBAM
-#pbbam_REPO        = $PWD/repos/pbbam
+pbbam_REPO        = $PWD/repos/pbbam
 blasr_REPO        = $PWD/repos/blasr
 blasr_libcpp_REPO = $PWD/repos/blasr_libcpp
-HAVE_HTSLIB       = $HAVE_HTSLIB
-#htslib_REPO       = $PWD/repos/htslib
+htslib_REPO       = $PWD/repos/htslib
 EOF
 echo y|make -C pitchfork _startover
 make -j -C pitchfork blasr cram
