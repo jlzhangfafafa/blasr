@@ -240,7 +240,7 @@ int main(int argc, char* argv[]) {
         if (subreadSequence.SubreadStart() >= subreadSequence.SubreadEnd() or 
             subreadSequence.SubreadEnd() - subreadSequence.SubreadStart() <= DNALength(minSubreadLength)) {
           //
-          // There is no high qualty portion of this subread. Skip it.
+          // There is no high quality portion of this subread. Skip it.
           //
           continue;
         }
