@@ -8,8 +8,11 @@ tar zxf .distfiles/gtest/release-1.7.0.tar.gz -C repos/
 ln -sfn googletest-release-1.7.0 repos/gtest
 rm -rf staging tarballs
 mkdir -p staging tarballs
+mkdir -p staging/pbbam/lib
 mkdir -p staging/pbbam/bin
+mkdir -p staging/pbbam/include
 mkdir -p staging/blasr_libcpp/lib
+mkdir -p staging/blasr_libcpp/include
 mkdir -p staging/blasr/bin
 
 set +x
@@ -37,7 +40,7 @@ mkdir build
 cd build
 rm -rf * && CFLAGS=-fPIC CXXFLAGS=-fPIC CMAKE_BUILD_TYPE=ReleaseWithAssert cmake -GNinja ..
 ninja
-cp -a bin/* ../../../staging/pbbam/bin/
+rsync -avx ../include bin ../../../staging/pbbam/
 
 cd ../../blasr_libcpp
 export CCACHE_BASEDIR=$PWD
@@ -55,6 +58,8 @@ python configure.py \
 make -j libpbdata LDLIBS=-lpbbam
 make -j libpbihdf
 make -j libblasr
+tar c `find alignment hdf pbdata \( -name '*.hpp' -or -name '*.h' \)` \
+  | tar x -C ../../staging/blasr_libcpp/include
 cp -a pbdata/libpbdata.so*   ../../staging/blasr_libcpp/lib/
 cp -a hdf/libpbihdf.so*      ../../staging/blasr_libcpp/lib/
 cp -a alignment/libblasr.so* ../../staging/blasr_libcpp/lib/
