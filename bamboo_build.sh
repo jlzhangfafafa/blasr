@@ -40,7 +40,7 @@ mkdir build
 cd build
 rm -rf * && CFLAGS=-fPIC CXXFLAGS=-fPIC CMAKE_BUILD_TYPE=ReleaseWithAssert cmake -GNinja ..
 ninja
-rsync -avx ../include bin ../../../staging/pbbam/
+rsync -avx ../include bin lib ../../../staging/pbbam/
 
 cd ../../blasr_libcpp
 export CCACHE_BASEDIR=$PWD
@@ -90,5 +90,5 @@ cp -a utils/sawriter ../../staging/blasr/bin/
 
 cd ../..
 cd staging/blasr   && tar zcf ../../tarballs/blasr.tgz        bin
-cd ../blasr_libcpp && tar zcf ../../tarballs/blasr_libcpp.tgz lib
-cd ../pbbam        && tar zcf ../../tarballs/pbbam.tgz        bin
+cd ../blasr_libcpp && tar zcf ../../tarballs/blasr_libcpp.tgz lib include
+cd ../pbbam        && tar zcf ../../tarballs/pbbam.tgz        lib include bin
