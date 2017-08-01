@@ -3,9 +3,13 @@ mkdir -p .distfiles/gtest
 if [ ! -e .distfiles/gtest/release-1.7.0.tar.gz ]; then
   curl -sL http://ossnexus/repository/unsupported/distfiles/googletest/release-1.7.0.tar.gz \
     -o .distfiles/gtest/release-1.7.0.tar.gz
-  tar zxf .distfiles/gtest/release-1.7.0.tar.gz -C repos/
-  ln -sfn googletest-release-1.7.0 repos/gtest
 fi
+tar zxf .distfiles/gtest/release-1.7.0.tar.gz -C repos/
+ln -sfn googletest-release-1.7.0 repos/gtest
+rm -rf staging tarballs
+mkdir -p staging tarballs
+mkdir -p staging/blasr_libcpp/lib
+mkdir -p staging/blasr/bin
 
 set +x
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
@@ -32,7 +36,9 @@ mkdir build
 cd build
 rm -rf * && CFLAGS=-fPIC CXXFLAGS=-fPIC CMAKE_BUILD_TYPE=ReleaseWithAssert cmake -GNinja ..
 ninja
+
 cd ../../blasr_libcpp
+export CCACHE_BASEDIR=$PWD
 rm -f defines.mk
 python configure.py \
       PREFIX=dummy \
@@ -47,9 +53,13 @@ python configure.py \
 make -j libpbdata LDLIBS=-lpbbam
 make -j libpbihdf
 make -j libblasr
+cp -a pbdata/libpbdata.so*   ../../staging/blasr_libcpp/lib/
+cp -a hdf/libpbihdf.so*      ../../staging/blasr_libcpp/lib/
+cp -a alignment/libblasr.so* ../../staging/blasr_libcpp/lib/
 
 cd ../blasr
 export CCACHE_BASEDIR=$PWD
+rm -f defines.mk
 python configure.py --shared \
        PREFIX=dummy \
      HDF5_INC=$(pkg-config --cflags-only-I hdf5|awk '{print $1}'|sed -e 's/^-I//') \
@@ -68,3 +78,9 @@ LIBPBIHDF_LIB=$PWD/../blasr_libcpp/hdf \
    HTSLIB_LIB=$(pkg-config --libs-only-L htslib|awk '{print $1}'|sed -e 's/^-L//')
 make -j
 make -C utils -j
+cp -a blasr          ../../staging/blasr/bin/
+cp -a utils/sawriter ../../staging/blasr/bin/
+
+cd ../..
+cd staging/blasr   && tar zcf ../../tarballs/blasr.tgz        bin
+cd ../blasr_libcpp && tar zcf ../../tarballs/blasr_libcpp.tgz lib
