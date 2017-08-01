@@ -3,9 +3,9 @@ mkdir -p .distfiles/gtest
 if [ ! -e .distfiles/gtest/release-1.7.0.tar.gz ]; then
   curl -sL http://ossnexus/repository/unsupported/distfiles/googletest/release-1.7.0.tar.gz \
     -o .distfiles/gtest/release-1.7.0.tar.gz
-  tar zxf .distfiles/gtest/release-1.7.0.tar.gz -C repos/
-  ln -sfn googletest-release-1.7.0 repos/gtest
 fi
+tar zxf .distfiles/gtest/release-1.7.0.tar.gz -C repos/
+ln -sfn googletest-release-1.7.0 repos/gtest
 
 set +x
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
