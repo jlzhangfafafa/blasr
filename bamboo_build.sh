@@ -8,6 +8,7 @@ tar zxf .distfiles/gtest/release-1.7.0.tar.gz -C repos/
 ln -sfn googletest-release-1.7.0 repos/gtest
 rm -rf staging tarballs
 mkdir -p staging tarballs
+mkdir -p staging/pbbam/bin
 mkdir -p staging/blasr_libcpp/lib
 mkdir -p staging/blasr/bin
 
@@ -36,6 +37,7 @@ mkdir build
 cd build
 rm -rf * && CFLAGS=-fPIC CXXFLAGS=-fPIC CMAKE_BUILD_TYPE=ReleaseWithAssert cmake -GNinja ..
 ninja
+cp -a bin/* ../../../staging/pbbam/bin/
 
 cd ../../blasr_libcpp
 export CCACHE_BASEDIR=$PWD
@@ -84,3 +86,4 @@ cp -a utils/sawriter ../../staging/blasr/bin/
 cd ../..
 cd staging/blasr   && tar zcf ../../tarballs/blasr.tgz        bin
 cd ../blasr_libcpp && tar zcf ../../tarballs/blasr_libcpp.tgz lib
+cd ../pbbam        && tar zcf ../../tarballs/pbbam.tgz        bin
