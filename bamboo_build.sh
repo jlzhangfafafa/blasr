@@ -53,9 +53,9 @@ python configure.py \
 make -j libpbdata LDLIBS=-lpbbam
 make -j libpbihdf
 make -j libblasr
-cp -a pbdata/libpbdata.*   ../staging/blasr_libcpp/lib/
-cp -a hdf/libpbihdf.*      ../staging/blasr_libcpp/lib/
-cp -a alignment/libblasr.* ../staging/blasr_libcpp/lib/
+cp -a pbdata/libpbdata.so*   ../../staging/blasr_libcpp/lib/
+cp -a hdf/libpbihdf.so*      ../../staging/blasr_libcpp/lib/
+cp -a alignment/libblasr.so* ../../staging/blasr_libcpp/lib/
 
 cd ../blasr
 export CCACHE_BASEDIR=$PWD
@@ -78,9 +78,9 @@ LIBPBIHDF_LIB=$PWD/../blasr_libcpp/hdf \
    HTSLIB_LIB=$(pkg-config --libs-only-L htslib|awk '{print $1}'|sed -e 's/^-L//')
 make -j
 make -C utils -j
-cp -a blasr          ../staging/blasr/bin/
-cp -a utils/sawriter ../staging/blasr/bin/
+cp -a blasr          ../../staging/blasr/bin/
+cp -a utils/sawriter ../../staging/blasr/bin/
 
-cd ..
+cd ../..
 cd staging/blasr   && tar zcf ../../tarballs/blasr.tgz        bin
 cd ../blasr_libcpp && tar zcf ../../tarballs/blasr_libcpp.tgz lib
