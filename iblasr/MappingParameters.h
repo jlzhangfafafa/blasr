@@ -401,12 +401,10 @@ public:
 
     void MakeSane()
     {
-#ifndef USE_PBBAM
-        if (polymeraseMode && !mapSubreadsSeparately) {
+        if (polymeraseMode && mapSubreadsSeparately) {
             cout << "ERROR, --polymerase can only be used with --noSplitSubreads." << endl;
             exit(1);
         }
-#endif
         // Expand FOFN
         FileOfFileNames::ExpandFileNameList(readsFileNames);
 
