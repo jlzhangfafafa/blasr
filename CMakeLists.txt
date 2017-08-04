@@ -60,6 +60,7 @@ target_link_libraries(
     ${PacBioBAM_LIBRARIES}
     ${hts_LIBRARIES}
     ${ZLIB_LDFLAGS}
+    ${HDF5_LDFLAGS}
     )
 
 # Binaries

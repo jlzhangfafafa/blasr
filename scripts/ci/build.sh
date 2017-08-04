@@ -7,12 +7,13 @@ type module >& /dev/null || source /mnt/software/Modules/current/init/bash
 module purge
 module load git
 module load gcc/4.9.2
+CCACHE_BASEDIR=$PWD
 module load ccache/3.3.4
 module load boost/1.60
 module load ninja/1.7.1
 module load cmake/3.2.2
-module load hdf5-tools/1.8.16
-module load zlib/1.2.8-cloudflare
+module load hdf5-tools/1.8.14
+module load zlib/1.2.8
 module load htslib/1.3.1
 
 echo "#############################"
@@ -44,7 +45,7 @@ export PATH=$PWD/build:$PATH
 mkdir -p test-reports
 module purge
 module load gcc/4.9.2
-module load hdf5-tools/1.8.16
+module load hdf5-tools/1.8.14
 module load zlib/1.2.8-cloudflare
 module load htslib/1.3.1
 module load samtools
