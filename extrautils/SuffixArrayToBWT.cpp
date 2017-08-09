@@ -8,16 +8,15 @@
 #include <fstream>
 #include <iostream>
 
-using namespace std;
 int main(int argc, char* argv[])
 {
     if (argc < 4) {
-        cout << "usage: sa2bwt genomeFileName suffixArray bwt [-debug]" << endl;
+        std::cout << "usage: sa2bwt genomeFileName suffixArray bwt [-debug]" << std::endl;
         exit(1);
     }
-    string genomeFileName = argv[1];
-    string suffixArrayFileName = argv[2];
-    string bwtFileName = argv[3];
+    std::string genomeFileName = argv[1];
+    std::string suffixArrayFileName = argv[2];
+    std::string bwtFileName = argv[3];
     int storeDebugInformation = 0;
     int argi = 4;
     while (argi < argc) {
@@ -27,7 +26,7 @@ int main(int argc, char* argv[])
         ++argi;
     }
 
-    ofstream bwtOutFile;
+    std::ofstream bwtOutFile;
     CrucialOpen(bwtFileName, bwtOutFile, std::ios::out | std::ios::binary);
 
     FASTAReader reader;

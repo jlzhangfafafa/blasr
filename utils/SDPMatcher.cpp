@@ -1,7 +1,7 @@
 #include <string>
 #include <iostream>
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
 
 #include <defs.h>
 #include <FASTAReader.hpp>
@@ -15,16 +15,16 @@
 #include <algorithms/alignment/SWAlign.hpp>
 #include <algorithms/alignment/SDPAlign.hpp>
 
-/* 
- * Performs sparse dynamic programming (SDP) between pairs of sequences as they 
- * are given in two FASTA files, one called for convenience query, the other 
+/*
+ * Performs sparse dynamic programming (SDP) between pairs of sequences as they
+ * are given in two FASTA files, one called for convenience query, the other
  * target. k is the size of the k-mer used for the SDP algorithm.
  */
 
 void PrintUsage() {
-        cout << "usage: sdpMatcher query target k [-indelRate delta] "
+        std::cout << "usage: sdpMatcher query target k [-indelRate delta] "
                 "[-showalign] [-printsw] [-noRefine] [-indel i] [ -local ] "
-                "[-match m] [-sdpIndel i]" << endl;
+                "[-match m] [-sdpIndel i]" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    string queryName, targetName;
+    std::string queryName, targetName;
     queryName = argv[1];
     targetName = argv[2];
     TupleMetrics tm;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
         }
         else {
             PrintUsage();
-            cout << "Bad option: " << argv[argi] << endl;
+            std::cout << "Bad option: " << argv[argi] << std::endl;
             exit(1);
         }
         ++argi;
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
     FASTASequence query, target;
     FASTAReader queryReader, targetReader;
     queryReader.Init(queryName);
-    
+
     targetReader.Init(targetName);
 
     if (match != 0) {
@@ -113,8 +113,8 @@ int main(int argc, char* argv[]) {
 
     int seqIndex = 0;
     Alignment alignment;
-    vector<int> scoreMat;
-    vector<Arrow> pathMat;
+    std::vector<int> scoreMat;
+    std::vector<Arrow> pathMat;
     DistanceMatrixScoreFunction<DNASequence, DNASequence> distScoreFn;
     distScoreFn.del = indel;
     distScoreFn.ins = indel;
@@ -124,22 +124,22 @@ int main(int argc, char* argv[]) {
         targetReader.GetNext(target);
     }
 
-    cout << "qid,tid,qstart,qend,qlen,tstart,tend,tlen,score";
-    if (printSimilarity) cout << ",pctSimilarity";
-    cout << endl;
-    
-    while (queryReader.GetNext(query) and 
+    std::cout << "qid,tid,qstart,qend,qlen,tstart,tend,tlen,score";
+    if (printSimilarity) std::cout << ",pctSimilarity";
+    std::cout << std::endl;
+
+    while (queryReader.GetNext(query) and
            (fixedTarget or targetReader.GetNext(target))) {
-        
+
         if (query.length == 0 or target.length == 0)
-            continue; 
+            continue;
         alignment.blocks.clear();
 
         int alignScore;
         alignScore = SDPAlign(query, target,
-                              distScoreFn, tm.tupleSize, 
-                              sdpIndel, sdpIndel, indelRate, 
-                              alignment, 
+                              distScoreFn, tm.tupleSize,
+                              sdpIndel, sdpIndel, indelRate,
+                              alignment,
                               alignType,
                               refineAlignments,
                               false,
@@ -147,30 +147,30 @@ int main(int argc, char* argv[]) {
 
         ComputeAlignmentStats(alignment, query.seq, target.seq, distScoreFn);
 
-        if (alignScore > 0){ // in rare cases the SDP returns positive. 
+        if (alignScore > 0){ // in rare cases the SDP returns positive.
             alignScore = 0;  // this makes it more like a true local alignment
-        }                   
+        }
 
         if (showalign) {
-            StickPrintAlignment(alignment, query, target, cout);
+            StickPrintAlignment(alignment, query, target, std::cout);
         }
 
         if (printSW) {
             MatchedAlignment swAlignment;
-            vector<int> scoreMat;
-            vector<Arrow> pathMat;
-            SWAlign(query, target, scoreMat, pathMat, swAlignment, distScoreFn);        
-            StickPrintAlignment(swAlignment, query, target, cout);
+            std::vector<int> scoreMat;
+            std::vector<Arrow> pathMat;
+            SWAlign(query, target, scoreMat, pathMat, swAlignment, distScoreFn);
+            StickPrintAlignment(swAlignment, query, target, std::cout);
         }
 
-        cout << query.GetName()  << "," << target.GetName() << "," 
-             << alignment.qPos << "," << alignment.QEnd()   << "," 
-             << query.length  << "," << alignment.tPos << "," 
-             << alignment.TEnd()   << "," << target.length << "," 
+        std::cout << query.GetName()  << "," << target.GetName() << ","
+             << alignment.qPos << "," << alignment.QEnd()   << ","
+             << query.length  << "," << alignment.tPos << ","
+             << alignment.TEnd()   << "," << target.length << ","
              << alignScore;
-        if (printSimilarity) 
-             cout << "," << alignment.pctSimilarity;
-        cout << endl;
+        if (printSimilarity)
+             std::cout << "," << alignment.pctSimilarity;
+        std::cout << std::endl;
 
         ++seqIndex;
     }

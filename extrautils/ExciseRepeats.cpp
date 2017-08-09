@@ -3,13 +3,11 @@
 #include "FASTASequence.hpp"
 #include "utils.hpp"
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
-    string seqInName, seqOutName, dotOutName;
+    std::string seqInName, seqOutName, dotOutName;
     if (argc < 4) {
-        cout << "usage: exciseRepeats inName repMaskOutFile outName" << endl;
+        std::cout << "usage: exciseRepeats inName repMaskOutFile outName" << std::endl;
         exit(1);
     }
 
@@ -21,26 +19,26 @@ int main(int argc, char* argv[])
     FASTASequence origSeq;
     reader.GetNext(origSeq);
 
-    ifstream dotOutFile;
+    std::ifstream dotOutFile;
     CrucialOpen(dotOutName, dotOutFile);
-    ofstream seqOutFile;
-    ofstream seqOut;
+    std::ofstream seqOutFile;
+    std::ofstream seqOut;
     CrucialOpen(seqOutName, seqOut, std::ios::out);
-    string dotOutLine;
+    std::string dotOutLine;
     getline(dotOutFile, dotOutLine);
     getline(dotOutFile, dotOutLine);
     getline(dotOutFile, dotOutLine);
     while (getline(dotOutFile, dotOutLine)) {
-        stringstream lineStrm(dotOutLine);
+        std::stringstream lineStrm(dotOutLine);
         int swScore;
         float pctDiv, pctDel, pctIns;
-        string query;
+        std::string query;
         int qPosBegin, qPosEnd;
-        string left;
+        std::string left;
         char strand;
-        string matchingRepeat;
-        string repClass;
-        string repPos, repEnd, repLeft;
+        std::string matchingRepeat;
+        std::string repClass;
+        std::string repPos, repEnd, repLeft;
         int id;
         lineStrm >> swScore >> pctDiv >> pctDel >> pctIns >> query >> qPosBegin >> qPosEnd >>
             left >> strand >> matchingRepeat >> repClass >> repPos >> repEnd >> repLeft >> id;

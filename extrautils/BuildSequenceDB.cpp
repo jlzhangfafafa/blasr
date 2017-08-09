@@ -1,19 +1,18 @@
 #include <string>
+
 #include "CommandLineParser.hpp"
 #include "FASTAReader.hpp"
 #include "metagenome/SequenceIndexDatabase.hpp"
 #include "utils.hpp"
 #include "utils/FileOfFileNames.hpp"
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
 
     CommandLineParser clp;
-    string fastaFileName, indexFileName;
-    vector<string> fastaFileNames;
-    vector<string> opts;
+    std::string fastaFileName, indexFileName;
+    std::vector<std::string> fastaFileNames;
+    std::vector<std::string> opts;
     clp.SetProgramName("bsdb");
     clp.SetProgramSummary(
         "Build an index database on a file of sequences.\n"
@@ -24,8 +23,8 @@ int main(int argc, char* argv[])
 
     clp.ParseCommandLine(argc, argv, opts);
 
-    ifstream fastaIn;
-    ofstream indexOut;
+    std::ifstream fastaIn;
+    std::ofstream indexOut;
 
     if (FileOfFileNames::IsFOFN(fastaFileName)) {
         FileOfFileNames::FOFNToList(fastaFileName, fastaFileNames);

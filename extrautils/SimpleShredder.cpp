@@ -8,11 +8,9 @@
 #include "statistics/StatUtils.hpp"
 #include "utils.hpp"
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
-    string inFileName, readsFileName;
+    std::string inFileName, readsFileName;
     DNALength readLength;
     float coverage = 0;
     bool noRandInit = false;
@@ -21,8 +19,8 @@ int main(int argc, char* argv[])
     int qualityValue = 20;
     bool printFastq = false;
     int stratify = 0;
-    string titleType = "pacbio";
-    string fastqType = "illumina";  // or "sanger"
+    std::string titleType = "pacbio";
+    std::string fastqType = "illumina";  // or "sanger"
     clp.RegisterStringOption("inFile", &inFileName, "Reference sequence", 0);
     clp.RegisterPreviousFlagsAsHidden();
     clp.RegisterIntOption("readLength", (int*)&readLength,
@@ -47,7 +45,7 @@ int main(int argc, char* argv[])
     clp.RegisterStringOption("titleType", &titleType,
                              "Set the name of the title: 'pacbio'|'illumina'");
     clp.RegisterStringOption("fastqType", &fastqType, "Set the type of fastq: 'illumina'|'sanger'");
-    vector<string> leftovers;
+    std::vector<std::string> leftovers;
     clp.ParseCommandLine(argc, argv, leftovers);
 
     if (!noRandInit) {
@@ -56,19 +54,19 @@ int main(int argc, char* argv[])
 
     FASTAReader inReader;
     inReader.Init(inFileName);
-    vector<FASTASequence> reference;
+    std::vector<FASTASequence> reference;
 
     inReader.ReadAllSequences(reference);
-    ofstream readsFile;
+    std::ofstream readsFile;
     if (readsFileName == "") {
-        cout << "ERROR.  You must specify a reads file." << endl;
+        std::cout << "ERROR.  You must specify a reads file." << std::endl;
         exit(1);
     }
     CrucialOpen(readsFileName, readsFile, std::ios::out);
 
-    ofstream sangerFastqFile;
+    std::ofstream sangerFastqFile;
     if (fastqType == "sanger") {
-        string sangerFastqFileName = readsFileName + ".fastq";
+        std::string sangerFastqFileName = readsFileName + ".fastq";
         CrucialOpen(sangerFastqFileName, sangerFastqFile, std::ios::out);
     }
 
@@ -78,7 +76,7 @@ int main(int argc, char* argv[])
         refLength += reference[i].length;
     }
     if (numReads == -1 and coverage == 0 and stratify == 0) {
-        cout << "ERROR, you must specify either coverage, nReads, or stratify." << endl;
+        std::cout << "ERROR, you must specify either coverage, nReads, or stratify." << std::endl;
         exit(1);
     } else if (numReads == -1) {
         numReads = (refLength / readLength) * coverage;
@@ -86,8 +84,8 @@ int main(int argc, char* argv[])
 
     if (stratify) {
         if (!readLength) {
-            cout << "ERROR. If you are using stratification, a read length must be specified."
-                 << endl;
+            std::cout << "ERROR. If you are using stratification, a read length must be specified."
+                      << std::endl;
             exit(1);
         }
     }
@@ -118,26 +116,26 @@ int main(int argc, char* argv[])
                     continue;
                 }
             }
-            readLength = min(reference[seqIndex].length - seqPos, origReadLength);
+            readLength = std::min(reference[seqIndex].length - seqPos, origReadLength);
         }
         sampleSeq.seq = &reference[seqIndex].seq[seqPos];
         int j;
         int gappedRead = 0;
-        string title;
-        stringstream titleStrm;
+        std::string title;
+        std::stringstream titleStrm;
         if (titleType == "pacbio") {
             titleStrm << i << "|" << reference[seqIndex].GetName() << "|" << seqPos << "|"
                       << seqPos + readLength;
         } else if (titleType == "illumina") {
             titleStrm << "SE_" << i << "_0@" << seqPos << "-" << seqPos + readLength << "/1";
         } else {
-            cout << "ERROR. Bad title type " << titleType << endl;
+            std::cout << "ERROR. Bad title type " << titleType << std::endl;
             exit(1);
         }
         title = titleStrm.str();
         sampleSeq.length = readLength;
         if (!printFastq) {
-            readsFile << ">" << title << endl;
+            readsFile << ">" << title << std::endl;
             sampleSeq.PrintSeq(readsFile);
         } else {
             FASTQSequence fastqSampleSeq;
@@ -145,8 +143,8 @@ int main(int argc, char* argv[])
             fastqSampleSeq.seq = sampleSeq.seq;
             fastqSampleSeq.length = sampleSeq.length;
             fastqSampleSeq.qual.data = new unsigned char[sampleSeq.length];
-            fill(fastqSampleSeq.qual.data, fastqSampleSeq.qual.data + sampleSeq.length,
-                 qualityValue);
+            std::fill(fastqSampleSeq.qual.data, fastqSampleSeq.qual.data + sampleSeq.length,
+                      qualityValue);
             if (fastqType == "illumina") {
                 fastqSampleSeq.PrintFastq(readsFile, fastqSampleSeq.length + 1);
             } else {

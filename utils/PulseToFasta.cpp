@@ -15,24 +15,22 @@
 #include <utils.hpp>
 #include <CommandLineParser.hpp>
 
-
-using namespace std;
 char VERSION[] = "v1.0.0";
 char PERFORCE_VERSION_STRING[] = "$Change: 126414 $";
 
 int main(int argc, char* argv[]) {
-    string program = "pls2fasta";
-    string versionString = VERSION;
+    std::string program = "pls2fasta";
+    std::string versionString = VERSION;
     AppendPerforceChangelist(PERFORCE_VERSION_STRING, versionString);
 
-	string plsFileName, fastaOutName;
-	vector<string> plsFileNames;
+	std::string plsFileName, fastaOutName;
+	std::vector<std::string> plsFileNames;
 	bool trimByRegion, maskByRegion;
 	trimByRegion = false;
 	maskByRegion = false;
 	RegionTable regionTable;
-	string regionsFOFNName = "";
-	vector<string> regionFileNames;
+	std::string regionsFOFNName = "";
+	std::vector<std::string> regionFileNames;
 	bool splitSubreads = true;
 	int minSubreadLength = 0;
 	bool addSimulatedData = false;
@@ -40,7 +38,7 @@ int main(int argc, char* argv[]) {
   bool printCcs   = false;
   int  lineLength = 50;
   int minReadScore = 0;
-  vector<int> holeNumbers;
+  std::vector<int> holeNumbers;
   CommandLineParser clp;
   bool printOnlyBest = false;
 
@@ -63,21 +61,21 @@ int main(int argc, char* argv[]) {
                         "A typical value would be between 750 and 800.  This does not apply to ccs reads.", CommandLineParser::NonNegativeInteger);
   clp.RegisterFlagOption("best", &printOnlyBest, "If a CCS sequence exists, print this.  Otherwise, print the longest"
                          "subread.  This does not support fastq.");
-  string description = ("Converts plx.h5/bax.h5/fofn files to fasta or fastq files. Although fasta files are provided"
+  std::string description = ("Converts plx.h5/bax.h5/fofn files to fasta or fastq files. Although fasta files are provided"
   " with every run, they are not trimmed nor split into subreads. This program takes "
   "additional annotation information, such as the subread coordinates and high quality regions "
   "and uses them to create fasta sequences that are substrings of all bases called. Most of the time "
   "you will want to trim low quality reads, so you should specify -trimByRegion.");
   clp.SetProgramSummary(description);
-                        
+
   clp.ParseCommandLine(argc, argv);
 
-    cerr << "[INFO] " << GetTimestamp() << " [" << program << "] started."  << endl;
+    std::cerr << "[INFO] " << GetTimestamp() << " [" << program << "] started."  << std::endl;
 	if (trimByRegion and maskByRegion) {
-		cout << "ERROR! You cannot both trim and mask regions. Use one or the other." << endl;
+		std::cout << "ERROR! You cannot both trim and mask regions. Use one or the other." << std::endl;
 		exit(1);
 	}
-		 
+
   if (printFastq) {
     // Setting lineLength to 0 flags to print on one line.
     lineLength = 0;
@@ -91,14 +89,14 @@ int main(int argc, char* argv[]) {
 	else {
         FileOfFileNames::StoreFileOrFileList(regionsFOFNName, regionFileNames);
 	}
-    
-	ofstream fastaOut;
+
+	std::ofstream fastaOut;
 	CrucialOpen(fastaOutName, fastaOut);
 	HDFRegionTableReader hdfRegionReader;
     sort(holeNumbers.begin(), holeNumbers.end());
 
-    vector<int> pls2rgn = MapPls2Rgn(plsFileNames, regionFileNames);
-   
+    std::vector<int> pls2rgn = MapPls2Rgn(plsFileNames, regionFileNames);
+
     for (size_t plsFileIndex = 0; plsFileIndex < plsFileNames.size(); plsFileIndex++) {
         if (trimByRegion or maskByRegion or splitSubreads) {
             hdfRegionReader.Initialize(regionFileNames[pls2rgn[plsFileIndex]]);
@@ -124,13 +122,13 @@ int main(int argc, char* argv[]) {
         }
 
         if (reader.SetReadFileName(plsFileNames[plsFileIndex]) == 0) {
-            cout << "ERROR, could not determine file type."
-                << plsFileNames[plsFileIndex] << endl;
+            std::cout << "ERROR, could not determine file type."
+                << plsFileNames[plsFileIndex] << std::endl;
             exit(1);
         }
         if (reader.Initialize() == 0) {
-            cout << "ERROR, could not initialize file "
-                << plsFileNames[plsFileIndex] << endl;
+            std::cout << "ERROR, could not initialize file "
+                << plsFileNames[plsFileIndex] << std::endl;
             exit(1);
         }
 
@@ -138,14 +136,14 @@ int main(int argc, char* argv[]) {
         DNALength simulatedSequenceIndex;
         reader.SkipReadQuality();
         SMRTSequence seq;
-        vector<ReadInterval> subreadIntervals;;
+        std::vector<ReadInterval> subreadIntervals;;
         SMRTSequence ccsSeq;
         while (reader.GetNextBases(seq, printFastq)) {
             if (printOnlyBest) {
                 ccsReader.GetNext(ccsSeq);
             }
 
-            if (holeNumbers.size() != 0 and 
+            if (holeNumbers.size() != 0 and
                     binary_search(holeNumbers.begin(), holeNumbers.end(), seq.zmwData.holeNumber) == false) {
                 continue;
             }
@@ -167,7 +165,7 @@ int main(int argc, char* argv[]) {
                     seq.PrintFastq(fastaOut, lineLength);
                 }
                 continue;
-            }	
+            }
 
             //
             // Determine the high quality boundaries of the read.  This is
@@ -176,7 +174,7 @@ int main(int argc, char* argv[]) {
             //
             DNALength hqReadStart, hqReadEnd;
             int hqRegionScore;
-            if (GetReadTrimCoordinates(seq, seq.zmwData, regionTable, hqReadStart, hqReadEnd, hqRegionScore) == false or 
+            if (GetReadTrimCoordinates(seq, seq.zmwData, regionTable, hqReadStart, hqReadEnd, hqRegionScore) == false or
                     (trimByRegion == false and maskByRegion == false)) {
                 hqReadStart = 0;
                 hqReadEnd   = seq.length;
@@ -187,18 +185,18 @@ int main(int argc, char* argv[]) {
             //
             if (maskByRegion) {
                 if (hqReadStart > 0) {
-                    fill(&seq.seq[0], &seq.seq[hqReadStart], 'N');
+                    std::fill(&seq.seq[0], &seq.seq[hqReadStart], 'N');
                 }
                 if (hqReadEnd != seq.length) {
-                    fill(&seq.seq[hqReadEnd], &seq.seq[seq.length], 'N');
+                    std::fill(&seq.seq[hqReadEnd], &seq.seq[seq.length], 'N');
                 }
             }
 
 
 
             //
-            // Now possibly print the full read with masking.  This could be handled by making a 
-            // 
+            // Now possibly print the full read with masking.  This could be handled by making a
+            //
             if (splitSubreads == false) {
                 ReadInterval wholeRead(0, seq.length);
                 // The set of subread intervals is just the entire read.
@@ -224,20 +222,20 @@ int main(int argc, char* argv[]) {
       SMRTSequence bestSubread;
       for (size_t intvIndex = 0; intvIndex < subreadIntervals.size(); intvIndex++) {
         SMRTSequence subreadSequence, subreadSequenceRC;
-					
+
         subreadSequence.SubreadStart(subreadIntervals[intvIndex].start);
         subreadSequence.SubreadEnd  (subreadIntervals[intvIndex].end);
-          
-        // 
+
+        //
         // When trimming by region, only output the parts of the
         // subread that overlap the hq region.
         //
         if (trimByRegion == true) {
-          subreadSequence.SubreadStart(max((DNALength) subreadIntervals[intvIndex].start, hqReadStart));
-          subreadSequence.SubreadEnd  ( min((DNALength) subreadIntervals[intvIndex].end, hqReadEnd));
+          subreadSequence.SubreadStart(std::max((DNALength) subreadIntervals[intvIndex].start, hqReadStart));
+          subreadSequence.SubreadEnd  (std::min((DNALength) subreadIntervals[intvIndex].end, hqReadEnd));
         }
 
-        if (subreadSequence.SubreadStart() >= subreadSequence.SubreadEnd() or 
+        if (subreadSequence.SubreadStart() >= subreadSequence.SubreadEnd() or
             subreadSequence.SubreadEnd() - subreadSequence.SubreadStart() <= DNALength(minSubreadLength)) {
           //
           // There is no high quality portion of this subread. Skip it.
@@ -252,24 +250,24 @@ int main(int argc, char* argv[]) {
         //
         // Print the subread, adding the coordinates as part of the title.
         //
-        subreadSequence.ReferenceSubstring(seq, subreadSequence.SubreadStart(), 
+        subreadSequence.ReferenceSubstring(seq, subreadSequence.SubreadStart(),
                                            subreadSequence.SubreadLength());
-        stringstream titleStream;
+        std::stringstream titleStream;
         titleStream << seq.title;
         if (splitSubreads) {
           //
           // Add the subread coordinates if splitting on subread.
           //
-          titleStream << "/" 
+          titleStream << "/"
                       << subreadSequence.SubreadStart()
                       << "_" << subreadSequence.SubreadEnd();
         }
-          
-        // 
+
+        //
         // If running on simulated data, add where the values were simulated from.
         //
         if (addSimulatedData) {
-          titleStream << ((FASTASequence*)&seq)->title << "/chrIndex_" 
+          titleStream << ((FASTASequence*)&seq)->title << "/chrIndex_"
                       << simulatedSequenceIndex << "/position_"<< simulatedCoordinate;
           ((FASTASequence*)&seq)->CopyTitle(titleStream.str());
         }
@@ -327,5 +325,5 @@ int main(int argc, char* argv[]) {
     reader.Close();
     hdfRegionReader.Close();
   }
-  cerr << "[INFO] " << GetTimestamp() << " [" << program << "] ended."  << endl;
+  std::cerr << "[INFO] " << GetTimestamp() << " [" << program << "] ended."  << std::endl;
 }
