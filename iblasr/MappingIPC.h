@@ -35,11 +35,11 @@ public:
     MappingMetrics metrics;
     RegionTable *regionTablePtr;
     ReaderAgglomerate *reader;
-    ostream *outFilePtr;
-    ostream *unalignedFilePtr;
-    ostream *anchorFilePtr;
-    ostream *clusterFilePtr;
-    ostream *lcpBoundsOutPtr;
+    std::ostream *outFilePtr;
+    std::ostream *unalignedFilePtr;
+    std::ostream *anchorFilePtr;
+    std::ostream *clusterFilePtr;
+    std::ostream *lcpBoundsOutPtr;
 
     // Declare a semaphore for blocking on reading from the same hdhf file.
 
@@ -84,9 +84,9 @@ public:
     void Initialize(T_SuffixArray *saP, T_GenomeSequence *refP,
                     SequenceIndexDatabase<FASTASequence> *seqDBP,
                     TupleCountTable<T_GenomeSequence, T_Tuple> *ctabP, MappingParameters &paramsP,
-                    ReaderAgglomerate *readerP, RegionTable *regionTableP, ostream *outFileP,
-                    ostream *unalignedFileP, ostream *anchorFilePtrP,
-                    ostream *clusterFilePtrP = NULL)
+                    ReaderAgglomerate *readerP, RegionTable *regionTableP, std::ostream *outFileP,
+                    std::ostream *unalignedFileP, std::ostream *anchorFilePtrP,
+                    std::ostream *clusterFilePtrP = NULL)
     {
         suffixArrayPtr = saP;
         referenceSeqPtr = refP;

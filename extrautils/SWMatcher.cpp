@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -11,23 +11,23 @@
 #include "algorithms/alignment/SWAlign.hpp"
 #include "format/StickAlignmentPrinter.hpp"
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
     if (argc < 3) {
-        cout << "usage: swMatcher query target [-indel i] [-local] [-showalign] " << endl
-             << "       [-type queryfit|overlap|global] [-match m ] [-mismatch m]" << endl
-             << "    or [-local] [-queryfit] [-overlap] [-fixedtarget] [-fixedquery]" << endl
-             << "       [-printmatrix]" << endl
-             << "   Unless -showalign is specified, output is tabular and in the formt:" << endl
-             << "   query_length target_length align_score query_start query_end target_start "
-                "target_end"
-             << endl;
+        std::cout << "usage: swMatcher query target [-indel i] [-local] [-showalign] " << std::endl
+                  << "       [-type queryfit|overlap|global] [-match m ] [-mismatch m]" << std::endl
+                  << "    or [-local] [-queryfit] [-overlap] [-fixedtarget] [-fixedquery]"
+                  << std::endl
+                  << "       [-printmatrix]" << std::endl
+                  << "   Unless -showalign is specified, output is tabular and in the formt:"
+                  << std::endl
+                  << "   query_length target_length align_score query_start query_end target_start "
+                     "target_end"
+                  << std::endl;
         exit(1);
     }
 
-    string queryName, targetName;
+    std::string queryName, targetName;
     queryName = argv[1];
     targetName = argv[2];
     int argi = 3;
@@ -69,7 +69,8 @@ int main(int argc, char* argv[])
             } else if (strcmp(argv[argi], "tsqp") == 0) {
                 alignType = TSuffixQPrefix;
             } else {
-                cout << " ERROR, aligntype must be one of queryfit, overlap, or global" << endl;
+                std::cout << " ERROR, aligntype must be one of queryfit, overlap, or global"
+                          << std::endl;
                 exit(1);
             }
         } else if (strcmp(argv[argi], "-printmatrix") == 0) {
@@ -112,8 +113,8 @@ int main(int argc, char* argv[])
 
     int seqIndex = 0;
 
-    vector<int> scoreMat;
-    vector<Arrow> pathMat;
+    std::vector<int> scoreMat;
+    std::vector<Arrow> pathMat;
     int alignScore;
     MatchedAlignment alignment;
 
@@ -132,7 +133,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    cout << "qlen tlen score" << endl;
+    std::cout << "qlen tlen score" << std::endl;
     while ((fixedQuery or queryReader.GetNext(query)) and
            (fixedTarget or targetReader.GetNext(target))) {
         alignment.qName.assign(query.title, query.titleLength);
@@ -147,15 +148,15 @@ int main(int argc, char* argv[])
         alignScore = SWAlign(query, target, scoreMat, pathMat, alignment, scoreFn, alignType, false,
                              printMatrix);
 
-        cout << query.length << " " << target.length << " " << alignScore << endl;
-        cout << alignment.qPos << " " << alignment.QEnd() << " " << alignment.tPos << " "
-             << alignment.TEnd() << endl;
+        std::cout << query.length << " " << target.length << " " << alignScore << std::endl;
+        std::cout << alignment.qPos << " " << alignment.QEnd() << " " << alignment.tPos << " "
+                  << alignment.TEnd() << std::endl;
 
         if (showAlign) {
             ComputeAlignmentStats(alignment, query.seq, target.seq, scoreFn);
             //SMRTDistanceMatrix, indelCost, indelCost);
-            PrintAlignmentStats(alignment, cout);
-            StickPrintAlignment(alignment, query, target, cout);
+            PrintAlignmentStats(alignment, std::cout);
+            StickPrintAlignment(alignment, query, target, std::cout);
         }
         ++seqIndex;
     }

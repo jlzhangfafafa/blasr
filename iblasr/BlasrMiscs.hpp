@@ -6,7 +6,7 @@
 //-------------------------Fetch Reads----------------------------//
 template <typename T_Sequence>
 bool GetNextReadThroughSemaphore(ReaderAgglomerate &reader, MappingParameters &params,
-                                 T_Sequence &read, string &readGroupId, int &associatedRandInt,
+                                 T_Sequence &read, std::string &readGroupId, int &associatedRandInt,
                                  MappingSemaphores &semaphores);
 
 //---------------------MAKE & CHECK READS-------------------------//
@@ -39,7 +39,8 @@ void MakeSubreadRC(SMRTSequence &subreadSequenceRC, SMRTSequence &subreadSequenc
                    SMRTSequence &smrtRead);
 
 // Construct subreads invervals from subreads
-void MakeSubreadIntervals(vector<SMRTSequence> &subreads, vector<ReadInterval> &subreadIntervals);
+void MakeSubreadIntervals(std::vector<SMRTSequence> &subreads,
+                          std::vector<ReadInterval> &subreadIntervals);
 
 // Return index of subread which will be used as concordant template.
 // If Zmw has exactly one subread, return index of the subread (i.e., 0).
@@ -47,7 +48,7 @@ void MakeSubreadIntervals(vector<SMRTSequence> &subreads, vector<ReadInterval> &
 // If Zmw has three or more subreads, return index of the median-length
 // subread in range subreadIntervals[1:-1]. Avoid using the first and last
 // subreads (which are less likely to be full-pass) if possible.
-int GetIndexOfConcordantTemplate(const vector<ReadInterval> &subreadIntervals);
+int GetIndexOfConcordantTemplate(const std::vector<ReadInterval> &subreadIntervals);
 
 //-------------------------MISC-----------------------------------//
 int CountZero(unsigned char *ptr, int length);

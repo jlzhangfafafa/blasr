@@ -4,9 +4,9 @@
 #include <mcheck.h>
 #endif
 #include <pthread.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <time.h>
+#include <csignal>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <set>
 #include <sstream>
@@ -18,8 +18,6 @@
 
 #define MAX_PHRED_SCORE 254
 #define MAPQV_END_ALIGN_WIGGLE 5
-
-using namespace std;
 
 #include <libconfig.h>
 #ifdef USE_PBBAM
@@ -107,7 +105,7 @@ typedef SMRTSequence T_Sequence;
 typedef FASTASequence T_GenomeSequence;
 typedef DNASuffixArray T_SuffixArray;
 typedef DNATuple T_Tuple;
-typedef LISPValueWeightor<T_GenomeSequence, DNATuple, vector<ChainedMatchPos> > PValueWeightor;
-typedef LISSMatchFrequencyPValueWeightor<T_GenomeSequence, DNATuple, vector<ChainedMatchPos> >
+typedef LISPValueWeightor<T_GenomeSequence, DNATuple, std::vector<ChainedMatchPos> > PValueWeightor;
+typedef LISSMatchFrequencyPValueWeightor<T_GenomeSequence, DNATuple, std::vector<ChainedMatchPos> >
     MultiplicityPValueWeightor;
 typedef MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> MappingIPC;

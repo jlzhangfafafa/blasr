@@ -14,11 +14,9 @@
 #include "gperftools/profiler.h"
 #endif
 
-using namespace std;
-
 // Declare global structures that are shared between threads.
 MappingSemaphores semaphores;
-ostream *outFilePtr = NULL;
+std::ostream *outFilePtr = NULL;
 #ifdef USE_PBBAM
 PacBio::BAM::IRecordWriter * bamWriterPtr = NULL; // use IRecordWriter for both SAM ands BAM
 #endif
@@ -35,17 +33,17 @@ ReaderAgglomerate *reader = NULL;
 // 5.2 - --sam no longer supported
 // 5.3 - --sam supported via pbbam/IRecordWriter
 //
-const string GetMajorVersion() {
+const std::string GetMajorVersion() {
   return "5.3";
 }
 
 // version format is 3 numbers sparated by dots : Version.Subversion.SHA1
-const string GetVersion(void) {
+const std::string GetVersion(void) {
 #if CMAKE_BUILD
   return PacBio::BlasrVersion() + "." + PacBio::BlasrGitSha1();
 #else
-  string gitVersionString(SHA1_7);  // gitVersionString is first 7 characters of SHA1
-  string version = GetMajorVersion();
+  std::string gitVersionString(SHA1_7);  // gitVersionString is first 7 characters of SHA1
+  std::string version = GetMajorVersion();
   // if (gitVersionString.size() == 7) {
     version.append(".");
     version.append(gitVersionString);
@@ -96,12 +94,12 @@ bool IsGoodRead(const SMRTSequence & smrtRead,
 // in the first round) from none BAM file using region table.
 void MakePrimaryIntervals(RegionTable * regionTablePtr,
                           SMRTSequence & smrtRead,
-                          vector<ReadInterval> & subreadIntervals,
-                          vector<int> & subreadDirections,
+                          std::vector<ReadInterval> & subreadIntervals,
+                          std::vector<int> & subreadDirections,
                           int & bestSubreadIndex,
                           MappingParameters & params)
 {
-    vector<ReadInterval> adapterIntervals;
+    std::vector<ReadInterval> adapterIntervals;
     //
     // Determine endpoints of this subread in the main read.
     //
@@ -176,9 +174,9 @@ void MakePrimaryIntervals(RegionTable * regionTablePtr,
 
 // Make primary intervals (which are intervals of subreads to align
 // in the first round) for BAM file, -concordant,
-void MakePrimaryIntervals(vector<SMRTSequence> & subreads,
-                          vector<ReadInterval> & subreadIntervals,
-                          vector<int> & subreadDirections,
+void MakePrimaryIntervals(std::vector<SMRTSequence> & subreads,
+                          std::vector<ReadInterval> & subreadIntervals,
+                          std::vector<int> & subreadDirections,
                           int & bestSubreadIndex)
 {
     MakeSubreadIntervals(subreads, subreadIntervals);
@@ -206,7 +204,7 @@ bool FetchReads(ReaderAgglomerate * reader,
                 RegionTable * regionTablePtr,
                 SMRTSequence & smrtRead,
                 CCSSequence & ccsRead,
-                vector<SMRTSequence> & subreads,
+                std::vector<SMRTSequence> & subreads,
                 MappingParameters & params,
                 bool & readIsCCS,
                 std::string & readGroupId,
@@ -269,7 +267,7 @@ bool FetchReads(ReaderAgglomerate * reader,
         return readHasGoodRegion;
     } else {
         subreads.clear();
-        vector<SMRTSequence> reads;
+        std::vector<SMRTSequence> reads;
         if (GetNextReadThroughSemaphore(*reader, params, reads, readGroupId, associatedRandInt, semaphores) == false) {
             stop = true;
             return false;
@@ -294,11 +292,11 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
                     MappingBuffers & mappingBuffers,
                     SMRTSequence & smrtRead,
                     SMRTSequence & smrtReadRC,
-                    vector<SMRTSequence> & subreads,
+                    std::vector<SMRTSequence> & subreads,
                     MappingParameters & params,
                     const int & associatedRandInt,
                     ReadAlignments & allReadAlignments,
-                    ofstream & threadOut)
+                    std::ofstream & threadOut)
 {
     DNASuffixArray sarray;
     TupleCountTable<T_GenomeSequence, DNATuple> ct;
@@ -314,8 +312,8 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
     bwtPtr = mapData->bwtPtr;
     SeqBoundaryFtr<FASTQSequence> seqBoundary(&seqdb);
 
-    vector<ReadInterval> subreadIntervals;
-    vector<int>          subreadDirections;
+    std::vector<ReadInterval> subreadIntervals;
+    std::vector<int>          subreadDirections;
     int bestSubreadIndex;
 
     if ((mapData->reader->GetFileType() != FileType::PBBAM and mapData->reader->GetFileType() != FileType::PBDATASET) or not params.concordant) {
@@ -341,12 +339,12 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
     if (params.concordant) {
         // Only the longest subread will be aligned in the first round.
         // VR , change the comment
-        startIndex = max(startIndex, bestSubreadIndex);
-        endIndex   = min(endIndex, bestSubreadIndex + 1);
+        startIndex = std::max(startIndex, bestSubreadIndex);
+        endIndex   = std::min(endIndex, bestSubreadIndex + 1);
 
         if (params.verbosity >= 1) {
-            cout << "Concordant template subread index: " << bestSubreadIndex << ", "
-                 << smrtRead.HoleNumber() << "/" << subreadIntervals[bestSubreadIndex] << endl;
+            std::cout << "Concordant template subread index: " << bestSubreadIndex << ", "
+                 << smrtRead.HoleNumber() << "/" << subreadIntervals[bestSubreadIndex] << std::endl;
         }
     }
 
@@ -368,7 +366,7 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
         //
         allReadAlignments.SetSequence(intvIndex, subreadSequence);
 
-        vector<T_AlignmentCandidate*> alignmentPtrs;
+        std::vector<T_AlignmentCandidate*> alignmentPtrs;
         mapData->metrics.numReads++;
 
         assert(subreadSequence.zmwData.holeNumber == smrtRead.zmwData.holeNumber);
@@ -433,7 +431,7 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
         //
         // Select alignments for this subread.
         //
-        vector<T_AlignmentCandidate*> selectedAlignmentPtrs =
+        std::vector<T_AlignmentCandidate*> selectedAlignmentPtrs =
             SelectAlignmentsToPrint(alignmentPtrs, params, associatedRandInt);
         allReadAlignments.AddAlignmentsForSeq(intvIndex, selectedAlignmentPtrs);
 
@@ -474,7 +472,7 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
         subreadSequence.Free();
         subreadSequenceRC.Free();
     } // End of looping over subread intervals within [startIndex, endIndex).
- 
+
 
     if (params.verbosity >= 3)
         allReadAlignments.Print(threadOut);
@@ -486,7 +484,7 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
         allReadAlignments.alignMode = ZmwSubreads;
 
         if (startIndex >= 0 && startIndex < int(allReadAlignments.subreadAlignments.size())) {
-            vector<T_AlignmentCandidate*> selectedAlignmentPtrs =
+            std::vector<T_AlignmentCandidate*> selectedAlignmentPtrs =
                 allReadAlignments.CopySubreadAlignments(startIndex);
 
             for(int alignmentIndex = 0; alignmentIndex < int(selectedAlignmentPtrs.size());
@@ -552,8 +550,8 @@ void MapReadsNonCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapDa
 
 //
 // invoked for mapping entire ZMW as a single entity
-// either for CCS reads : all subreads of a ZMW collapsed/merged into a single read 
-// or Polymerase reads  : all subreads of a ZMW stitched into a single read  
+// either for CCS reads : all subreads of a ZMW collapsed/merged into a single read
+// or Polymerase reads  : all subreads of a ZMW stitched into a single read
 //
 void MapReadsCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData,
                  MappingBuffers & mappingBuffers,
@@ -564,7 +562,7 @@ void MapReadsCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData,
                  MappingParameters & params,
                  const int & associatedRandInt,
                  ReadAlignments & allReadAlignments,
-                 ofstream & threadOut)
+                 std::ofstream & threadOut)
 {
     DNASuffixArray sarray;
     TupleCountTable<T_GenomeSequence, DNATuple> ct;
@@ -583,7 +581,7 @@ void MapReadsCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData,
     //
     // The read must be mapped as a whole, even if it contains subreads.
     //
-    vector<T_AlignmentCandidate*> alignmentPtrs;
+    std::vector<T_AlignmentCandidate*> alignmentPtrs;
     mapData->metrics.numReads++;
     smrtRead.SubreadStart(0).SubreadEnd(smrtRead.length);
     smrtReadRC.SubreadStart(0).SubreadEnd(smrtRead.length);
@@ -604,7 +602,7 @@ void MapReadsCCS(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData,
     //
     // Select de novo ccs-reference alignments for subreads to align to.
     //
-    vector<T_AlignmentCandidate*> selectedAlignmentPtrs =
+    std::vector<T_AlignmentCandidate*> selectedAlignmentPtrs =
         SelectAlignmentsToPrint(alignmentPtrs, params, associatedRandInt);
 
     //
@@ -763,12 +761,12 @@ void MapReads(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData)
     CCSSequence  ccsRead;
 
     // Print verbose logging to pid.threadid.log for each thread.
-    ofstream threadOut;
+    std::ofstream threadOut;
     if (params.verbosity >= 3) {
-        stringstream ss;
+        std::stringstream ss;
         ss << getpid() << "." << pthread_self();
-        string threadLogFileName = ss.str() + ".log";
-        threadOut.open(threadLogFileName.c_str(), ios::out|ios::app);
+        std::string threadLogFileName = ss.str() + ".log";
+        threadOut.open(threadLogFileName.c_str(), std::ios::out|std::ios::app);
     }
 
     //
@@ -784,7 +782,7 @@ void MapReads(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData)
         // Associate each sequence to read in with a determined random int.
         int associatedRandInt = 0;
         bool stop = false;
-        vector<SMRTSequence> subreads;
+        std::vector<SMRTSequence> subreads;
         bool readsOK = FetchReads(mapData->reader, mapData->regionTablePtr,
                                   smrtRead, ccsRead, subreads,
                                   params, readIsCCS,
@@ -794,13 +792,13 @@ void MapReads(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData)
         if (not readsOK) continue;
 
         if (params.verbosity > 1) {
-            cout << "aligning read: " << endl;
-            smrtRead.PrintSeq(cout);
+            std::cout << "aligning read: " << std::endl;
+            smrtRead.PrintSeq(std::cout);
         }
 
         smrtRead.MakeRC(smrtReadRC);
 
-        // important 
+        // important
         // 1. CCS and unrolled mode are mutually exclusive
         // 2. Reverse Complement Read is generated fort CCS only
         //
@@ -820,7 +818,7 @@ void MapReads(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData)
         //
         // for regular subreads MapReadsNonCCS
         // for mapping ZMW as a whole (CCS or Polymerase) MapReadsCCS
-        // For the future , change the name of functions  to be more desriptive 
+        // For the future , change the name of functions  to be more desriptive
         // noSplitSubreads is in essense unrolled - Polymerase read mode
         //
         if (readIsCCS == false and params.mapSubreadsSeparately) {
@@ -899,19 +897,19 @@ int main(int argc, char* argv[]) {
   // Parse command line args.
   clp.ParseCommandLine(argc, argv, params.readsFileNames);
 
-  string commandLine;
+  std::string commandLine;
   clp.CommandLineToString(argc, argv, commandLine);
 
   if (params.printVerboseHelp) {
-    cout << BlasrHelp(params) << endl;
+    std::cout << BlasrHelp(params) << std::endl;
     exit(0); // Not a failure.
   }
   if (params.printDiscussion) {
-    cout << BlasrDiscussion();
+    std::cout << BlasrDiscussion();
     exit(0); // Not a failure.
   }
   if (argc < 3) {
-    cout << BlasrConciseHelp();
+    std::cout << BlasrConciseHelp();
     exit(1); // A failure.
   }
 
@@ -929,22 +927,22 @@ int main(int argc, char* argv[]) {
 
   if (params.scoreMatrixString != "") {
     if (StringToScoreMatrix(params.scoreMatrixString, SMRTDistanceMatrix) == false) {
-      cout << "ERROR. The string " << endl
-           << params.scoreMatrixString << endl
-           << "is not a valid format.  It should be a quoted, space separated string of " << endl
-           << "integer values.  The matrix: " << endl
-           << "    A  C  G  T  N" << endl
-           << " A  1  2  3  4  5" << endl
-           << " C  6  7  8  9 10" << endl
-           << " G 11 12 13 14 15" << endl
-           << " T 16 17 18 19 20" << endl
-           << " N 21 22 23 24 25" << endl
-           << " should be specified as \"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25\"" << endl;
+      std::cout << "ERROR. The string " << std::endl
+           << params.scoreMatrixString << std::endl
+           << "is not a valid format.  It should be a quoted, space separated string of " << std::endl
+           << "integer values.  The matrix: " << std::endl
+           << "    A  C  G  T  N" << std::endl
+           << " A  1  2  3  4  5" << std::endl
+           << " C  6  7  8  9 10" << std::endl
+           << " G 11 12 13 14 15" << std::endl
+           << " T 16 17 18 19 20" << std::endl
+           << " N 21 22 23 24 25" << std::endl
+           << " should be specified as \"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25\"" << std::endl;
       exit(1);
     }
   }
 
-  cerr << "[INFO] " << GetTimestamp() << " [blasr] started." << endl;
+  std::cerr << "[INFO] " << GetTimestamp() << " [blasr] started." << std::endl;
   params.MakeSane();
 
   //
@@ -965,7 +963,7 @@ int main(int argc, char* argv[]) {
   //
   MappingMetrics metrics;
 
-  ofstream fullMetricsFile;
+  std::ofstream fullMetricsFile;
   if (params.fullMetricsFileName != "") {
     CrucialOpen(params.fullMetricsFileName, fullMetricsFile, std::ios::out);
     metrics.SetStoreList();
@@ -986,7 +984,7 @@ int main(int argc, char* argv[]) {
 
   if (params.regionTableFileNames.size() != 0 and
       params.regionTableFileNames.size() != params.queryFileNames.size()) {
-    cout << "Error, there are not the same number of region table files as input files." << endl;
+    std::cout << "Error, there are not the same number of region table files as input files." << std::endl;
     exit(1);
   }
 
@@ -1002,7 +1000,7 @@ int main(int argc, char* argv[]) {
   }
   if (params.ccsFofnFileNames.size() != 0 and
       params.ccsFofnFileNames.size() != params.queryFileNames.size()) {
-    cout << "Error, there are not the same number of ccs files as input files." << endl;
+    std::cout << "Error, there are not the same number of ccs files as input files." << std::endl;
     exit(1);
   }
 
@@ -1015,7 +1013,7 @@ int main(int argc, char* argv[]) {
   // file.
   //
   if (params.useSeqDB) {
-    ifstream seqdbin;
+    std::ifstream seqdbin;
     CrucialOpen(params.seqDBName, seqdbin);
     seqdb.ReadDatabase(seqdbin);
   }
@@ -1035,7 +1033,7 @@ int main(int argc, char* argv[]) {
   // format.  Both may be read in using a FASTA reader.
   //
   if (!genomeReader.Init(params.genomeFileName)) {
-    cout << "Could not open genome file " << params.genomeFileName << endl;
+    std::cout << "Could not open genome file " << params.genomeFileName << std::endl;
     exit(1);
   }
 
@@ -1075,14 +1073,14 @@ int main(int argc, char* argv[]) {
   DNASuffixArray sarray;
   TupleCountTable<T_GenomeSequence, DNATuple> ct;
 
-  ofstream outFile;
-  outFile.exceptions(ostream::failbit);
-  ofstream unalignedOutFile;
+  std::ofstream outFile;
+  outFile.exceptions(std::ostream::failbit);
+  std::ofstream unalignedOutFile;
   BWT bwt;
 
   if (params.useBwt) {
     if (bwt.Read(params.bwtFileName) == 0) {
-      cout << "ERROR! Could not read the BWT file. " << params.bwtFileName << endl;
+      std::cout << "ERROR! Could not read the BWT file. " << params.bwtFileName << std::endl;
       exit(1);
     }
   }
@@ -1093,7 +1091,7 @@ int main(int argc, char* argv[]) {
       // array on the command line, so build it on the fly here.
       //
       genome.ToThreeBit();
-      vector<int> alphabet;
+      std::vector<int> alphabet;
       sarray.InitThreeBitDNAAlphabet(alphabet);
       sarray.LarssonBuildSuffixArray(genome.seq, genome.length, alphabet);
       if (params.minMatchLength > 0) {
@@ -1110,26 +1108,26 @@ int main(int argc, char* argv[]) {
     else if (params.useSuffixArray) {
       if (sarray.Read(params.suffixArrayFileName)) {
         if (params.minMatchLength != 0) {
-          params.listTupleSize = min(8, params.minMatchLength);
+          params.listTupleSize = std::min(8, params.minMatchLength);
         }
         else {
           params.listTupleSize = sarray.lookupPrefixLength;
         }
         if (params.minMatchLength < int(sarray.lookupPrefixLength)) {
-          cerr << "WARNING. The value of -minMatch " << params.minMatchLength << " is less than the smallest searched length of " << sarray.lookupPrefixLength << ".  Setting -minMatch to " << sarray.lookupPrefixLength << "." << endl;
+          std::cerr << "WARNING. The value of -minMatch " << params.minMatchLength << " is less than the smallest searched length of " << sarray.lookupPrefixLength << ".  Setting -minMatch to " << sarray.lookupPrefixLength << "." << std::endl;
           params.minMatchLength = sarray.lookupPrefixLength;
         }
       }
       else {
-        cout << "ERROR. " << params.suffixArrayFileName << " is not a valid suffix array. " << endl
-             << " Make sure it is generated with the latest version of sawriter." << endl;
+        std::cout << "ERROR. " << params.suffixArrayFileName << " is not a valid suffix array. " << std::endl
+             << " Make sure it is generated with the latest version of sawriter." << std::endl;
         exit(1);
       }
     }
   }
 
   if (params.minMatchLength < int(sarray.lookupPrefixLength)) {
-    cerr << "WARNING. The value of -minMatch " << params.minMatchLength << " is less than the smallest searched length of " << sarray.lookupPrefixLength << ".  Setting -minMatch to " << sarray.lookupPrefixLength << "." << endl;
+    std::cerr << "WARNING. The value of -minMatch " << params.minMatchLength << " is less than the smallest searched length of " << sarray.lookupPrefixLength << ".  Setting -minMatch to " << sarray.lookupPrefixLength << "." << std::endl;
     params.minMatchLength = sarray.lookupPrefixLength;
   }
 
@@ -1143,7 +1141,7 @@ int main(int argc, char* argv[]) {
   //
   TupleMetrics saLookupTupleMetrics;
   if (params.useCountTable) {
-    ifstream ctIn;
+    std::ifstream ctIn;
     CrucialOpen(params.countTableName, ctIn, std::ios::in | std::ios::binary);
     ct.Read(ctIn);
     saLookupTupleMetrics = ct.tm;
@@ -1156,7 +1154,7 @@ int main(int argc, char* argv[]) {
 
   TitleTable titleTable;
   if (params.useTitleTable) {
-    ofstream titleTableOut;
+    std::ofstream titleTableOut;
     CrucialOpen(params.titleTableName, titleTableOut);
     //
     // When using a sequence index database, the title table is simply copied
@@ -1190,13 +1188,13 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  ostream  *outFilePtr = &cout;
-  ofstream outFileStrm;
-  ofstream unalignedFile;
-  ostream *unalignedFilePtr = NULL;
-  ofstream metricsOut, lcpBoundsOut;
-  ofstream anchorFileStrm;
-  ofstream clusterOut, *clusterOutPtr;
+  std::ostream  *outFilePtr = &std::cout;
+  std::ofstream outFileStrm;
+  std::ofstream unalignedFile;
+  std::ostream *unalignedFilePtr = NULL;
+  std::ofstream metricsOut, lcpBoundsOut;
+  std::ofstream anchorFileStrm;
+  std::ofstream clusterOut, *clusterOutPtr;
 
   if (params.anchorFileName != "") {
     CrucialOpen(params.anchorFileName, anchorFileStrm, std::ios::out);
@@ -1205,7 +1203,7 @@ int main(int argc, char* argv[]) {
   if (params.clusterFileName != "") {
     CrucialOpen(params.clusterFileName, clusterOut, std::ios::out);
     clusterOutPtr = &clusterOut;
-    clusterOut << "total_size p_value n_anchors read_length align_score read_accuracy anchor_probability min_exp_anchors seq_length" << endl;
+    clusterOut << "total_size p_value n_anchors read_length align_score read_accuracy anchor_probability min_exp_anchors seq_length" << std::endl;
   }
   else {
     clusterOutPtr = NULL;
@@ -1243,7 +1241,7 @@ int main(int argc, char* argv[]) {
 
   if (params.lcpBoundsFileName != "") {
     CrucialOpen(params.lcpBoundsFileName, lcpBoundsOut);
-    //    lcpBoundsOut << "pos depth width lnwidth" << endl;
+    //    lcpBoundsOut << "pos depth width lnwidth" << std::endl;
   }
 
   //
@@ -1291,17 +1289,17 @@ int main(int argc, char* argv[]) {
     reader->UseCCS();
   }
 
-  string commandLineString; // Restore command.
+  std::string commandLineString; // Restore command.
   clp.CommandLineToString(argc, argv, commandLineString);
 
   if (params.printSAM or params.printBAM) {
-      string so = "UNKNOWN"; // sorting order;
-      string version = GetVersion(); //blasr version;
+      std::string so = "UNKNOWN"; // sorting order;
+      std::string version = GetVersion(); //blasr version;
       SAMHeaderPrinter shp(so, seqdb,
               params.queryFileNames, params.queryReadType,
               params.samQVList, "BLASR", version,
               commandLineString);
-      string headerString = shp.ToString();// SAM/BAM header
+      std::string headerString = shp.ToString();// SAM/BAM header
       if (params.printSAM) {
       // this is not going to be executed since sam is printed via bam
           *outFilePtr << headerString;
@@ -1334,7 +1332,7 @@ int main(int argc, char* argv[]) {
     //
     reader->SetReadFileName(params.queryFileNames[params.readsFileIndex]);
 
-    // if PBBAM , need to construct scrap file name and check if exist  
+    // if PBBAM , need to construct scrap file name and check if exist
     //
     // Initialize using already set file names.
     //
@@ -1343,12 +1341,12 @@ int main(int argc, char* argv[]) {
 
     // unrolled Need to pass unrolled option
     // unrolled If not PBDATASET also need to construct scrap file name and
-    // test if it exists in the same directory, if not exit with error message 
+    // test if it exists in the same directory, if not exit with error message
     //
     int initReturnValue;
-    
+
     if ( ( (reader->GetFileType() == FileType::PBDATASET) || (reader->GetFileType() == FileType::PBBAM)) and not params.mapSubreadsSeparately) {
-        
+
         if ( reader->GetFileType() == FileType::PBBAM ) {
             reader->SetScrapsFileName(params.scrapsFileNames[params.readsFileIndex]);
         }
@@ -1358,7 +1356,7 @@ int main(int argc, char* argv[]) {
         initReturnValue = reader->Initialize();
     }
     if (initReturnValue <= 0) {
-        cerr << "WARNING! Could not open file " << params.queryFileNames[params.readsFileIndex] << endl;
+        std::cerr << "WARNING! Could not open file " << params.queryFileNames[params.readsFileIndex] << std::endl;
         continue;
     }
 
@@ -1368,14 +1366,14 @@ int main(int argc, char* argv[]) {
        params.useCcs = params.useCcsOnly = true;
     }
 
-    string changeListIdString;
+    std::string changeListIdString;
     reader->hdfBasReader.GetChangeListID(changeListIdString);
     ChangeListID changeListId(changeListIdString);
     params.qvScaleType = DetermineQVScaleFromChangeListID(changeListId);
     if (reader->FileHasZMWInformation() and params.useRegionTable) {
       if (params.readSeparateRegionTable) {
         if (regionTableReader->Initialize(params.regionTableFileNames[params.readsFileIndex]) == 0) {
-          cout << "ERROR! Could not read the region table " << params.regionTableFileNames[params.readsFileIndex] <<endl;
+          std::cout << "ERROR! Could not read the region table " << params.regionTableFileNames[params.readsFileIndex] <<std::endl;
           exit(1);
         }
         params.useRegionTable = true;
@@ -1383,7 +1381,7 @@ int main(int argc, char* argv[]) {
       else {
         if (reader->HasRegionTable()) {
           if (regionTableReader->Initialize(params.queryFileNames[params.readsFileIndex]) == 0) {
-            cout << "ERROR! Could not read the region table " << params.queryFileNames[params.readsFileIndex] <<endl;
+            std::cout << "ERROR! Could not read the region table " << params.queryFileNames[params.readsFileIndex] <<std::endl;
             exit(1);
           }
           params.useRegionTable = true;
@@ -1415,8 +1413,8 @@ int main(int argc, char* argv[]) {
     //
     //if (params.readSeparateCcsFofn and params.useCcs) {
     //  if (reader->SetCCS(params.ccsFofnFileNames[params.readsFileIndex]) == 0) {
-    //    cout << "ERROR! Could not read the ccs file "
-    //         << params.ccsFofnFileNames[params.readsFileIndex] << endl;
+    //    std::cout << "ERROR! Could not read the ccs file "
+    //         << params.ccsFofnFileNames[params.readsFileIndex] << std::endl;
     //    exit(1);
     //  }
     // }
@@ -1427,9 +1425,9 @@ int main(int argc, char* argv[]) {
         reader->GetFileType() != FileType::PBBAM and
         reader->GetFileType() != FileType::PBDATASET and
         params.concordant) {
-        cerr << "WARNING! Option concordant is only enabled when "
+        std::cerr << "WARNING! Option concordant is only enabled when "
              << "input reads are in PacBio bax/pls.h5, bam or "
-             << "dataset xml format." << endl;
+             << "dataset xml format." << std::endl;
         params.concordant = false;
     }
 
@@ -1482,9 +1480,9 @@ int main(int argc, char* argv[]) {
           }
 
           if (params.outputByThread) {
-            ofstream *outPtr =new ofstream;
+            std::ofstream *outPtr = new std::ofstream;
             mapdb[procIndex].outFilePtr = outPtr;
-            stringstream outNameStream;
+            std::stringstream outNameStream;
             outNameStream << params.outFileName << "." << procIndex;
             mapdb[procIndex].params.outFileName = outNameStream.str();
             CrucialOpen(mapdb[procIndex].params.outFileName, *outPtr, std::ios::out);
@@ -1536,13 +1534,13 @@ int main(int argc, char* argv[]) {
 #ifdef USE_PBBAM
           assert(bamWriterPtr);
           try {
-              if (!params.sam_via_bam) {  // no need to flush for SAM , but need to understand why 
+              if (!params.sam_via_bam) {  // no need to flush for SAM , but need to understand why
                  bamWriterPtr->TryFlush();
               }
               delete bamWriterPtr;
               bamWriterPtr = NULL;
           } catch (std::exception e) {
-              cout << "Error, could not flush bam records to bam file." << endl;
+              std::cout << "Error, could not flush bam records to bam file." << std::endl;
               exit(1);
           }
 #else
@@ -1552,6 +1550,6 @@ int main(int argc, char* argv[]) {
           outFileStrm.close();
       }
   }
-  cerr << "[INFO] " << GetTimestamp() << " [blasr] ended." << endl;
+  std::cerr << "[INFO] " << GetTimestamp() << " [blasr] ended." << std::endl;
   return 0;
 }

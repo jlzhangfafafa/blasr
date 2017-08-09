@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class ReadAlignments
 {
 public:
@@ -33,8 +31,8 @@ public:
    of read in it.
 
 */
-    vector<vector<T_AlignmentCandidate *> > subreadAlignments;
-    vector<SMRTSequence> subreads;
+    std::vector<std::vector<T_AlignmentCandidate *> > subreadAlignments;
+    std::vector<SMRTSequence> subreads;
     AlignMode alignMode;
     SMRTSequence read;
 
@@ -52,14 +50,15 @@ public:
 
     inline void AddAlignmentForSeq(int seqIndex, T_AlignmentCandidate *alignmentPtr);
 
-    inline void AddAlignmentsForSeq(int seqIndex, vector<T_AlignmentCandidate *> &seqAlignmentPtrs);
+    inline void AddAlignmentsForSeq(int seqIndex,
+                                    std::vector<T_AlignmentCandidate *> &seqAlignmentPtrs);
 
     // Copy all T_AlignmentCandidate objects (to which subreadAlignment[seqIndex]
     // is pointing) to newly created objects, and then return pointers to the new
     // objects.
-    inline vector<T_AlignmentCandidate *> CopySubreadAlignments(int seqIndex);
+    inline std::vector<T_AlignmentCandidate *> CopySubreadAlignments(int seqIndex);
 
-    inline void Print(ostream &out = cout);
+    inline void Print(std::ostream &out = std::cout);
 
     inline ~ReadAlignments();
 };
@@ -107,7 +106,7 @@ inline void ReadAlignments::Resize(int nSeq)
 inline void ReadAlignments::CheckSeqIndex(int seqIndex)
 {
     if (seqIndex < 0 or seqIndex >= int(subreads.size())) {
-        cout << "ERROR, adding a sequence to an unallocated position." << endl;
+        std::cout << "ERROR, adding a sequence to an unallocated position." << std::endl;
         assert(0);
     }
 }
@@ -124,17 +123,17 @@ inline void ReadAlignments::AddAlignmentForSeq(int seqIndex, T_AlignmentCandidat
     subreadAlignments[seqIndex].push_back(alignmentPtr);
 }
 
-inline void ReadAlignments::AddAlignmentsForSeq(int seqIndex,
-                                                vector<T_AlignmentCandidate *> &seqAlignmentPtrs)
+inline void ReadAlignments::AddAlignmentsForSeq(
+    int seqIndex, std::vector<T_AlignmentCandidate *> &seqAlignmentPtrs)
 {
     CheckSeqIndex(seqIndex);
     subreadAlignments[seqIndex].insert(subreadAlignments[seqIndex].end(), seqAlignmentPtrs.begin(),
                                        seqAlignmentPtrs.end());
 }
 
-inline vector<T_AlignmentCandidate *> ReadAlignments::CopySubreadAlignments(int seqIndex)
+inline std::vector<T_AlignmentCandidate *> ReadAlignments::CopySubreadAlignments(int seqIndex)
 {
-    vector<T_AlignmentCandidate *> ret;
+    std::vector<T_AlignmentCandidate *> ret;
     for (int i = 0; i < int(subreadAlignments[seqIndex].size()); i++) {
         T_AlignmentCandidate *q = new T_AlignmentCandidate();
         *q = *(subreadAlignments[seqIndex][i]);
@@ -143,21 +142,22 @@ inline vector<T_AlignmentCandidate *> ReadAlignments::CopySubreadAlignments(int 
     return ret;
 }
 
-inline void ReadAlignments::Print(ostream &out)
+inline void ReadAlignments::Print(std::ostream &out)
 {
     out << "A ReadAlignments object with " << subreadAlignments.size()
-        << " groups of subread alignments." << endl;
+        << " groups of subread alignments." << std::endl;
     for (int i = 0; i < int(subreadAlignments.size()); i++) {
         out << "  subreadAlignment group [" << i << "/" << subreadAlignments.size() << "] has "
-            << subreadAlignments[i].size() << " alignments." << endl;
+            << subreadAlignments[i].size() << " alignments." << std::endl;
         for (int j = 0; j < int(subreadAlignments[i].size()); j++) {
-            out << "    [" << i << "][" << j << "/" << subreadAlignments[i].size() << "]" << endl;
+            out << "    [" << i << "][" << j << "/" << subreadAlignments[i].size() << "]"
+                << std::endl;
             subreadAlignments[i][j]->Print(out);
         }
     }
     out << "  read: ";
     read.Print(out);
-    out << endl << endl;
+    out << std::endl << std::endl;
 }
 
 inline ReadAlignments::~ReadAlignments() { read.Free(); }

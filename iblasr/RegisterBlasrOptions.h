@@ -23,7 +23,6 @@
 
 #include "MappingParameters.h"
 #include "RegisterFilterOptions.h"
-using namespace std;
 
 void RegisterBlasrOptions(CommandLineParser& clp, MappingParameters& params)
 {
@@ -222,533 +221,544 @@ void RegisterBlasrOptions(CommandLineParser& clp, MappingParameters& params)
                           params.hitPolicyStr, trashbinBool = true, trashbinInt, params.maxScore);
 }
 
-const string BlasrHelp(MappingParameters& params)
+const std::string BlasrHelp(MappingParameters& params)
 {
-    stringstream helpStream;
+    std::stringstream helpStream;
     helpStream
-        << "   Options for blasr " << endl
-        << "   Basic usage: 'blasr reads.{bam|fasta|bax.h5|fofn} genome.fasta [-options] " << endl
-        << " option\tDescription (default_value)." << endl
-        << endl
-        << " Input Files." << endl
-        << "   reads.bam   is a PacBio BAM file of reads." << endl
-        << "               This is the preferred input to blasr because rich quality" << endl
+        << "   Options for blasr " << std::endl
+        << "   Basic usage: 'blasr reads.{bam|fasta|bax.h5|fofn} genome.fasta [-options] "
+        << std::endl
+        << " option\tDescription (default_value)." << std::endl
+        << std::endl
+        << " Input Files." << std::endl
+        << "   reads.bam   is a PacBio BAM file of reads." << std::endl
+        << "               This is the preferred input to blasr because rich quality" << std::endl
         << "               value (insertion,deletion, and substitution quality values) information "
            "is "
-        << endl
+        << std::endl
         << "               maintained.  The extra quality information improves variant detection "
            "and mapping"
-        << endl
-        << "               speed." << endl
+        << std::endl
+        << "               speed." << std::endl
         << "   reads.fasta is a multi-fasta file of reads.  While any fasta file is valid input, "
-        << endl
-        << "   reads.bax.h5|reads.plx.h5 is the old DEPRECATED output format of SMRT reads." << endl
-        << "   input.fofn  File of file names accepted." << endl
-        << endl
-        << "   --sa suffixArrayFile" << endl
-        << "               Use the suffix array 'sa' for detecting matches" << endl
-        << "               between the reads and the reference.  The suffix" << endl
-        << "               array has been prepared by the sawriter program." << endl
-        << endl
-        << "   --ctab tab " << endl
+        << std::endl
+        << "   reads.bax.h5|reads.plx.h5 is the old DEPRECATED output format of SMRT reads."
+        << std::endl
+        << "   input.fofn  File of file names accepted." << std::endl
+        << std::endl
+        << "   --sa suffixArrayFile" << std::endl
+        << "               Use the suffix array 'sa' for detecting matches" << std::endl
+        << "               between the reads and the reference.  The suffix" << std::endl
+        << "               array has been prepared by the sawriter program." << std::endl
+        << std::endl
+        << "   --ctab tab " << std::endl
         << "               A table of tuple counts used to estimate match significance.  This is "
-        << endl
+        << std::endl
         << "               by the program 'printTupleCountTable'.  While it is quick to generate "
            "on "
-        << endl
-        << "               the fly, if there are many invocations of blasr, it is useful to" << endl
-        << "               precompute the ctab." << endl
-        << endl
-        << "   --regionTable table (DEPRECATED)" << endl
+        << std::endl
+        << "               the fly, if there are many invocations of blasr, it is useful to"
+        << std::endl
+        << "               precompute the ctab." << std::endl
+        << std::endl
+        << "   --regionTable table (DEPRECATED)" << std::endl
         << "               Read in a read-region table in HDF format for masking portions of reads."
-        << endl
-        << "               This may be a single table if there is just one input file, " << endl
+        << std::endl
+        << "               This may be a single table if there is just one input file, "
+        << std::endl
         << "               or a fofn.  When a region table is specified, any region table inside "
-        << endl
-        << "               the reads.plx.h5 or reads.bax.h5 files are ignored." << endl
-        << endl
+        << std::endl
+        << "               the reads.plx.h5 or reads.bax.h5 files are ignored." << std::endl
+        << std::endl
 
-        << " Options for modifying reads." << endl
-        << "   --noSplitSubreads" << endl
-        << "               Do not split subreads at adapters. This is typically only " << endl
+        << " Options for modifying reads." << std::endl
+        << "   --noSplitSubreads" << std::endl
+        << "               Do not split subreads at adapters. This is typically only " << std::endl
         << "               useful when the genome in an unrolled version of a known template, and "
-        << endl
-        << "               contains template-adapter-reverse_template sequence." << endl
+        << std::endl
+        << "               contains template-adapter-reverse_template sequence." << std::endl
 #ifdef USE_PBBAM
-        << "               For BAM input it reconstitutes full ZMW reads." << endl
-        << endl
-        << " Option for modifying BAM reads with --noSplitSubreads." << endl
-        << "   --polymerase" << endl
-        << "               Instead of reconstituting ZMW reads," << endl
-        << "               this option reconstitutes polymerase reads, omitting LQ regions." << endl
+        << "               For BAM input it reconstitutes full ZMW reads." << std::endl
+        << std::endl
+        << " Option for modifying BAM reads with --noSplitSubreads." << std::endl
+        << "   --polymerase" << std::endl
+        << "               Instead of reconstituting ZMW reads," << std::endl
+        << "               this option reconstitutes polymerase reads, omitting LQ regions."
+        << std::endl
         << "               Polymerase reads are aligned, if at least one subread is present."
-        << endl
-        << endl
+        << std::endl
+        << std::endl
 #endif
-        << "(DEPRECATED) Options for modifying HDF reads." << endl
-        << "               There is ancilliary information about substrings of reads " << endl
-        << "               that is stored in a 'region table' for each read file.  Because " << endl
+        << "(DEPRECATED) Options for modifying HDF reads." << std::endl
+        << "               There is ancilliary information about substrings of reads " << std::endl
+        << "               that is stored in a 'region table' for each read file.  Because "
+        << std::endl
         << "               HDF is used, the region table may be part of the .bax.h5 or .plx.h5 "
            "file,"
-        << endl
+        << std::endl
         << "               or a separate file.  A contiguously read substring from the template "
-        << endl
+        << std::endl
         << "               is a subread, and any read may contain multiple subreads. The "
            "boundaries "
-        << endl
+        << std::endl
         << "               of the subreads may be inferred from the region table either directly "
            "or "
-        << endl
+        << std::endl
         << "               by definition of adapter boundaries.  Typically region tables also"
-        << endl
+        << std::endl
         << "               contain information for the location of the high and low quality "
            "regions of"
-        << endl
+        << std::endl
         << "               reads.  Reads produced by spurrious reads from empty ZMWs have a high"
-        << endl
+        << std::endl
         << "               quality start coordinate equal to high quality end, making no usable "
            "read."
-        << endl
-        << "   --useccs   " << endl
+        << std::endl
+        << "   --useccs   " << std::endl
         << "               Align the circular consensus sequence (ccs), then report alignments"
-        << endl
+        << std::endl
         << "               of the ccs subreads to the window that the ccs was mapped to.  Only "
-        << endl
-        << "               alignments of the subreads are reported." << endl
-        << "   --useccsall" << endl
+        << std::endl
+        << "               alignments of the subreads are reported." << std::endl
+        << "   --useccsall" << std::endl
         << "               Similar to -useccs, except all subreads are aligned, rather than just"
-        << endl
+        << std::endl
         << "               the subreads used to call the ccs.  This will include reads that only"
-        << endl
-        << "               cover part of the template." << endl
-        << "   --useccsdenovo" << endl
+        << std::endl
+        << "               cover part of the template." << std::endl
+        << "   --useccsdenovo" << std::endl
         << "               Align the circular consensus, and report only the alignment of the ccs"
-        << endl
-        << "               sequence." << endl
-        << "   --ignoreRegions(false)" << endl
-        << "               Ignore any information in the region table." << endl
-        << "   --ignoreHQRegions (false)Ignore any hq regions in the region table." << endl
-        << endl
-        << " Alignments To Report." << endl
-        << "   --bestn n (10)" << endl
-        << "               Report the top 'n' alignments." << endl
-        << "   --hitPolicy" << endl
-        << "               " << params.hitPolicy.Help(string(15, ' ')) << endl
-        << "   --placeRepeatsRandomly (false)" << endl
-        << "               DEPRECATED! If true, equivalent to --hitPolicy randombest." << endl
-        << "   --placeGapConsistently (false)" << endl
-        << "               Place gaps consistently in alignments of a read as alignments " << endl
-        << "               of its reverse complementary sequence." << endl
-        << "   --randomSeed (0)" << endl
+        << std::endl
+        << "               sequence." << std::endl
+        << "   --ignoreRegions(false)" << std::endl
+        << "               Ignore any information in the region table." << std::endl
+        << "   --ignoreHQRegions (false)Ignore any hq regions in the region table." << std::endl
+        << std::endl
+        << " Alignments To Report." << std::endl
+        << "   --bestn n (10)" << std::endl
+        << "               Report the top 'n' alignments." << std::endl
+        << "   --hitPolicy" << std::endl
+        << "               " << params.hitPolicy.Help(std::string(15, ' ')) << std::endl
+        << "   --placeRepeatsRandomly (false)" << std::endl
+        << "               DEPRECATED! If true, equivalent to --hitPolicy randombest." << std::endl
+        << "   --placeGapConsistently (false)" << std::endl
+        << "               Place gaps consistently in alignments of a read as alignments "
+        << std::endl
+        << "               of its reverse complementary sequence." << std::endl
+        << "   --randomSeed (0)" << std::endl
         << "               Seed for random number generator. By default (0), use current time as "
            "seed. "
-        << endl
-        << "   --noSortRefinedAlignments (false) " << endl
+        << std::endl
+        << "   --noSortRefinedAlignments (false) " << std::endl
         << "               Once candidate alignments are generated and scored via sparse dynamic "
-        << endl
+        << std::endl
         << "               programming, they are rescored using local alignment that accounts "
-        << endl
-        << "               for different error profiles." << endl
+        << std::endl
+        << "               for different error profiles." << std::endl
         << "               Resorting based on the local alignment may change the order the hits "
            "are returned."
-        << endl
-        << "   --allowAdjacentIndels " << endl
+        << std::endl
+        << "   --allowAdjacentIndels " << std::endl
         << "               When specified, adjacent insertion or deletions are allowed. Otherwise, "
            "adjacent "
-        << endl
+        << std::endl
         << "               insertion and deletions are merged into one operation.  Using quality "
            "values "
-        << endl
+        << std::endl
         << "               to guide pairwise alignments may dictate that the higher probability "
            "alignment "
-        << endl
+        << std::endl
         << "               contains adjacent insertions or deletions.  Current tools such as GATK "
            "do not permit"
-        << endl
-        << "               this and so they are not reported by default." << endl
-        << endl
-        << " Output Formats and Files" << endl
-        << "   --out out (terminal)  " << endl
-        << "               Write output to 'out'." << endl
+        << std::endl
+        << "               this and so they are not reported by default." << std::endl
+        << std::endl
+        << " Output Formats and Files" << std::endl
+        << "   --out out (terminal)  " << std::endl
+        << "               Write output to 'out'." << std::endl
 #ifdef USE_PBBAM
         << "   --bam       Write output in PacBio BAM format. This is the preferred output format."
-        << endl
-        << "               Input query reads must be in PacBio BAM format." << endl
+        << std::endl
+        << "               Input query reads must be in PacBio BAM format." << std::endl
 #endif
         << "   --sam       Write output in SAM format. Starting from version 5.2 is no longer "
            "supported"
-        << endl
-        << "               Use --bam, then translate from .bam to .sam" << endl
-        << "   -m t           " << endl
-        << "               If not printing SAM, modify the output of the alignment." << endl
+        << std::endl
+        << "               Use --bam, then translate from .bam to .sam" << std::endl
+        << "   -m t           " << std::endl
+        << "               If not printing SAM, modify the output of the alignment." << std::endl
         << "                t=" << StickPrint
-        << " Print blast like output with |'s connecting matched nucleotides." << endl
-        << "                  " << SummaryPrint << " Print only a summary: score and pos." << endl
-        << "                  " << CompareXML << " Print in Compare.xml format." << endl
-        << "                  " << Vulgar << " Print in vulgar format (DEPRECATED)." << endl
+        << " Print blast like output with |'s connecting matched nucleotides." << std::endl
+        << "                  " << SummaryPrint << " Print only a summary: score and pos."
+        << std::endl
+        << "                  " << CompareXML << " Print in Compare.xml format." << std::endl
+        << "                  " << Vulgar << " Print in vulgar format (DEPRECATED)." << std::endl
         << "                  " << Interval << " Print a longer tabular version of the alignment."
-        << endl
+        << std::endl
         << "                  " << CompareSequencesParsable
-        << " Print in a machine-parsable format that is read by compareSequences.py." << endl
-        << "   --header" << endl
+        << " Print in a machine-parsable format that is read by compareSequences.py." << std::endl
+        << "   --header" << std::endl
         << "               Print a header as the first line of the output file describing the "
            "contents of each column."
-        << endl
-        << "   --titleTable tab (NULL) " << endl
+        << std::endl
+        << "   --titleTable tab (NULL) " << std::endl
         << "               Construct a table of reference sequence titles.  The reference "
            "sequences are "
-        << endl
+        << std::endl
         << "               enumerated by row, 0,1,...  The reference index is printed in alignment "
            "results"
-        << endl
+        << std::endl
         << "               rather than the full reference name.  This makes output concise, "
            "particularly when"
-        << endl
-        << "               very verbose titles exist in reference names." << endl
-        << "   --unaligned file" << endl
-        << "               Output reads that are not aligned to 'file'" << endl
-        << "   --noPrintUnalignedSeqs" << endl
+        << std::endl
+        << "               very verbose titles exist in reference names." << std::endl
+        << "   --unaligned file" << std::endl
+        << "               Output reads that are not aligned to 'file'" << std::endl
+        << "   --noPrintUnalignedSeqs" << std::endl
         << "               Must be used together with -unaligned, print unaligned read names only."
-        << endl
-        << "   --clipping [none|hard|subread|soft] (none)" << endl
-        << "               Use no/hard/subread/soft clipping, ONLY for SAM/BAM output." << endl
-        << "   --printSAMQV (false)" << endl
-        << "               Print quality values to SAM output." << endl
-        //             << "   --cigarUseSeqMatch (false)" << endl
-        //             << "               CIGAR strings in SAM/BAM output use '=' and 'X' to represent sequence match and mismatch instead of 'M'." << endl << endl
+        << std::endl
+        << "   --clipping [none|hard|subread|soft] (none)" << std::endl
+        << "               Use no/hard/subread/soft clipping, ONLY for SAM/BAM output." << std::endl
+        << "   --printSAMQV (false)" << std::endl
+        << "               Print quality values to SAM output." << std::endl
+        //             << "   --cigarUseSeqMatch (false)" << std::endl
+        //             << "               CIGAR strings in SAM/BAM output use '=' and 'X' to represent sequence match and mismatch instead of 'M'." << std::endl << std::endl
         << " Options for anchoring alignment regions. This will have the greatest effect on speed "
            "and sensitivity."
-        << endl
-        << "   --minMatch m (12) " << endl
-        << "               Minimum seed length.  Higher minMatch will speed up alignment, " << endl
-        << "               but decrease sensitivity." << endl
-        //             << "   --maxExpand M (1)" << endl
-        //             << "               Perform no more than M iterations of searches through the suffix " << endl
-        //             << "               array for matches. At each iteration, all matches of length LCPi-M" << endl
-        //             << "               are found, where LCPi is the length of the longest common prefix " << endl
-        //             << "               between the string at i and anywhere in the genome."<<endl
-        //             << "               The number of matches grows as M increases, and can become very large with M > 3." << endl
-        << "   --maxMatch l (inf)" << endl
+        << std::endl
+        << "   --minMatch m (12) " << std::endl
+        << "               Minimum seed length.  Higher minMatch will speed up alignment, "
+        << std::endl
+        << "               but decrease sensitivity." << std::endl
+        //             << "   --maxExpand M (1)" << std::endl
+        //             << "               Perform no more than M iterations of searches through the suffix " << std::endl
+        //             << "               array for matches. At each iteration, all matches of length LCPi-M" << std::endl
+        //             << "               are found, where LCPi is the length of the longest common prefix " << std::endl
+        //             << "               between the string at i and anywhere in the genome."<<std::endl
+        //             << "               The number of matches grows as M increases, and can become very large with M > 3." << std::endl
+        << "   --maxMatch l (inf)" << std::endl
         << "               Stop mapping a read to the genome when the lcp length reaches l.  "
-        << endl
+        << std::endl
         << "               This is useful when the query is part of the reference, for example "
            "when "
-        << endl
-        << "               constructing pairwise alignments for de novo assembly." << endl
-        << "   --maxLCPLength l (inf)" << endl
-        << "               The same as -maxMatch." << endl
-        << "   --maxAnchorsPerPosition m (10000) " << endl
+        << std::endl
+        << "               constructing pairwise alignments for de novo assembly." << std::endl
+        << "   --maxLCPLength l (inf)" << std::endl
+        << "               The same as -maxMatch." << std::endl
+        << "   --maxAnchorsPerPosition m (10000) " << std::endl
         << "               Do not add anchors from a position if it matches to more than 'm' "
            "locations in the target."
-        << endl
-        //             << "   --advanceHalf (false) " << endl
-        //             << "               A trick for speeding up alignments at the cost of sensitivity.  If " << endl
-        //             << "               a cluster of anchors of size n, (a1,...,an) is found, normally anchors " << endl
-        //             << "               (a2,...an) of size n-1 is also clustered to make sure a1 did not decrease the " << endl
-        //             << "               cluster score.  When advanceHalf is specified, clustering begins at a_(n/2)."<<endl<< endl
-        << "   --advanceExactMatches E (0)" << endl
+        << std::endl
+        //             << "   --advanceHalf (false) " << std::endl
+        //             << "               A trick for speeding up alignments at the cost of sensitivity.  If " << std::endl
+        //             << "               a cluster of anchors of size n, (a1,...,an) is found, normally anchors " << std::endl
+        //             << "               (a2,...an) of size n-1 is also clustered to make sure a1 did not decrease the " << std::endl
+        //             << "               cluster score.  When advanceHalf is specified, clustering begins at a_(n/2)."<<std::endl<< std::endl
+        << "   --advanceExactMatches E (0)" << std::endl
         << "               Another trick for speeding up alignments with match - E fewer anchors.  "
            "Rather than"
-        << endl
+        << std::endl
         << "               finding anchors between the read and the genome at every position in "
            "the read, "
-        << endl
+        << std::endl
         << "               when an anchor is found at position i in a read of length L, the next "
            "position "
-        << endl
-        << "               in a read to find an anchor is at i+L-E." << endl
-        << "               Use this when alignining already assembled contigs." << endl
-        << "   --nCandidates n (10)" << endl
+        << std::endl
+        << "               in a read to find an anchor is at i+L-E." << std::endl
+        << "               Use this when alignining already assembled contigs." << std::endl
+        << "   --nCandidates n (10)" << std::endl
         << "               Keep up to 'n' candidates for the best alignment.  A large value of n "
            "will slow mapping"
-        << endl
+        << std::endl
         << "               because the slower dynamic programming steps are applied to more "
            "clusters of anchors"
-        << endl
-        << "               which can be a rate limiting step when reads are very long." << endl
-        << "   --concordant(false)" << endl
+        << std::endl
+        << "               which can be a rate limiting step when reads are very long." << std::endl
+        << "   --concordant(false)" << std::endl
         << "               Map all subreads of a zmw (hole) to where the longest full pass subread "
            "of the zmw "
-        << endl
+        << std::endl
         << "               aligned to. This requires to use the region table and hq regions."
-        << endl
+        << std::endl
         << "               This option only works when reads are in base or pulse h5 format."
-        << endl
-        << "   --fastMaxInterval(false)" << endl
+        << std::endl
+        << "   --fastMaxInterval(false)" << std::endl
         << "               Fast search maximum increasing intervals as alignment candidates. The "
            "search "
-        << endl
-        << "               is not as exhaustive as the default, but is much faster." << endl
-        << "   --aggressiveIntervalCut(false)" << endl
+        << std::endl
+        << "               is not as exhaustive as the default, but is much faster." << std::endl
+        << "   --aggressiveIntervalCut(false)" << std::endl
         << "               Agreesively filter out non-promising alignment candidates, if there "
-        << endl
+        << std::endl
         << "               exists at least one promising candidate. If this option is turned on, "
-        << endl
-        << "               Blasr is likely to ignore short alignments of ALU elements." << endl
-        << "   --fastSDP(false)" << endl
+        << std::endl
+        << "               Blasr is likely to ignore short alignments of ALU elements." << std::endl
+        << "   --fastSDP(false)" << std::endl
         << "               Use a fast heuristic algorithm to speed up sparse dynamic programming."
-        << endl
-        << endl
-        << "  Options for Refining Hits." << endl
-        //             << "   --indelRate i (0.30)" << endl
-        //             << "               The approximate maximum rate to allow drifting from the diagonal." <<endl << endl
-        << "   --refineConcordantAlignments(false)" << endl
+        << std::endl
+        << std::endl
+        << "  Options for Refining Hits." << std::endl
+        //             << "   --indelRate i (0.30)" << std::endl
+        //             << "               The approximate maximum rate to allow drifting from the diagonal." <<std::endl << std::endl
+        << "   --refineConcordantAlignments(false)" << std::endl
         << "               Refine concordant alignments. It slightly increases alignment accuracy "
            "at cost of time."
-        << endl
-        << "   --sdpTupleSize K (11)" << endl
+        << std::endl
+        << "   --sdpTupleSize K (11)" << std::endl
         << "               Use matches of length K to speed dynamic programming alignments.  This "
            "controls"
-        << endl
+        << std::endl
         << "               accuracy of assigning gaps in pairwise alignments once a mapping has "
            "been found,"
-        << endl
-        << "               rather than mapping sensitivity itself." << endl
-        << "   --scoreMatrix \"score matrix string\" " << endl
+        << std::endl
+        << "               rather than mapping sensitivity itself." << std::endl
+        << "   --scoreMatrix \"score matrix string\" " << std::endl
         << "               Specify an alternative score matrix for scoring fasta reads.  The "
            "matrix is "
-        << endl
-        << "               in the format " << endl
-        << "                  ACGTN" << endl
-        << "                A abcde" << endl
-        << "                C fghij" << endl
-        << "                G klmno" << endl
-        << "                T pqrst" << endl
+        << std::endl
+        << "               in the format " << std::endl
+        << "                  ACGTN" << std::endl
+        << "                A abcde" << std::endl
+        << "                C fghij" << std::endl
+        << "                G klmno" << std::endl
+        << "                T pqrst" << std::endl
         << "                N uvwxy"
-        << " . The values a...y should be input as a quoted space separated " << endl
+        << " . The values a...y should be input as a quoted space separated " << std::endl
         << "               string: \"a b c ... y\". Lower scores are better, so matches should be "
            "less "
-        << endl
-        << "               than mismatches e.g. a,g,m,s = -5 (match), mismatch = 6. " << endl
-        << "   --affineOpen value (10) " << endl
-        << "               Set the penalty for opening an affine alignment." << endl
-        << "   --affineExtend a (0)" << endl
+        << std::endl
+        << "               than mismatches e.g. a,g,m,s = -5 (match), mismatch = 6. " << std::endl
+        << "   --affineOpen value (10) " << std::endl
+        << "               Set the penalty for opening an affine alignment." << std::endl
+        << "   --affineExtend a (0)" << std::endl
         << "               Change affine (extension) gap penalty. Lower value allows more gaps."
-        << endl
-        << endl
+        << std::endl
+        << std::endl
         << " Options for overlap/dynamic programming alignments and pairwise overlap for de novo "
            "assembly. "
-        << endl
-        << "   --useQuality (false)" << endl
+        << std::endl
+        << "   --useQuality (false)" << std::endl
         << "               Use substitution/insertion/deletion/merge quality values to score gap "
            "and "
-        << endl
+        << std::endl
         << "               mismatch penalties in pairwise alignments.  Because the insertion and "
            "deletion"
-        << endl
+        << std::endl
         << "               rates are much higher than substitution, this will make many alignments "
-        << endl
+        << std::endl
         << "               favor an insertion/deletion over a substitution.  Naive consensus "
            "calling methods "
-        << endl
+        << std::endl
         << "               will then often miss substitution polymorphisms. This option should be "
-        << endl
+        << std::endl
         << "               used when calling consensus using the Quiver method.  Furthermore, when "
-        << endl
+        << std::endl
         << "               not using quality values to score alignments, there will be a lower "
            "consensus "
-        << endl
-        << "               accuracy in homolymer regions." << endl
-        << "   --affineAlign (false)" << endl
-        << "               Refine alignment using affine guided align." << endl
-        << endl
-        << " Options for filtering reads and alignments" << endl
-        << "   --minReadLength l(50)" << endl
+        << std::endl
+        << "               accuracy in homolymer regions." << std::endl
+        << "   --affineAlign (false)" << std::endl
+        << "               Refine alignment using affine guided align." << std::endl
+        << std::endl
+        << " Options for filtering reads and alignments" << std::endl
+        << "   --minReadLength l(50)" << std::endl
         << "               Skip reads that have a full length less than l. Subreads may be shorter."
-        << endl
-        << "   --minSubreadLength l(0)" << endl
-        << "               Do not align subreads of length less than l." << endl
-        << "   --minRawSubreadScore m(0)" << endl
+        << std::endl
+        << "   --minSubreadLength l(0)" << std::endl
+        << "               Do not align subreads of length less than l." << std::endl
+        << "   --minRawSubreadScore m(0)" << std::endl
         << "               Do not align subreads whose quality score in region table is less than "
            "m (quality scores should be in range [0, 1000])."
-        << endl
-        << "   --maxScore m(-200)" << endl  //params.filterCriteria.scoreCutoff
-        << "               Maximum score to output (high is bad, negative good)." << endl
-        << "   --minAlnLength" << endl
-        << "               " << params.filterCriteria.MinAlnLengthHelp() << endl
-        << "   --minPctSimilarity" << endl
-        << "               " << params.filterCriteria.MinPctSimilarityHelp() << endl
-        << "   --minPctAccuracy" << endl
-        << "               " << params.filterCriteria.MinPctAccuracyHelp() << endl
-        << endl
-        << " Options for parallel alignment." << endl
-        << "   --nproc N (1)" << endl
+        << std::endl
+        << "   --maxScore m(-200)" << std::endl  //params.filterCriteria.scoreCutoff
+        << "               Maximum score to output (high is bad, negative good)." << std::endl
+        << "   --minAlnLength" << std::endl
+        << "               " << params.filterCriteria.MinAlnLengthHelp() << std::endl
+        << "   --minPctSimilarity" << std::endl
+        << "               " << params.filterCriteria.MinPctSimilarityHelp() << std::endl
+        << "   --minPctAccuracy" << std::endl
+        << "               " << params.filterCriteria.MinPctAccuracyHelp() << std::endl
+        << std::endl
+        << " Options for parallel alignment." << std::endl
+        << "   --nproc N (1)" << std::endl
         << "               Align using N processes.  All large data structures such as the suffix "
            "array and "
-        << endl
-        << "               tuple count table are shared." << endl
-        << "   --start S (0)" << endl
+        << std::endl
+        << "               tuple count table are shared." << std::endl
+        << "   --start S (0)" << std::endl
         << "               Index of the first read to begin aligning. This is useful when multiple "
            "instances "
-        << endl
+        << std::endl
         << "               are running on the same data, for example when on a multi-rack cluster."
-        << endl
-        << "   --stride S (1)" << endl
-        << "               Align one read every 'S' reads." << endl
-        << endl
-        << " Options for subsampling reads." << endl
-        << "   --subsample (0)" << endl
+        << std::endl
+        << "   --stride S (1)" << std::endl
+        << "               Align one read every 'S' reads." << std::endl
+        << std::endl
+        << " Options for subsampling reads." << std::endl
+        << "   --subsample (0)" << std::endl
         << "               Proportion of reads to randomly subsample (expressed as a decimal) and "
            "align."
-        << endl
-        << "   --holeNumbers LIST " << endl
+        << std::endl
+        << "   --holeNumbers LIST " << std::endl
         << "               When specified, only align reads whose ZMW hole numbers are in LIST."
-        << endl
+        << std::endl
         << "               LIST is a comma-delimited string of ranges, such as '1,2,3,10-13'."
-        << endl
+        << std::endl
         << "               This option only works when reads are in bam, bax.h5 or plx.h5 format."
-        << endl
-        << endl
-        //             << " Options for dynamic programming alignments. " << endl << endl
-        //             << "   --ignoreQuality" << endl
-        //             << "                 Ignore quality values when computing alignments (they still may be used." << endl
-        //             << "                 when mapping)." << endl << endl
-        //             << " -v            Print some verbose information." << endl
-        //             << " -V 2          Make verbosity more verbose.  Probably only useful for development." << endl
-        << " -h            Print this help file." << endl
-        << endl
-        << "In release v5.1 of BLASR, command-line options will use the " << endl
-        << "single dash/double dash convention: " << endl
-        << "Character options are preceded by a single dash. (Example: -v) " << endl
-        << "Word options are preceded by a double dash. (Example: --verbose) " << endl
-        << "Please modify your scripts accordingly when BLASR v5.1 is released. " << endl
-        << endl
-        << "To cite BLASR, please use: Chaisson M.J., and Tesler G., Mapping " << endl
-        << "single molecule sequencing reads using Basic Local Alignment with " << endl
-        << "Successive Refinement (BLASR): Theory and Application, BMC " << endl
-        << "Bioinformatics 2012, 13:238." << endl
+        << std::endl
+        << std::endl
+        //             << " Options for dynamic programming alignments. " << std::endl << std::endl
+        //             << "   --ignoreQuality" << std::endl
+        //             << "                 Ignore quality values when computing alignments (they still may be used." << std::endl
+        //             << "                 when mapping)." << std::endl << std::endl
+        //             << " -v            Print some verbose information." << std::endl
+        //             << " -V 2          Make verbosity more verbose.  Probably only useful for development." << std::endl
+        << " -h            Print this help file." << std::endl
+        << std::endl
+        << "In release v5.1 of BLASR, command-line options will use the " << std::endl
+        << "single dash/double dash convention: " << std::endl
+        << "Character options are preceded by a single dash. (Example: -v) " << std::endl
+        << "Word options are preceded by a double dash. (Example: --verbose) " << std::endl
+        << "Please modify your scripts accordingly when BLASR v5.1 is released. " << std::endl
+        << std::endl
+        << "To cite BLASR, please use: Chaisson M.J., and Tesler G., Mapping " << std::endl
+        << "single molecule sequencing reads using Basic Local Alignment with " << std::endl
+        << "Successive Refinement (BLASR): Theory and Application, BMC " << std::endl
+        << "Bioinformatics 2012, 13:238." << std::endl
         << "Please report any bugs to "
-        << "'https://github.com/PacificBiosciences/blasr/issues'." << endl
-        << endl;
+        << "'https://github.com/PacificBiosciences/blasr/issues'." << std::endl
+        << std::endl;
     return helpStream.str();
 }
 
-const string BlasrConciseHelp(void)
+const std::string BlasrConciseHelp(void)
 {
-    stringstream ss;
-    ss << "blasr - a program to map reads to a genome" << endl
-       << " usage: blasr reads genome " << endl
-       << " Run with -h for a list of commands " << endl
-       << "          --help for verbose discussion of how to run blasr." << endl
-       << endl
-       << "In release v5.1 of BLASR, command-line options will use the " << endl
-       << "single dash/double dash convention: " << endl
-       << "Character options are preceded by a single dash. (Example: -v) " << endl
-       << "Word options are preceded by a double dash. (Example: --verbose) " << endl
-       << "Please modify your scripts accordingly when BLASR v5.1 is released. " << endl
-       << endl;
+    std::stringstream ss;
+    ss << "blasr - a program to map reads to a genome" << std::endl
+       << " usage: blasr reads genome " << std::endl
+       << " Run with -h for a list of commands " << std::endl
+       << "          --help for verbose discussion of how to run blasr." << std::endl
+       << std::endl
+       << "In release v5.1 of BLASR, command-line options will use the " << std::endl
+       << "single dash/double dash convention: " << std::endl
+       << "Character options are preceded by a single dash. (Example: -v) " << std::endl
+       << "Word options are preceded by a double dash. (Example: --verbose) " << std::endl
+       << "Please modify your scripts accordingly when BLASR v5.1 is released. " << std::endl
+       << std::endl;
     return ss.str();
 }
 
-const string BlasrSummaryHelp(void)
+const std::string BlasrSummaryHelp(void)
 {
-    stringstream ss;
-    ss << "   Basic usage: 'blasr reads.{bam|fasta|bax.h5|fofn} genome.fasta [-options] " << endl
-       << " [option]\tDescription (default_value)." << endl
-       << endl
-       << " Input Files." << endl
+    std::stringstream ss;
+    ss << "   Basic usage: 'blasr reads.{bam|fasta|bax.h5|fofn} genome.fasta [-options] "
+       << std::endl
+       << " [option]\tDescription (default_value)." << std::endl
+       << std::endl
+       << " Input Files." << std::endl
        << "   reads.bam is the NEW native output format for SMRT reads."
           "This is the preferred input to blasr because rich quality"
           "value (insertion,deletion, and substitution quality values) information is "
           "maintained.  The extra quality information improves variant detection and mapping"
-       << "speed." << endl
+       << "speed." << std::endl
        << "   reads.fasta is a multi-fasta file of reads.  While any fasta file is valid input, "
           "it is preferable to use bax.h5 or plx.h5 files because they contain "
           "more rich quality value information."
-       << endl
+       << std::endl
        << "   reads.bax.h5|reads.plx.h5 is the OLD (DEPRECATED) output format of "
           "SMRT reads. "
-       << endl
-       << "   reads.fofn File of file names accepted." << endl
-       << endl;
+       << std::endl
+       << "   reads.fofn File of file names accepted." << std::endl
+       << std::endl;
     return ss.str();
 }
 
-const string BlasrDiscussion(void)
+const std::string BlasrDiscussion(void)
 {
-    stringstream ss;
-    ss << "NAME" << endl
-       << "         blasr - Map SMRT Sequences to a reference genome." << endl
-       << endl
-       << "SYNOPSIS" << endl
-       << "         blasr reads.bam genome.fasta --bam --out out.bam" << endl
-       << endl
-       << "         blasr reads.fasta genome.fasta " << endl
-       << endl
-       << "         blasr reads.fasta genome.fasta --sa genome.fasta.sa" << endl
-       << endl
-       << "         blasr reads.bax.h5 genome.fasta [--sa genome.fasta.sa] " << endl
-       << endl
+    std::stringstream ss;
+    ss << "NAME" << std::endl
+       << "         blasr - Map SMRT Sequences to a reference genome." << std::endl
+       << std::endl
+       << "SYNOPSIS" << std::endl
+       << "         blasr reads.bam genome.fasta --bam --out out.bam" << std::endl
+       << std::endl
+       << "         blasr reads.fasta genome.fasta " << std::endl
+       << std::endl
+       << "         blasr reads.fasta genome.fasta --sa genome.fasta.sa" << std::endl
+       << std::endl
+       << "         blasr reads.bax.h5 genome.fasta [--sa genome.fasta.sa] " << std::endl
+       << std::endl
        << "         blasr reads.bax.h5 genome.fasta --sa genome.fasta.sa --maxScore 100 --minMatch "
           "15 ... "
-       << endl
-       << endl
+       << std::endl
+       << std::endl
        << "         blasr reads.bax.h5 genome.fasta --sa genome.fasta.sa --nproc 24 --out "
           "alignment.out ... "
-       << endl
-       << endl
-       << "DESCRIPTION " << endl
-       << "  blasr is a read mapping program that maps reads to positions " << endl
-       << "  in a genome by clustering short exact matches between the read and" << endl
-       << "  the genome, and scoring clusters using alignment. The matches are" << endl
-       << "  generated by searching all suffixes of a read against the genome" << endl
-       << "  using a suffix array. Global chaining methods are used to score " << endl
-       << "  clusters of matches." << endl
-       << endl
-       << "  The only required inputs to blasr are a file of reads and a" << endl
-       << "  reference genome.  It is exremely useful to have read filtering" << endl
-       << "  information, and mapping runtime may decrease substantially when a" << endl
-       << "  precomputed suffix array index on the reference sequence is" << endl
-       << "  specified." << endl
-       << "  " << endl
-       << "  Although reads may be input in FASTA format, the recommended input is" << endl
-       << "  PacBio BAM files because these contain quality value" << endl
-       << "  information that is used in the alignment and produces higher quality" << endl
-       << "  variant detection." << endl
-       << "  Although alignments can be output in various formats, the recommended " << endl
-       << "  output format is PacBio BAM." << endl
-       << "  Support to bax.h5 and plx.h5 files will be DEPRECATED." << endl
-       << "  Support to region tables for h5 files will be DEPRECATED." << endl
-       //<< "  Read filtering information is contained in the .bax.h5 input files as" << endl
-       //<< "  well as generated by other post-processing programs with analysis of" << endl
-       //<< "  pulse files and read in from a separate .region.h5 file.  The current" << endl
-       //<< "  set of filters that are applied to reads are high quality region" << endl
-       //<< "  filtering, and adapter filtering.  Regions outside high-quality" << endl
-       //<< "  regions are ignored in mapping.  Reads that contain regions annotated" << endl
-       //<< "  as adapter are split into non-adapter (template) regions, and mapped" << endl
-       //<< "  separately." << endl
-       << "  " << endl
-       << "  When suffix array index of a genome is not specified, the suffix array is" << endl
-       << "  built before producing alignment.   This may be prohibitively slow" << endl
-       << "  when the genome is large (e.g. Human).  It is best to precompute the" << endl
-       << "  suffix array of a genome using the program sawriter, and then specify" << endl
-       << "  the suffix array on the command line using -sa genome.fa.sa." << endl
-       << "  " << endl
-       << "  The optional parameters are roughly divided into three categories:" << endl
-       << "  control over anchoring, alignment scoring, and output. " << endl
-       << "  " << endl
-       << "  The default anchoring parameters are optimal for small genomes and" << endl
-       << "  samples with up to 5% divergence from the reference genome.  The main" << endl
-       << "  parameter governing speed and sensitivity is the -minMatch parameter." << endl
-       << "  For human genome alignments, a value of 11 or higher is recommended.  " << endl
-       << "  Several methods may be used to speed up alignments, at the expense of" << endl
-       << "  possibly decreasing sensitivity.  " << endl
-       << "  " << endl
-       //       << "  If the genome is highly repetitive or divergent from the read" << endl
-       //       << "  sequences, the value of -maxExpand should be increased.  This option" << endl
-       //       << "  controls how much the search for anchors is expanded past a simple" << endl
-       //       << "  greedy search.  A value for -maxExpand of 1 is sufficent for" << endl
-       //       << "  non-repetitive genomes, and values of -maxExpand greater than 5 are" << endl
-       //       << "  not recommended." << endl
-       //       << "  " << endl
-       << "  Regions that are too repetitive may be ignored during mapping by" << endl
-       << "  limiting the number of positions a read maps to with the" << endl
-       << "  -maxAnchorsPerPosition option.  Values between 500 and 1000 are effective" << endl
-       << "  in the human genome." << endl
-       << "  " << endl
-       << "  For small genomes such as bacterial genomes or BACs, the default parameters " << endl
-       << "  are sufficient for maximal sensitivity and good speed." << endl
-       << endl
-       << endl;
+       << std::endl
+       << std::endl
+       << "DESCRIPTION " << std::endl
+       << "  blasr is a read mapping program that maps reads to positions " << std::endl
+       << "  in a genome by clustering short exact matches between the read and" << std::endl
+       << "  the genome, and scoring clusters using alignment. The matches are" << std::endl
+       << "  generated by searching all suffixes of a read against the genome" << std::endl
+       << "  using a suffix array. Global chaining methods are used to score " << std::endl
+       << "  clusters of matches." << std::endl
+       << std::endl
+       << "  The only required inputs to blasr are a file of reads and a" << std::endl
+       << "  reference genome.  It is exremely useful to have read filtering" << std::endl
+       << "  information, and mapping runtime may decrease substantially when a" << std::endl
+       << "  precomputed suffix array index on the reference sequence is" << std::endl
+       << "  specified." << std::endl
+       << "  " << std::endl
+       << "  Although reads may be input in FASTA format, the recommended input is" << std::endl
+       << "  PacBio BAM files because these contain quality value" << std::endl
+       << "  information that is used in the alignment and produces higher quality" << std::endl
+       << "  variant detection." << std::endl
+       << "  Although alignments can be output in various formats, the recommended " << std::endl
+       << "  output format is PacBio BAM." << std::endl
+       << "  Support to bax.h5 and plx.h5 files will be DEPRECATED." << std::endl
+       << "  Support to region tables for h5 files will be DEPRECATED." << std::endl
+       //<< "  Read filtering information is contained in the .bax.h5 input files as" << std::endl
+       //<< "  well as generated by other post-processing programs with analysis of" << std::endl
+       //<< "  pulse files and read in from a separate .region.h5 file.  The current" << std::endl
+       //<< "  set of filters that are applied to reads are high quality region" << std::endl
+       //<< "  filtering, and adapter filtering.  Regions outside high-quality" << std::endl
+       //<< "  regions are ignored in mapping.  Reads that contain regions annotated" << std::endl
+       //<< "  as adapter are split into non-adapter (template) regions, and mapped" << std::endl
+       //<< "  separately." << std::endl
+       << "  " << std::endl
+       << "  When suffix array index of a genome is not specified, the suffix array is" << std::endl
+       << "  built before producing alignment.   This may be prohibitively slow" << std::endl
+       << "  when the genome is large (e.g. Human).  It is best to precompute the" << std::endl
+       << "  suffix array of a genome using the program sawriter, and then specify" << std::endl
+       << "  the suffix array on the command line using -sa genome.fa.sa." << std::endl
+       << "  " << std::endl
+       << "  The optional parameters are roughly divided into three categories:" << std::endl
+       << "  control over anchoring, alignment scoring, and output. " << std::endl
+       << "  " << std::endl
+       << "  The default anchoring parameters are optimal for small genomes and" << std::endl
+       << "  samples with up to 5% divergence from the reference genome.  The main" << std::endl
+       << "  parameter governing speed and sensitivity is the -minMatch parameter." << std::endl
+       << "  For human genome alignments, a value of 11 or higher is recommended.  " << std::endl
+       << "  Several methods may be used to speed up alignments, at the expense of" << std::endl
+       << "  possibly decreasing sensitivity.  " << std::endl
+       << "  " << std::endl
+       //       << "  If the genome is highly repetitive or divergent from the read" << std::endl
+       //       << "  sequences, the value of -maxExpand should be increased.  This option" << std::endl
+       //       << "  controls how much the search for anchors is expanded past a simple" << std::endl
+       //       << "  greedy search.  A value for -maxExpand of 1 is sufficent for" << std::endl
+       //       << "  non-repetitive genomes, and values of -maxExpand greater than 5 are" << std::endl
+       //       << "  not recommended." << std::endl
+       //       << "  " << std::endl
+       << "  Regions that are too repetitive may be ignored during mapping by" << std::endl
+       << "  limiting the number of positions a read maps to with the" << std::endl
+       << "  -maxAnchorsPerPosition option.  Values between 500 and 1000 are effective" << std::endl
+       << "  in the human genome." << std::endl
+       << "  " << std::endl
+       << "  For small genomes such as bacterial genomes or BACs, the default parameters "
+       << std::endl
+       << "  are sufficient for maximal sensitivity and good speed." << std::endl
+       << std::endl
+       << std::endl;
     return ss.str();
 }

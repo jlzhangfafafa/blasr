@@ -6,14 +6,12 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-
 int main(int argc, char* argv[])
 {
 
-    string bwtFileName, saFileName;
+    std::string bwtFileName, saFileName;
     if (argc < 3) {
-        cout << "usage: bwt2sa bwtfile safile " << endl;
+        std::cout << "usage: bwt2sa bwtfile safile " << std::endl;
         exit(1);
     }
     bwtFileName = argv[1];
