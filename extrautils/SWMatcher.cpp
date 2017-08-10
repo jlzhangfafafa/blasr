@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
                   << "   query_length target_length align_score query_start query_end target_start "
                      "target_end"
                   << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     std::string queryName, targetName;
@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
             } else {
                 std::cout << " ERROR, aligntype must be one of queryfit, overlap, or global"
                           << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
         } else if (strcmp(argv[argi], "-printmatrix") == 0) {
             printMatrix = true;

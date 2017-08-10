@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 4) {
         std::cout << "usage: sa2bwt genomeFileName suffixArray bwt [-debug]" << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     std::string genomeFileName = argv[1];
     std::string suffixArrayFileName = argv[2];

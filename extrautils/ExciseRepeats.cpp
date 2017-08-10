@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
     std::string seqInName, seqOutName, dotOutName;
     if (argc < 4) {
         std::cout << "usage: exciseRepeats inName repMaskOutFile outName" << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     seqInName = argv[1];

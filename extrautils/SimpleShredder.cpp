@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     std::ofstream readsFile;
     if (readsFileName == "") {
         std::cout << "ERROR.  You must specify a reads file." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     CrucialOpen(readsFileName, readsFile, std::ios::out);
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     }
     if (numReads == -1 and coverage == 0 and stratify == 0) {
         std::cout << "ERROR, you must specify either coverage, nReads, or stratify." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     } else if (numReads == -1) {
         numReads = (refLength / readLength) * coverage;
     }
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         if (!readLength) {
             std::cout << "ERROR. If you are using stratification, a read length must be specified."
                       << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
 
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
             titleStrm << "SE_" << i << "_0@" << seqPos << "-" << seqPos + readLength << "/1";
         } else {
             std::cout << "ERROR. Bad title type " << titleType << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         title = titleStrm.str();
         sampleSeq.length = readLength;

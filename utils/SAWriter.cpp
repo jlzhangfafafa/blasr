@@ -36,13 +36,13 @@ int main(int argc, char* argv[]) {
 
   if (argc < 2) {
     PrintUsage();
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
   else if (strcmp(argv[1], "-h") == 0 or
            strcmp(argv[1], "-help") == 0 or
            strcmp(argv[1], "--help") == 0) {
     PrintUsage();
-    exit(0);
+    std::exit(EXIT_SUCCESS);
   }
   int argi = 1;
   std::string saFile = argv[argi++];
@@ -69,12 +69,12 @@ int main(int argc, char* argv[]) {
           bltPrefixLength = atoi(argv[++argi]);
           if (bltPrefixLength == 0) {
             std::cout << argv[argi] << " is not a valid lookup table length." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
           }
         }
         else {
           std::cout << "Please specify a lookup table length." << std::endl;
-          exit(1);
+          std::exit(EXIT_FAILURE);
         }
       }
       else if (strcmp(argv[argi], "-mamy") == 0) {
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
         }
         else {
           std::cout << "Please specify a difference cover size.  Valid values are 7,32,64,111, and 2281.  Larger values use less memory but may be slower." << std::endl;
-          exit(1);
+          std::exit(EXIT_FAILURE);
         }
         if ( ! (diffCoverSize == 7 or
                 diffCoverSize == 32 or
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
                 diffCoverSize == 2281) ) {
           std::cout << "The difference cover size must be one of 7,32,64,111, or 2281." << std::endl;
           std::cout << "Larger numbers use less space but are more slow." << std::endl;
-          exit(1);
+          std::exit(EXIT_FAILURE);
         }
       }
       else if (strcmp(argv[argi], "-4bit") == 0) {
@@ -123,12 +123,12 @@ int main(int argc, char* argv[]) {
                strcmp(argv[argi], "-help") == 0 or
                strcmp(argv[argi], "--help") == 0) {
         PrintUsage();
-        exit(0);
+        std::exit(EXIT_SUCCESS);
       }
       else {
         PrintUsage();
         std::cout << "ERROR, bad option: " << argv[argi] << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
       }
     }
     ++argi;
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
     std::cout << "ERROR, references greater than " << UINT_MAX << " bases are not supported." << std::endl;
     std::cout << "Consider breaking the reference into multiple files, running alignment. " << std::endl;
     std::cout << "against each file, and merging the result." << std::endl;
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
   std::vector<int> alphabet;
 

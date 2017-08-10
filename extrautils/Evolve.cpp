@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         if (changeProb[Mut] > 1) {
             std::cout << "ERROR! The sum of the error probabilities must be less than 1"
                       << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         DNALength pos;
         float randomNumber;
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
                             << "ERROR, something is wrong with the random number generation, it "
                                "took too many tries to generate a new nucleotide"
                             << std::endl;
-                        exit(1);
+                        std::exit(EXIT_FAILURE);
                     }
                 }
                 subIndices[pos] = refGenome[pos];
@@ -131,7 +131,7 @@ int main(int argc, char* argv[])
         DNALength newPos;
         if (numIns - numDel + refGenome.length < 0) {
             std::cout << "ERROR, the genome has been deleted to nothing." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         ResizeSequence(newSequence, refGenome.length + (numIns - numDel));
         newPos = 0;

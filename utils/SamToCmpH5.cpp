@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
     std::cout << "ERROR. Read type '" << readType
          << "' must be one of either 'standard', 'strobe', 'cDNA' or 'CCS'."
          << std::endl;
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
 
   std::cerr << "[INFO] " << GetTimestamp() << " [" << program << "] started." << std::endl;
@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
           std::string fullRefName(references[i].title);
           if (shortRefNameToFull.find(shortRefName) != shortRefNameToFull.end()) {
               std::cout << "ERROR, Found more than one reference " << shortRefName << "in sam header" << std::endl;
-              exit(1);
+              std::exit(EXIT_FAILURE);
           }
           shortRefNameToFull[shortRefName] = fullRefName;
           alignmentSet.references[i].sequenceName = fullRefName;
@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
         it = shortRefNameToFull.find(samAlignment.rName);
         if (it == shortRefNameToFull.end()) {
             std::cout << "ERROR, Could not find " << samAlignment.rName << " in the reference repository." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         samAlignment.rName = (*it).second;
     }

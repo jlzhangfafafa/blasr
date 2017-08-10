@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     std::cerr << "[INFO] " << GetTimestamp() << " [" << program << "] started."  << std::endl;
 	if (trimByRegion and maskByRegion) {
 		std::cout << "ERROR! You cannot both trim and mask regions. Use one or the other." << std::endl;
-		exit(1);
+		std::exit(EXIT_FAILURE);
 	}
 
   if (printFastq) {
@@ -124,12 +124,12 @@ int main(int argc, char* argv[]) {
         if (reader.SetReadFileName(plsFileNames[plsFileIndex]) == 0) {
             std::cout << "ERROR, could not determine file type."
                 << plsFileNames[plsFileIndex] << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         if (reader.Initialize() == 0) {
             std::cout << "ERROR, could not initialize file "
                 << plsFileNames[plsFileIndex] << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
 
         DNALength simulatedCoordinate;

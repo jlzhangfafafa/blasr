@@ -30,7 +30,7 @@ void PrintUsage() {
 int main(int argc, char* argv[]) {
     if (argc < 4) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     std::string queryName, targetName;
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
         else {
             PrintUsage();
             std::cout << "Bad option: " << argv[argi] << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         ++argi;
     }

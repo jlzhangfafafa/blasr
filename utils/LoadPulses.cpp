@@ -66,7 +66,7 @@ int CheckCmpFileFormat(CmpFile &cmpFile) {
     if (cmpFile.readType != ReadType::Standard) {
         std::cout << "ERROR! Reading pulse information into a cmp.h5 file generated from circular " << std::endl
             << "consensus called sequences is not supported." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     return 1;
 }
@@ -260,7 +260,7 @@ void ParseMetricsList(std::string metricListString, MetricOptionsMap &metricOpti
         }
         else {
             std::cout << "ERROR! Metric " << metrics[m] << " is not supported." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
 }
@@ -410,7 +410,7 @@ void CanMetricsBeComputed(
                  << metricName << " in the file " << movieName << " ";
             std::cout << " It will be ignored." << std::endl;
             if (failOnMissingData) {
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             metricOptions[metricName] = false;
         }
@@ -547,7 +547,7 @@ void BuildLookupTable(
     //
     if (cmpFile.platformId == Astro) {
         std::cout << "ASTRO pulse loading is deprecated." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     int alignmentIndex = movieAlnIndex[toFrom[movieAlignmentIndex].second];
@@ -566,7 +566,7 @@ void BuildLookupTable(
         std::cout << "ERROR! An alignment " << alignmentIndex
              << " is specified with reference group " << std::endl
              << refGroupId << " that is not found as an alignment group." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     int refGroupIndex = cmpReader.refGroupIdToArrayIndex[refGroupId];
 
@@ -578,7 +578,7 @@ void BuildLookupTable(
         std::cout << "ERROR! An alignment " << alignmentIndex
              << " is specified with alignment group " << std::endl
              << alnGroupId << " that is not found." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     std::string readGroupName = cmpReader.alnGroupIdToReadGroupName[alnGroupId];
@@ -587,7 +587,7 @@ void BuildLookupTable(
         std::cout << "ERROR! An alignment " << alignmentIndex
              << " is specified with read group name " << std::endl
              << readGroupName << " that is not found." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     int readGroupIndex = cmpReader.refAlignGroups[refGroupIndex]->experimentNameToIndex[readGroupName];
@@ -616,7 +616,7 @@ void BuildLookupTable(
         if (!baseFile.LookupReadIndexByHoleNumber(holeNumber, readIndex)) {
             std::cout << "ERROR! Alignment has hole number " << holeNumber
                  << " that is not in the movie. " << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         readStart  = baseFile.readStartPositions[readIndex];
         readLength = baseFile.readStartPositions[readIndex+1] -
@@ -625,7 +625,7 @@ void BuildLookupTable(
             if (!pulseFile.LookupReadIndexByHoleNumber(holeNumber, plsReadIndex)) {
                 std::cout << "ERROR! Alignment has  hole number " << holeNumber
                      << " that is not in the movie. " << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             assert(pulseFile.holeNumbers[plsReadIndex] ==
                    baseFile.holeNumbers[readIndex]);
@@ -820,7 +820,7 @@ void BuildLookupTablesAndMakeSane(
                  << alignedSequence      << std::endl
                  << "Original sequence: "<< std::endl
                  << readSequence         << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
 
@@ -877,7 +877,7 @@ void GroupLookupTables(
                 // Assumption (1) has been violated
                 std::cout << "ERROR! lookupTables should have been sorted by reference"
                      << "group index and read group index." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             } else {
                 // Find the first lookupTable of a new group, save indices of [first and last)
                 // lookupTables of the last group.
@@ -1112,7 +1112,7 @@ void ComputeStartFrame(
         if (!ComputeStartFrameFromBase(baseFile, hdfBasReader, useBaseFile,
                 lookupTable, newStartFrame)) {
             std::cout << "ERROR! There is insufficient data to compute metric: StartFrame." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
 }
@@ -1258,7 +1258,7 @@ void WriteMetric(
             }
         } else {
             std::cout << "ERROR, metric " << curMetric << " is not supported." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
 
         for (size_t movieAlignmentIndex = firstIndex; movieAlignmentIndex < lastIndex; movieAlignmentIndex++) {
@@ -1548,7 +1548,7 @@ void WriteMetric(
 
             } else {
                 std::cout << "ERROR, unknown metric " << curMetric << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -1587,7 +1587,7 @@ void WriteMetric(
 
         } else {
             std::cout << "ERROR, unknown metric " << curMetric << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
 }
@@ -1605,7 +1605,7 @@ void WriteMetricWhenStarted(
         std::cout << "ERROR! Attempting to read WhenStarted from "
              << movieName
              << " but the attriubte does not exist." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     hdfPlsReader.scanDataReader.ReadWhenStarted(whenStarted);
 
@@ -1871,7 +1871,7 @@ int main(int argc, char* argv[]) {
         if (!hdfBasReader.Initialize(movieFileNames[movieIndex], fileAccPropList)) {
             std::cout << "ERROR, could not initialize HDF file "
                 << movieFileNames[movieIndex] << " for reading bases." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         else {
             fofnMovieNames.push_back(hdfBasReader.GetMovieName());
@@ -1898,7 +1898,7 @@ int main(int argc, char* argv[]) {
 
     if (cmpReader.Initialize(cmpFileName, H5F_ACC_RDWR) == 0) {
         std::cout << "ERROR, could not open the cmp file." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     if (cmpReader.HasNoAlignments()) {
@@ -1911,7 +1911,7 @@ int main(int argc, char* argv[]) {
         }
         cmpReader.Close();
         std::cerr << "[INFO] " << GetTimestamp() << " [" << program << "] ended." << std::endl;
-        exit(0);
+        std::exit(EXIT_SUCCESS);
     }
 
     cmpReader.Read(cmpFile, false);
@@ -1921,7 +1921,7 @@ int main(int argc, char* argv[]) {
     if (cmpFile.readType != ReadType::CCS and useCcsOnly) {
         std::cout << "ERROR, there is a ccs.h5 file in the fofn, while read type of"
              << " the cmp.h5 file is not CCS." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     std::string commandLine;
@@ -2084,7 +2084,7 @@ int main(int argc, char* argv[]) {
             // with -bymetric only
             std::cout << "ERROR: Internal metrics StartFrameBase and StartFramePulse "
                  << "can only be loaded with -bymetric." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
 
         // Load "WhenStarted" before processing the others.

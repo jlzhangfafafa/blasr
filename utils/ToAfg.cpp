@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
     if (argc < 2) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     std::vector<std::string> inputFileNames;
     inputFileName = argv[1];
