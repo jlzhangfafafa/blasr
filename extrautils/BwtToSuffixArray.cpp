@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
     std::string bwtFileName, saFileName;
     if (argc < 3) {
         std::cout << "usage: bwt2sa bwtfile safile " << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     bwtFileName = argv[1];
     saFileName = argv[2];

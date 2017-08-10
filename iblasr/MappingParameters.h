@@ -404,7 +404,7 @@ public:
         if (polymeraseMode && mapSubreadsSeparately) {
             std::cout << "ERROR, --polymerase can only be used with --noSplitSubreads."
                       << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         // Expand FOFN
         FileOfFileNames::ExpandFileNameList(readsFileNames);
@@ -413,7 +413,7 @@ public:
         if (readsFileNames.size() <= 1) {
             std::cout << "Error, you must provide at least one reads file and a genome file."
                       << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
 
         // Separate query reads files and a genome read file
@@ -429,7 +429,7 @@ public:
             BaseSequenceIO::DetermineFileTypeByExtension(queryFileNames[i], fileType);
             if (fileType != queryFileType) {
                 std::cout << "ERROR, mixed query file types is not allowed." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -468,7 +468,7 @@ public:
                     << "ERROR, you can not use -useQuality option when any of the input reads "
                        "files are in multi-fasta format."
                     << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -502,26 +502,26 @@ public:
             if (refineBetweenAnchorsOnly) {
                 std::cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time."
                           << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             if (extendAlignments) {
                 std::cout
                     << "ERROR, extend and placeGapConsistently cannot be set at the same time."
                     << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             if (not useGuidedAlign) {
                 std::cout
                     << "ERROR, noUseGuidedAlign and placeGapConsistently cannot be set the same "
                        "time."
                     << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             if (affineAlign) {
                 std::cout
                     << "ERROR, affineAlign and placeGapConsistently cannot be set the same time."
                     << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -542,7 +542,7 @@ public:
                 concordantTemplate != "typicalsubread" and concordantTemplate != "mediansubread") {
                 std::cout << "ERROR, unsupported concordantTemplate: " << concordantTemplate
                           << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             if (refineConcordantAlignments) {
                 refineAlignments = true;
@@ -574,7 +574,7 @@ public:
         }
         if (useBwt and useSuffixArray) {
             std::cout << "ERROR, sa and bwt must be used independently." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         if (countTableName != "") {
             useCountTable = true;
@@ -606,7 +606,7 @@ public:
             std::cout << "ERROR: query must be HDF files in order to set ignoreRegions or "
                          "ignoreHQRegions."
                       << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         if (ccsFofnFileName != "") {
             readSeparateCcsFofn = true;
@@ -625,7 +625,7 @@ public:
         }
         if (subsample < 1 and stride > 1) {
             std::cout << "ERROR, subsample and stride must be used independently." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
 
         if (emulateNucmer) {
@@ -648,7 +648,7 @@ public:
             clipping = SAMOutput::subread;
         } else if (clippingString != "") {
             std::cout << "ERROR, clipping should either be soft, hard, or none." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
 
         if (printSAM) {  // since sam is printed via bam we need to use ifndef USE_PBBAM here
@@ -671,19 +671,19 @@ public:
             if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and not enableHiddenPaths) {
                 // bax|fasta|fastq -> bam paths are turned off by default
                 std::cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             */
             if (outFileName == "") {
                 std::cout << "ERROR, SAM output file must be specified." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             // VR Need to see what happens if printing SAM
             // VR Check with Derek regarding sam_via_bam
             if (outputByThread) {
                 std::cout << "ERROR, could not output alignments by threads in BAM format."
                           << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
 #endif
         }
@@ -706,19 +706,19 @@ public:
             if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and not enableHiddenPaths) {
                 // bax|fasta|fastq -> bam paths are turned off by default
                 std::cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             */
             if (outFileName == "") {
                 std::cout << "ERROR, BAM output file must be specified." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             // VR Need to see what happens if printing SAM
             // VR Check with Derek regarding sam_via_bam
             if (outputByThread) {
                 std::cout << "ERROR, could not output alignments by threads in BAM format."
                           << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
 #endif
         }
@@ -732,7 +732,7 @@ public:
             if (not holeNumberRanges.setRanges(holeNumberRangesStr)) {
                 std::cout << "ERROR, could not parse hole number ranges: " << holeNumberRangesStr
                           << "." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -746,12 +746,12 @@ public:
 
         if (minRawSubreadScore > 1000) {
             std::cout << "ERROR, minimum raw subread score should be less than 1000." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         if (minRawSubreadScore != -1 and byAdapter) {
             std::cout << "ERROR, minRawSubreadScore and byAdapter should not be used together."
                       << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         // Determine query read type
         queryReadType = DetermineQueryReadType();

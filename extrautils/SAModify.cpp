@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 
     if (argc < 4) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     int argi = 1;
     std::string saInFile = argv[argi++];
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
         } else {
             PrintUsage();
             std::cout << "Bad option: " << argv[argi] << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         ++argi;
     }

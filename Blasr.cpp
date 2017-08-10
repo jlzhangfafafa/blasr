@@ -902,15 +902,15 @@ int main(int argc, char* argv[]) {
 
   if (params.printVerboseHelp) {
     std::cout << BlasrHelp(params) << std::endl;
-    exit(0); // Not a failure.
+    std::exit(EXIT_SUCCESS); // Not a failure.
   }
   if (params.printDiscussion) {
     std::cout << BlasrDiscussion();
-    exit(0); // Not a failure.
+    std::exit(EXIT_SUCCESS); // Not a failure.
   }
   if (argc < 3) {
     std::cout << BlasrConciseHelp();
-    exit(1); // A failure.
+    std::exit(EXIT_FAILURE); // A failure.
   }
 
   int a, b;
@@ -938,7 +938,7 @@ int main(int argc, char* argv[]) {
            << " T 16 17 18 19 20" << std::endl
            << " N 21 22 23 24 25" << std::endl
            << " should be specified as \"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25\"" << std::endl;
-      exit(1);
+      std::exit(EXIT_FAILURE);
     }
   }
 
@@ -985,7 +985,7 @@ int main(int argc, char* argv[]) {
   if (params.regionTableFileNames.size() != 0 and
       params.regionTableFileNames.size() != params.queryFileNames.size()) {
     std::cout << "Error, there are not the same number of region table files as input files." << std::endl;
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
 
   // If reading a separate ccs fofn, there is a 1-1 corresponence
@@ -1001,7 +1001,7 @@ int main(int argc, char* argv[]) {
   if (params.ccsFofnFileNames.size() != 0 and
       params.ccsFofnFileNames.size() != params.queryFileNames.size()) {
     std::cout << "Error, there are not the same number of ccs files as input files." << std::endl;
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
 
   SequenceIndexDatabase<FASTASequence> seqdb;
@@ -1034,7 +1034,7 @@ int main(int argc, char* argv[]) {
   //
   if (!genomeReader.Init(params.genomeFileName)) {
     std::cout << "Could not open genome file " << params.genomeFileName << std::endl;
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
 
   if (params.printSAM or params.printBAM) {
@@ -1081,7 +1081,7 @@ int main(int argc, char* argv[]) {
   if (params.useBwt) {
     if (bwt.Read(params.bwtFileName) == 0) {
       std::cout << "ERROR! Could not read the BWT file. " << params.bwtFileName << std::endl;
-      exit(1);
+      std::exit(EXIT_FAILURE);
     }
   }
   else {
@@ -1121,7 +1121,7 @@ int main(int argc, char* argv[]) {
       else {
         std::cout << "ERROR. " << params.suffixArrayFileName << " is not a valid suffix array. " << std::endl
              << " Make sure it is generated with the latest version of sawriter." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
       }
     }
   }
@@ -1374,7 +1374,7 @@ int main(int argc, char* argv[]) {
       if (params.readSeparateRegionTable) {
         if (regionTableReader->Initialize(params.regionTableFileNames[params.readsFileIndex]) == 0) {
           std::cout << "ERROR! Could not read the region table " << params.regionTableFileNames[params.readsFileIndex] <<std::endl;
-          exit(1);
+          std::exit(EXIT_FAILURE);
         }
         params.useRegionTable = true;
       }
@@ -1382,7 +1382,7 @@ int main(int argc, char* argv[]) {
         if (reader->HasRegionTable()) {
           if (regionTableReader->Initialize(params.queryFileNames[params.readsFileIndex]) == 0) {
             std::cout << "ERROR! Could not read the region table " << params.queryFileNames[params.readsFileIndex] <<std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
           }
           params.useRegionTable = true;
         }
@@ -1415,7 +1415,7 @@ int main(int argc, char* argv[]) {
     //  if (reader->SetCCS(params.ccsFofnFileNames[params.readsFileIndex]) == 0) {
     //    std::cout << "ERROR! Could not read the ccs file "
     //         << params.ccsFofnFileNames[params.readsFileIndex] << std::endl;
-    //    exit(1);
+    //    std::exit(EXIT_FAILURE);
     //  }
     // }
 
@@ -1541,7 +1541,7 @@ int main(int argc, char* argv[]) {
               bamWriterPtr = NULL;
           } catch (std::exception e) {
               std::cout << "Error, could not flush bam records to bam file." << std::endl;
-              exit(1);
+              std::exit(EXIT_FAILURE);
           }
 #else
           REQUIRE_PBBAM_ERROR();

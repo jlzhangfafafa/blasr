@@ -171,7 +171,7 @@ void ConvertTitlesToTitleTableIndices(std::vector<FASTASequence> & references,
                  << " in the title table " << titleTableName << ". The "
                  << "reference fasta and the title table do not match."
                  << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
     tt.Free();
@@ -193,7 +193,7 @@ bool CheckAdapterOnly(GFFFile & adapterGffFile, //Adapter gff file
         // This should not happen ...
         std::cout << "ERROR, could not find alignment target name "
              << alignment.tName << " in the reference file." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     int refNameIndex = refNameToIndex[alignment.tName];
     char buf [16];
@@ -337,7 +337,7 @@ int main(int argc, char* argv[]) {
     std::string errMsg;
     if (not filterCriteria.MakeSane(errMsg)) {
         std::cout << errMsg << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     // Parse hole number ranges.
@@ -345,7 +345,7 @@ int main(int argc, char* argv[]) {
         if (not holeNumberRanges.setRanges(holeNumberStr)) {
             std::cout << "Could not parse hole number ranges: "
                  << holeNumberStr << "." << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
     }
 
@@ -449,7 +449,7 @@ int main(int argc, char* argv[]) {
                                      thisHoleNumber)) {
                 std::cout << "ERROR, could not parse SMRT title: "
                      << samAlignment.qName << "." << std::endl;
-                exit(1);
+                std::exit(EXIT_FAILURE);
             }
             if (not holeNumberRanges.contains(UInt(thisHoleNumber))) {
                 if (verbose)

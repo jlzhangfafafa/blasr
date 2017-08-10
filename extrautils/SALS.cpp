@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     if (argc <= 1) {
         std::cout << "sals checks if a suffix array has lookup table or not." << std::endl;
         std::cout << "usage sals genome.sa" << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     std::string saFileName = argv[1];
@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
     DNASuffixArray sa;
     if (!sa.LightRead(saFileName)) {
         std::cout << "The file is not in a sa format." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     if (sa.componentList[DNASuffixArray::CompArray]) {

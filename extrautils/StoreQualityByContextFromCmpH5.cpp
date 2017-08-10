@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
     int maxSamples = 1000;
     if (argc < 3) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     int argi = 1;
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
         } else {
             PrintUsage();
             std::cout << "ERROR, bad option: " << argv[argi] << std::endl;
-            exit(1);
+            std::exit(EXIT_FAILURE);
         }
         ++argi;
     }
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
     if (cmpReader.Initialize(cmpH5FileName, H5F_ACC_RDWR) == 0) {
         std::cout << "ERROR, could not open the cmp file." << std::endl;
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     std::cout << "Reading cmp file." << std::endl;
 
