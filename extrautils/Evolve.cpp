@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
         //
         FASTASequence newSequence;
         DNALength newPos;
-        if (numIns - numDel + refGenome.length < 0) {
+        if (numIns - numDel + static_cast<int>(refGenome.length) < 0) {
             std::cout << "ERROR, the genome has been deleted to nothing." << std::endl;
             std::exit(EXIT_FAILURE);
         }
