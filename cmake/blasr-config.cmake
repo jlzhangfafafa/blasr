@@ -6,3 +6,7 @@ configure_file(
     ${BLASR_RootDir}/BlasrVersion.h.in
     ${CMAKE_BINARY_DIR}/generated/BlasrVersion.h
 )
+configure_file(
+    ${BLASR_RootDir}/BlasrGitHash.h.in
+    ${CMAKE_BINARY_DIR}/generated/BlasrGitHash.h
+)

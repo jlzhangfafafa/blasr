@@ -37,21 +37,14 @@
 
 #pragma once
 
-#include <algorithm>
 #include <string>
-
-#include "BlasrGitHash.h"
 
 namespace PacBio {
 namespace {
-constexpr char   BlasrVersionInt[]    = "@BLASR_VERSION@";
-constexpr char   BlasrChangelogInt[]  = "${BLASR_CHANGELOG}";
-constexpr size_t BlasrVersionMajorInt = @BLASR_VERSION_MAJOR@;
-constexpr size_t BlasrVersionMinorInt = @BLASR_VERSION_MINOR@;
-constexpr size_t BlasrVersionPatchInt = @BLASR_VERSION_PATCH@;
+constexpr char BlasrGitSha1Int[] = "@BLASR_GIT_SHA1@";
 }
 
-std::string BlasrVersion()
-{ return BlasrVersionInt; }
+std::string BlasrGitSha1()
+{ return BlasrGitSha1Int; }
 
 } // ::PacBio

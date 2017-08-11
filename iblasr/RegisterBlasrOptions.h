@@ -17,7 +17,7 @@
  * ============================================================================
  */
 
-#include <libconfig.h>
+#include <LibBlasrConfig.h>
 #include <CommandLineParser.hpp>
 #include <sstream>
 

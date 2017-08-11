@@ -19,7 +19,7 @@
 #define MAX_PHRED_SCORE 254
 #define MAPQV_END_ALIGN_WIGGLE 5
 
-#include <libconfig.h>
+#include <LibBlasrConfig.h>
 #ifdef USE_PBBAM
 #include <pbbam/BamWriter.h>
 #include <pbbam/SamWriter.h>
