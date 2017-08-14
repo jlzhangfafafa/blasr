@@ -3,6 +3,7 @@ defines.mk
 *.o
 *.err
 blasr
+build/
 /utils/bam2bax/build/
 /utils/bam2bax/bin/
 /utils/bam2bax/tests/bin/
@@ -11,3 +12,8 @@ blasr
 /utils/bax2bam/bin/
 /utils/bax2bam/tests/bin/
 /utils/bax2bam/tests/src/TestData.h
+
+# Meson WrapDB stuff
+subprojects/packagecache/
+subprojects/blasr_libcpp*
+subprojects/pbbam*

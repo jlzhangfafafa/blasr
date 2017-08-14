@@ -32,7 +32,7 @@ include(blasr-compilerflags)
 include(blasr-gitsha1)
 include(blasr-config)
 
-file(WRITE libcpp/pbdata/libconfig.h "")
+file(WRITE libcpp/pbdata/LibBlasrConfig.h "")
 
 include_directories(
     ${BLASR_RootDir}/libcpp/hdf
