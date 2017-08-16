@@ -39,7 +39,7 @@ void PrintUsage()
 int main(int argc, char* argv[])
 {
     std::string outFileName;
-    int contextLength = 5;
+    unsigned contextLength = 5;
     int minSamples = 500;
     int maxSamples = 1000;
     if (argc < 3) {
@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
                 if (RefChar[alignmentArray[ab]] != ' ') {
                     nb++;
                 }
-                if (ab == 0 or nb == contextLength / 2) break;
+                if (ab == 0 or nb == static_cast<int>(contextLength) / 2) break;
                 ab--;
             }
 
@@ -186,7 +186,8 @@ int main(int argc, char* argv[])
             // characters, counted by ne.
             //
             ae = a + 1;
-            while (ae < alignmentArray.size() and ne < contextLength / 2) {
+            while (ae < static_cast<int>(alignmentArray.size()) and
+                   ne < static_cast<int>(contextLength) / 2) {
                 if (RefChar[alignmentArray[ae]] != ' ') {
                     ne++;
                 }
@@ -196,7 +197,7 @@ int main(int argc, char* argv[])
             //
             // Make sure there are no edge effects that prevent a context of the correct length from being assigned.
             //
-            if (nb + ne + 1 != contextLength) {
+            if (nb + ne + 1 != static_cast<int>(contextLength)) {
                 continue;
             }
             int ai;
@@ -247,11 +248,10 @@ int main(int argc, char* argv[])
             sample.Resize(sampleLength);
             if (sampleLength > 0) {
                 int seqPos = alignmentToBaseMap[aq];
-                if (seqPos < read.length) {
+                if (seqPos < static_cast<int>(read.length)) {
                     sample.CopyFromSeq(read, seqPos, sampleLength);
                     std::string nucs;
-                    int n;
-                    for (n = 0; n < sample.nucleotides.size(); n++) {
+                    for (size_t n = 0; n < sample.nucleotides.size(); n++) {
                         char c = sample.nucleotides[n];
                         assert(c == 'A' or c == 'T' or c == 'G' or c == 'C');
                         nucs.push_back(sample.nucleotides[n]);
