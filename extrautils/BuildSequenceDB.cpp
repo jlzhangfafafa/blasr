@@ -35,8 +35,7 @@ int main(int argc, char* argv[])
     CrucialOpen(indexFileName, indexOut, std::ios::out | std::ios::binary);
     SequenceIndexDatabase<FASTASequence> seqDB;
 
-    int fileNameIndex;
-    for (fileNameIndex = 0; fileNameIndex < fastaFileNames.size(); fileNameIndex++) {
+    for (size_t fileNameIndex = 0; fileNameIndex < fastaFileNames.size(); fileNameIndex++) {
         FASTAReader reader;
         FASTASequence seq;
         reader.Init(fastaFileNames[fileNameIndex]);

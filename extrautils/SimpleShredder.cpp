@@ -71,8 +71,7 @@ int main(int argc, char* argv[])
     }
 
     DNALength refLength = 0;
-    int i;
-    for (i = 0; i < reference.size(); i++) {
+    for (size_t i = 0; i < reference.size(); i++) {
         refLength += reference[i].length;
     }
     if (numReads == -1 and coverage == 0 and stratify == 0) {
@@ -100,7 +99,7 @@ int main(int argc, char* argv[])
         seqPos = 0;
     }
     DNALength origReadLength = readLength;
-    for (i = 0; stratify or i < numReads; i++) {
+    for (int i = 0; stratify or i < numReads; i++) {
         if (stratify == 0) {
             FindRandomPos(reference, seqIndex, seqPos, readLength);
         } else {

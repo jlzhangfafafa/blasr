@@ -48,9 +48,8 @@ int main(int argc, char* argv[])
     CrucialOpen(tableFileName, tableOut, std::ios::out | std::ios::binary);
     CountTable table;
     table.InitCountTable(tm);
-    int i;
     FASTASequence seq;
-    for (i = 0; i < sequenceFiles.size(); i++) {
+    for (size_t i = 0; i < sequenceFiles.size(); i++) {
         FASTAReader reader;
         reader.Init(sequenceFiles[i]);
         while (reader.GetNext(seq)) {

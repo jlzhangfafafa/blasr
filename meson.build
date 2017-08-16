@@ -16,7 +16,6 @@ project(
 blasr_warning_flags = []
 cpp = meson.get_compiler('cpp')
 foreach cflag: [
-  '-Wno-sign-compare',
   '-Wno-non-virtual-dtor',
   '-Wno-unused-but-set-variable',
   '-Wno-unused-variable']
