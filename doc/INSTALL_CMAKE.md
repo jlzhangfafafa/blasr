@@ -1,20 +1,26 @@
 ## Compile BLASR and util binaries using cmake
 
-Make sure that you are using cmake >=3.7 and
-always start from an empty build subdirectory!
+Make sure that you are using cmake >=3.7, have [ninja](https://ninja-build.org/)
+installed, and always start from an empty build subdirectory!
 
     git clone git://github.com/PacificBiosciences/blasr.git && cd blasr
     git submodule update --init --remote
     mkdir build && cd build
-    cmake .. && make
+    cmake -GNinja .. && ninja
 
 Where is the binary?
 
     blasr/build/blasr
 
-Want to build MUCH faster? Install ninja and execute
+Can I install it system-wide?
 
-    cmake -GNinja .. && ninja
+    ninja install
+
+Can I use make instead of ninja, even though it's officially not supported?
+Yes, but make does not resolve dependencies correctly;
+because of that, you need to run make twice.
+
+    cmake .. && make -j && make -j
 
 Can I install all binaries to a custom location?
 
@@ -38,4 +44,3 @@ Are you on MacOS? Install homebrew and install following dependencies and
 use the default instructions above:
 
     brew install ninja hdf5 cmake
-
