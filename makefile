@@ -12,10 +12,10 @@ foo:
 GET_SHA1 := $(shell git -C ${SRCDIR} describe --always --dirty='*')
 CXXFLAGS += -O3 -g -DSHA1_7=\"${GET_SHA1}\"
 CXXOPTS += \
-		   -std=c++0x -pedantic \
+		   -std=c++14 -pedantic \
            -Wall -Wextra -Wno-div-by-zero -Wno-overloaded-virtual \
            -MMD -MP
-GCXXFLAGS := -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer 
+GCXXFLAGS := -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer
 override CXXFLAGS += ${CXXOPTS} ${GCXXFLAGS}
 #INC_DIRS:=${LIBBLASR_INC} ${LIBPBIHDF_INC} ${LIBPBDATA_INC} ${PBBAM_INC} ${HTSLIB_INC} ${HDF5_INC} ${ZLIB_INC}
 #LIB_DIRS:=${LIBBLASR_LIB} ${LIBPBIHDF_LIB} ${LIBPBDATA_LIB} ${PBBAM_LIB} ${HTSLIB_LIB} ${HDF5_LIB} ${ZLIB_LIB}

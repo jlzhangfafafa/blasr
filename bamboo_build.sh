@@ -18,9 +18,10 @@ mkdir -p staging/blasr/bin
 set +x
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
 module load git/2.8.3
-module load gcc/4.9.2
+module load gcc/6.4.0
 module load ccache/3.2.3
 export CCACHE_DIR=/mnt/secondary/Share/tmp/bamboo.mobs.ccachedir
+export CCACHE_COMPILERCHECK='%compiler% -dumpversion'
 module load boost/1.60
 if [[ $BOOST_ROOT =~ /include ]]; then
   set -x
@@ -29,7 +30,7 @@ if [[ $BOOST_ROOT =~ /include ]]; then
 fi
 module load ninja/1.7.1
 module load cmake/3.7.2
-module load hdf5-tools/1.8.16
+module load hdf5-tools/1.8.19
 module load zlib/1.2.8
 module load htslib/1.3.1
 set -x
@@ -45,6 +46,7 @@ rsync -avx ../include bin lib ../../../staging/pbbam/
 cd ../../blasr_libcpp
 export CCACHE_BASEDIR=$PWD
 rm -f defines.mk
+CXXFLAGS="-std=c++14" \
 python configure.py \
       PREFIX=dummy \
     HDF5_INC=$(pkg-config --cflags-only-I hdf5|awk '{print $1}'|sed -e 's/^-I//') \
@@ -67,6 +69,7 @@ cp -a alignment/libblasr.so* ../../staging/blasr_libcpp/lib/
 cd ../blasr
 export CCACHE_BASEDIR=$PWD
 rm -f defines.mk
+CXXFLAGS="-std=c++14" \
 python configure.py --shared \
        PREFIX=dummy \
      HDF5_INC=$(pkg-config --cflags-only-I hdf5|awk '{print $1}'|sed -e 's/^-I//') \
@@ -83,8 +86,8 @@ LIBPBIHDF_LIB=$PWD/../blasr_libcpp/hdf \
  LIBBLASR_LIB=$PWD/../blasr_libcpp/alignment \
    HTSLIB_INC=$(pkg-config --cflags-only-I htslib|awk '{print $1}'|sed -e 's/^-I//') \
    HTSLIB_LIB=$(pkg-config --libs-only-L htslib|awk '{print $1}'|sed -e 's/^-L//')
-make -j
-make -C utils -j
+VERBOSE=1 make
+VERBOSE=1 CXXFLAGS="-std=c++14 -O3 -g" make -C utils
 cp -a blasr          ../../staging/blasr/bin/
 cp -a utils/sawriter ../../staging/blasr/bin/
 

@@ -2,7 +2,10 @@
 include(CheckCXXCompilerFlag)
 
 # shared CXX flags for all source code & tests
-set(BLASR_FLAGS "-std=c++11 -pedantic -Wno-long-long -Wall -Wextra -Wno-return-type -Wno-overloaded-virtual -Wno-unused-parameter -Wno-div-by-zero -MMD -MP -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer -Wno-unused-variable")
+set(BLASR_FLAGS "-pedantic -Wno-long-long -Wall -Wextra -Wno-return-type -Wno-overloaded-virtual -Wno-unused-parameter -Wno-div-by-zero -MMD -MP -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer -Wno-unused-variable")
+set(CMAKE_CXX_STANDARD          14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS        OFF)
 
 # gperftools support
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND APPLE)
