@@ -32,6 +32,7 @@ cd build
 cmake \
     -DCMAKE_BUILD_TYPE=ReleaseWithAssert \
     -DHDF5_ROOT=$HDF5_DIR \
+    -DPacBioBAM_build_docs=OFF \
     -GNinja \
   ..
 sed -i -e 's@/-I@/ -I@g' build.ninja
