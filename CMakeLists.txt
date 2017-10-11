@@ -32,13 +32,14 @@ include(blasr-compilerflags)
 include(blasr-gitsha1)
 include(blasr-config)
 
-file(WRITE libcpp/pbdata/libconfig.h "")
+file(WRITE libcpp/pbdata/LibBlasrConfig.h "")
 
 include_directories(
     ${BLASR_RootDir}/libcpp/hdf
     ${BLASR_RootDir}/libcpp/alignment
     ${BLASR_RootDir}/libcpp/pbdata
     ${HDF5_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
     ${PacBioBAM_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/generated
 )
@@ -54,7 +55,13 @@ add_library(deps STATIC
     ${PBDATA_CPP}
 )
 
-target_link_libraries(deps ${PacBioBAM_LIBRARIES})
+target_link_libraries(
+    deps
+    ${PacBioBAM_LIBRARIES}
+    ${hts_LIBRARIES}
+    ${ZLIB_LDFLAGS}
+    ${HDF5_LDFLAGS}
+    )
 
 # Binaries
 function(create_exe exe_name exe_cpp)

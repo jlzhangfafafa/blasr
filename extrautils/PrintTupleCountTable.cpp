@@ -21,8 +21,8 @@ typedef TupleCountTable<FASTASequence, DNATuple> CountTable;
 int main(int argc, char* argv[])
 {
     CommandLineParser clp;
-    string tableFileName;
-    vector<string> sequenceFiles;
+    std::string tableFileName;
+    std::vector<std::string> sequenceFiles;
     TupleMetrics tm;
     int tupleSize = 8;
     clp.SetProgramName("printTupleCountTable");
@@ -32,10 +32,10 @@ int main(int argc, char* argv[])
                           CommandLineParser::NonNegativeInteger, false);
     clp.RegisterStringListOption("reads", &sequenceFiles, "All sequences.", false);
     clp.RegisterPreviousFlagsAsHidden();
-    vector<string> opts;
+    std::vector<std::string> opts;
 
     if (argc == 2) {
-        string fastaFileName = argv[1];
+        std::string fastaFileName = argv[1];
         sequenceFiles.push_back(fastaFileName);
         tableFileName = fastaFileName + ".ctab";
     } else {
@@ -44,13 +44,12 @@ int main(int argc, char* argv[])
 
     tm.tupleSize = tupleSize;
     tm.InitializeMask();
-    ofstream tableOut;
+    std::ofstream tableOut;
     CrucialOpen(tableFileName, tableOut, std::ios::out | std::ios::binary);
     CountTable table;
     table.InitCountTable(tm);
-    int i;
     FASTASequence seq;
-    for (i = 0; i < sequenceFiles.size(); i++) {
+    for (size_t i = 0; i < sequenceFiles.size(); i++) {
         FASTAReader reader;
         reader.Init(sequenceFiles[i]);
         while (reader.GetNext(seq)) {

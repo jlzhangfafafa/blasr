@@ -4,7 +4,7 @@ SRCDIR:=$(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 -include ${CURDIR}/../defines.mk
 include ${SRCDIR}/../rules.mk
 
-CXXOPTS := -std=c++0x -pedantic \
+CXXOPTS := -std=c++14 -pedantic \
            -Wall -Wextra -Wno-overloaded-virtual \
            -MMD -MP
 CXXFLAGS += ${CXXOPTS} ${GCXXFLAGS}

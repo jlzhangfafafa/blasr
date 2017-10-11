@@ -41,29 +41,29 @@ public:
     int nProc;
     int globalChainType;
     SAMOutput::Clipping clipping;
-    string clippingString;
+    std::string clippingString;
     QVScale qvScaleType;
-    vector<string> readsFileNames;  // = queryFileNames, genomeFileName
-    vector<string> queryFileNames;
-    vector<string>
+    std::vector<std::string> readsFileNames;  // = queryFileNames, genomeFileName
+    std::vector<std::string> queryFileNames;
+    std::vector<std::string>
         scrapsFileNames;  // needed for noSplitSubread flag in PBBAM, deriived from queryFileNames
-    string genomeFileName;
+    std::string genomeFileName;
     // Query file type: FASTA/FASTQ/HDF*/PBBAM,
     // Note that mixed query file types is not allowed.
     FileType queryFileType;
     // Query read type, SUBREAD, CCS or UNKNOWN
     // Note that mixed read types is not allowed.
     ReadType::ReadTypeEnum queryReadType;
-    vector<string> regionTableFileNames;
-    vector<string> ccsFofnFileNames;
-    string tupleListName;
-    string posTableName;
-    string outFileName;
-    string suffixArrayFileName;
-    string bwtFileName;
-    string indexFileName;
-    string anchorFileName;
-    string clusterFileName;
+    std::vector<std::string> regionTableFileNames;
+    std::vector<std::string> ccsFofnFileNames;
+    std::string tupleListName;
+    std::string posTableName;
+    std::string outFileName;
+    std::string suffixArrayFileName;
+    std::string bwtFileName;
+    std::string indexFileName;
+    std::string anchorFileName;
+    std::string clusterFileName;
     int nBest;
     int printWindow;
     int doCondense;
@@ -74,9 +74,9 @@ public:
     int useReverseCompressIndex;
     int useTupleList;
     int useSeqDB;
-    string seqDBName;
+    std::string seqDBName;
     int useCountTable;
-    string countTableName;
+    std::string countTableName;
     int minMatchLength;
     int listTupleSize;
     int printFormat;
@@ -132,13 +132,13 @@ public:
     bool refineAlignments;
     int nCandidates;
     bool doGlobalAlignment;
-    string tempDirectory;
+    std::string tempDirectory;
     bool useTitleTable;
-    string titleTableName;
+    std::string titleTableName;
     bool readSeparateRegionTable;
     bool readSeparateCcsFofn;
-    string regionTableFileName;
-    string ccsFofnFileName;
+    std::string regionTableFileName;
+    std::string ccsFofnFileName;
     //float averageMismatchScore;
     bool mapSubreadsSeparately;
     bool concordant;
@@ -150,10 +150,10 @@ public:
     bool setIgnoreHQRegions;
     bool printUnaligned;
     bool noPrintUnalignedSeqs;  // print unaligned reads names only.
-    string unalignedFileName;
-    string metricsFileName;
-    string lcpBoundsFileName;
-    string fullMetricsFileName;
+    std::string unalignedFileName;
+    std::string metricsFileName;
+    std::string lcpBoundsFileName;
+    std::string fullMetricsFileName;
     bool printSubreadTitle;
     bool useCcs;
     bool useAllSubreadsInCcs;
@@ -183,7 +183,7 @@ public:
     int recurseOver;
     bool allowAdjacentIndels;
     bool separateGaps;
-    string scoreMatrixString;
+    std::string scoreMatrixString;
     bool printDotPlots;
     bool preserveReadTitle;
     bool forwardOnly;
@@ -193,19 +193,19 @@ public:
     int affineOpen;
     bool scaleMapQVByNumSignificantClusters;
     int limsAlign;
-    string holeNumberRangesStr;
+    std::string holeNumberRangesStr;
     Ranges holeNumberRanges;
     int minAlnLength;
     bool printSAMQV;
-    vector<string> samQV;
+    std::vector<std::string> samQV;
     SupplementalQVList samQVList;
     bool fastMaxInterval;
     bool aggressiveIntervalCut;
     bool fastSDP;
-    string concordantTemplate;
+    std::string concordantTemplate;
     bool concordantAlignBothDirections;
     FilterCriteria filterCriteria;
-    string hitPolicyStr;
+    std::string hitPolicyStr;
     HitPolicy hitPolicy;
     bool enableHiddenPaths;
     bool polymeraseMode;
@@ -401,19 +401,19 @@ public:
 
     void MakeSane()
     {
-#ifndef USE_PBBAM
-        if (polymeraseMode && !mapSubreadsSeparately) {
-            cout << "ERROR, --polymerase can only be used with --noSplitSubreads." << endl;
-            exit(1);
+        if (polymeraseMode && mapSubreadsSeparately) {
+            std::cout << "ERROR, --polymerase can only be used with --noSplitSubreads."
+                      << std::endl;
+            std::exit(EXIT_FAILURE);
         }
-#endif
         // Expand FOFN
         FileOfFileNames::ExpandFileNameList(readsFileNames);
 
         // Must have at least a query and a genome
         if (readsFileNames.size() <= 1) {
-            cout << "Error, you must provide at least one reads file and a genome file." << endl;
-            exit(1);
+            std::cout << "Error, you must provide at least one reads file and a genome file."
+                      << std::endl;
+            std::exit(EXIT_FAILURE);
         }
 
         // Separate query reads files and a genome read file
@@ -428,8 +428,8 @@ public:
             FileType fileType;
             BaseSequenceIO::DetermineFileTypeByExtension(queryFileNames[i], fileType);
             if (fileType != queryFileType) {
-                cout << "ERROR, mixed query file types is not allowed." << endl;
-                exit(1);
+                std::cout << "ERROR, mixed query file types is not allowed." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -441,8 +441,8 @@ public:
         // not needed for xml since scraps specified explicetely
         //
         if (not mapSubreadsSeparately && (queryFileType == FileType::PBBAM)) {
-            const string dsubdb = ".subreads.bam";
-            const string dbam = ".bam";
+            const std::string dsubdb = ".subreads.bam";
+            const std::string dbam = ".bam";
             // loop over all subread files and fill the vector or scraps files
             for (size_t i = 0; i < queryFileNames.size(); i++) {
                 scrapsFileNames.push_back(queryFileNames[i]);
@@ -464,10 +464,11 @@ public:
         // -useQuality can not be used in combination with a fasta input
         if (!ignoreQualities) {
             if (queryFileType == FileType::Fasta) {
-                cout << "ERROR, you can not use -useQuality option when any of the input reads "
-                        "files are in multi-fasta format."
-                     << endl;
-                exit(1);
+                std::cout
+                    << "ERROR, you can not use -useQuality option when any of the input reads "
+                       "files are in multi-fasta format."
+                    << std::endl;
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -486,45 +487,48 @@ public:
         }
 
         if (nCandidates < nBest) {
-            cerr << "Warning: resetting nCandidates to nBest " << nBest << endl;
+            std::cerr << "Warning: resetting nCandidates to nBest " << nBest << std::endl;
             nCandidates = nBest;
         }
 
         if (placeRandomly and hitPolicyStr != "randombest") {
-            cerr << "Warning: placeRepeatsRandomly is deprecated, resetting hit policy to "
-                    "randombest."
-                 << endl;
+            std::cerr << "Warning: placeRepeatsRandomly is deprecated, resetting hit policy to "
+                         "randombest."
+                      << std::endl;
             hitPolicyStr = "randombest";
         }
 
         if (placeGapConsistently) {
             if (refineBetweenAnchorsOnly) {
-                cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time."
-                     << endl;
-                exit(1);
+                std::cout << "ERROR, rbao and placeGapConsistently cannot be set at the same time."
+                          << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             if (extendAlignments) {
-                cout << "ERROR, extend and placeGapConsistently cannot be set at the same time."
-                     << endl;
-                exit(1);
+                std::cout
+                    << "ERROR, extend and placeGapConsistently cannot be set at the same time."
+                    << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             if (not useGuidedAlign) {
-                cout << "ERROR, noUseGuidedAlign and placeGapConsistently cannot be set the same "
-                        "time."
-                     << endl;
-                exit(1);
+                std::cout
+                    << "ERROR, noUseGuidedAlign and placeGapConsistently cannot be set the same "
+                       "time."
+                    << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             if (affineAlign) {
-                cout << "ERROR, affineAlign and placeGapConsistently cannot be set the same time."
-                     << endl;
-                exit(1);
+                std::cout
+                    << "ERROR, affineAlign and placeGapConsistently cannot be set the same time."
+                    << std::endl;
+                std::exit(EXIT_FAILURE);
             }
         }
 
         if ((hitPolicyStr == "random" or hitPolicyStr == "randombest") and nBest == 1) {
-            cerr << "Warning: When attempting to select equivalently scoring reads at random "
-                 << endl
-                 << "the bestn parameter should be greater than one." << endl;
+            std::cerr << "Warning: When attempting to select equivalently scoring reads at random "
+                      << std::endl
+                      << "the bestn parameter should be greater than one." << std::endl;
         }
 
         if (concordant) {
@@ -536,8 +540,9 @@ public:
             }
             if (concordantTemplate != "longestsubread" and
                 concordantTemplate != "typicalsubread" and concordantTemplate != "mediansubread") {
-                cout << "ERROR, unsupported concordantTemplate: " << concordantTemplate << endl;
-                exit(1);
+                std::cout << "ERROR, unsupported concordantTemplate: " << concordantTemplate
+                          << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             if (refineConcordantAlignments) {
                 refineAlignments = true;
@@ -545,9 +550,9 @@ public:
         }
 
         if (sdpFilterType > 1) {
-            cerr << "Warning: using new filter method for SDP alignments.  The parameter is "
-                 << endl
-                 << "either 0 or 1, but " << sdpFilterType << " was specified." << endl;
+            std::cerr << "Warning: using new filter method for SDP alignments.  The parameter is "
+                      << std::endl
+                      << "either 0 or 1, but " << sdpFilterType << " was specified." << std::endl;
             sdpFilterType = 1;
         }
         if (sdpFilterType == 0) {
@@ -568,8 +573,8 @@ public:
             useBwt = true;
         }
         if (useBwt and useSuffixArray) {
-            cout << "ERROR, sa and bwt must be used independently." << endl;
-            exit(1);
+            std::cout << "ERROR, sa and bwt must be used independently." << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         if (countTableName != "") {
             useCountTable = true;
@@ -598,10 +603,10 @@ public:
             (queryFileType == FileType::HDFPulse or queryFileType == FileType::HDFBase or
              queryFileType == FileType::HDFCCSONLY);
         if ((setIgnoreRegions or setIgnoreHQRegions) and not isHDFFile) {
-            cout << "ERROR: query must be HDF files in order to set ignoreRegions or "
-                    "ignoreHQRegions."
-                 << std::endl;
-            exit(1);
+            std::cout << "ERROR: query must be HDF files in order to set ignoreRegions or "
+                         "ignoreHQRegions."
+                      << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         if (ccsFofnFileName != "") {
             readSeparateCcsFofn = true;
@@ -614,12 +619,13 @@ public:
         }
         if (anchorParameters.maxLCPLength != 0 and
             int(anchorParameters.maxLCPLength) < int(anchorParameters.minMatchLength)) {
-            cerr << "ERROR: maxLCPLength is less than minLCPLength, which will result in no hits."
-                 << endl;
+            std::cerr
+                << "ERROR: maxLCPLength is less than minLCPLength, which will result in no hits."
+                << std::endl;
         }
         if (subsample < 1 and stride > 1) {
-            cout << "ERROR, subsample and stride must be used independently." << endl;
-            exit(1);
+            std::cout << "ERROR, subsample and stride must be used independently." << std::endl;
+            std::exit(EXIT_FAILURE);
         }
 
         if (emulateNucmer) {
@@ -641,8 +647,8 @@ public:
         } else if (clippingString == "subread") {
             clipping = SAMOutput::subread;
         } else if (clippingString != "") {
-            cout << "ERROR, clipping should either be soft, hard, or none." << endl;
-            exit(1);
+            std::cout << "ERROR, clipping should either be soft, hard, or none." << std::endl;
+            std::exit(EXIT_FAILURE);
         }
 
         if (printSAM) {  // since sam is printed via bam we need to use ifndef USE_PBBAM here
@@ -664,19 +670,20 @@ public:
             /*
             if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and not enableHiddenPaths) {
                 // bax|fasta|fastq -> bam paths are turned off by default
-                cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << endl;
-                exit(1);
+                std::cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             */
             if (outFileName == "") {
-                cout << "ERROR, SAM output file must be specified." << endl;
-                exit(1);
+                std::cout << "ERROR, SAM output file must be specified." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             // VR Need to see what happens if printing SAM
             // VR Check with Derek regarding sam_via_bam
             if (outputByThread) {
-                cout << "ERROR, could not output alignments by threads in BAM format." << endl;
-                exit(1);
+                std::cout << "ERROR, could not output alignments by threads in BAM format."
+                          << std::endl;
+                std::exit(EXIT_FAILURE);
             }
 #endif
         }
@@ -698,19 +705,20 @@ public:
             /*
             if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and not enableHiddenPaths) {
                 // bax|fasta|fastq -> bam paths are turned off by default
-                cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << endl;
-                exit(1);
+                std::cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             */
             if (outFileName == "") {
-                cout << "ERROR, BAM output file must be specified." << endl;
-                exit(1);
+                std::cout << "ERROR, BAM output file must be specified." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             // VR Need to see what happens if printing SAM
             // VR Check with Derek regarding sam_via_bam
             if (outputByThread) {
-                cout << "ERROR, could not output alignments by threads in BAM format." << endl;
-                exit(1);
+                std::cout << "ERROR, could not output alignments by threads in BAM format."
+                          << std::endl;
+                std::exit(EXIT_FAILURE);
             }
 #endif
         }
@@ -722,9 +730,9 @@ public:
 
         if (holeNumberRangesStr.size() > 0) {
             if (not holeNumberRanges.setRanges(holeNumberRangesStr)) {
-                cout << "ERROR, could not parse hole number ranges: " << holeNumberRangesStr << "."
-                     << endl;
-                exit(1);
+                std::cout << "ERROR, could not parse hole number ranges: " << holeNumberRangesStr
+                          << "." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
         }
 
@@ -737,12 +745,13 @@ public:
         }
 
         if (minRawSubreadScore > 1000) {
-            cout << "ERROR, minimum raw subread score should be less than 1000." << endl;
-            exit(1);
+            std::cout << "ERROR, minimum raw subread score should be less than 1000." << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         if (minRawSubreadScore != -1 and byAdapter) {
-            cout << "ERROR, minRawSubreadScore and byAdapter should not be used together." << endl;
-            exit(1);
+            std::cout << "ERROR, minRawSubreadScore and byAdapter should not be used together."
+                      << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         // Determine query read type
         queryReadType = DetermineQueryReadType();

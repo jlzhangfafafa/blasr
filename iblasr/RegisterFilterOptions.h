@@ -1,6 +1,6 @@
 #pragma once
 
-#include <libconfig.h>
+#include <LibBlasrConfig.h>
 #include <CommandLineParser.hpp>
 #include <datastructures/alignment/FilterCriteria.hpp>
 #include <string>

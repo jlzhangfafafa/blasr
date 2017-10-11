@@ -6,7 +6,6 @@
 #include "statistics/StatUtils.hpp"
 #include "utils.hpp"
 
-using namespace std;
 /*
 ref000001	.	SNV	9454	9454	0.00	.	.	reference=C;confidence=0;Name=9454C>A;coverage=0;variantseq=A
 ref000001	.	deletion	20223	20223	0.00	.	.	reference=T;length=1;confidence=0;coverage=0;Name=20222delT
@@ -26,9 +25,9 @@ int main(int argc, char* argv[])
 {
     CommandLineParser clp;
 
-    string refGenomeName;
-    string mutGenomeName;
-    string gffFileName;
+    std::string refGenomeName;
+    std::string mutGenomeName;
+    std::string gffFileName;
     float insRate = 0;
     float delRate = 0;
     float mutRate = 0;
@@ -46,21 +45,21 @@ int main(int argc, char* argv[])
     clp.RegisterFloatOption("m", &mutRate, "Mutation rate, even across all nucleotides: (0-1]",
                             CommandLineParser::NonNegativeFloat, false);
     clp.RegisterFlagOption("lower", &lower, "Make mutations in lower case", false);
-    vector<string> leftovers;
+    std::vector<std::string> leftovers;
     clp.ParseCommandLine(argc, argv, leftovers);
 
     FASTAReader reader;
     FASTASequence refGenome;
 
     reader.Init(refGenomeName);
-    ofstream mutGenomeOut;
+    std::ofstream mutGenomeOut;
     CrucialOpen(mutGenomeName, mutGenomeOut, std::ios::out);
-    ofstream gffOut;
+    std::ofstream gffOut;
     if (gffFileName != "") {
         CrucialOpen(gffFileName, gffOut, std::ios::out);
     }
 
-    vector<int> insIndices, delIndices, subIndices;
+    std::vector<int> insIndices, delIndices, subIndices;
     int readIndex = 0;
     InitializeRandomGeneratorWithTime();
     while (reader.GetNext(refGenome)) {
@@ -85,8 +84,9 @@ int main(int argc, char* argv[])
         changeProb[None] = 1;
 
         if (changeProb[Mut] > 1) {
-            cout << "ERROR! The sum of the error probabilities must be less than 1" << endl;
-            exit(1);
+            std::cout << "ERROR! The sum of the error probabilities must be less than 1"
+                      << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         DNALength pos;
         float randomNumber;
@@ -108,10 +108,11 @@ int main(int argc, char* argv[])
                 while (newNuc == refGenome.seq[pos]) {
                     newNuc = TwoBitToAscii[RandomInt(4)];
                     if (it == maxIts) {
-                        cout << "ERROR, something is wrong with the random number generation, it "
-                                "took too many tries to generate a new nucleotide"
-                             << endl;
-                        exit(1);
+                        std::cout
+                            << "ERROR, something is wrong with the random number generation, it "
+                               "took too many tries to generate a new nucleotide"
+                            << std::endl;
+                        std::exit(EXIT_FAILURE);
                     }
                 }
                 subIndices[pos] = refGenome[pos];
@@ -119,18 +120,18 @@ int main(int argc, char* argv[])
                 ++numMut;
             }
         }
-        //		cout << readIndex << " m " << numMut << " i " << numIns << " d " << numDel << endl;
+        //		std::cout << readIndex << " m " << numMut << " i " << numIns << " d " << numDel << std::endl;
         if (readIndex % 100000 == 0 && readIndex > 0) {
-            cout << readIndex << endl;
+            std::cout << readIndex << std::endl;
         }
         //
         // Now add the insertions and deletions.
         //
         FASTASequence newSequence;
         DNALength newPos;
-        if (numIns - numDel + refGenome.length < 0) {
-            cout << "ERROR, the genome has been deleted to nothing." << endl;
-            exit(1);
+        if (numIns - numDel + static_cast<int>(refGenome.length) < 0) {
+            std::cout << "ERROR, the genome has been deleted to nothing." << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         ResizeSequence(newSequence, refGenome.length + (numIns - numDel));
         newPos = 0;
@@ -142,7 +143,7 @@ int main(int argc, char* argv[])
                        << " 0.00	.	.	reference=" << (char)subIndices[pos]
                        << ";confidence=10;Name=" << newPos << (char)subIndices[pos] << ">"
                        << refGenome.seq[pos] << ";coverage=10;variantseq=" << refGenome.seq[pos]
-                       << endl;
+                       << std::endl;
             }
 
             if (insIndices[pos] == true) {
@@ -156,7 +157,7 @@ int main(int argc, char* argv[])
                     gffOut << refGenome.GetName() << "	.	deletion	" << newPos << " " << newPos
                            << " 0.00	.	.	reference=" << newSequence.seq[newPos]
                            << ";length=1;confidence=10;coverage=0;Name=" << newPos << "del"
-                           << newSequence.seq[newPos] << endl;
+                           << newSequence.seq[newPos] << std::endl;
                 }
                 newPos++;
             } else if (delIndices[pos] == true) {
@@ -165,7 +166,7 @@ int main(int argc, char* argv[])
                     gffOut << refGenome.GetName() << "	.	insertion	" << newPos << " " << newPos
                            << " 0.00	.	.	confidence=10;Name=" << newPos << "_ins"
                            << refGenome.seq[pos] << ";reference=.;length=1;coverage=0;variantseq="
-                           << refGenome.seq[newPos] << endl;
+                           << refGenome.seq[newPos] << std::endl;
                     //ref000001	.	deletion	20223	20223	0.00	.	.	reference=T;length=1;confidence=0;coverage=0;Name=20222delT
                 }
             } else {
@@ -173,7 +174,7 @@ int main(int argc, char* argv[])
                 newPos++;
             }
         }
-        stringstream titlestrm;
+        std::stringstream titlestrm;
         titlestrm << " mutated ins " << insRate << " del " << delRate << " mut " << mutRate;
         newSequence.CopyTitle(refGenome.title);
         newSequence.AppendToTitle(titlestrm.str());

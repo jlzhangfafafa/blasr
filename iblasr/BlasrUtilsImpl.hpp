@@ -43,7 +43,7 @@ void AssignRefContigLocation(T_AlignmentCandidate &alignment,
     }
 }
 
-void AssignRefContigLocations(vector<T_AlignmentCandidate *> &alignmentPtrs,
+void AssignRefContigLocations(std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                               SequenceIndexDatabase<FASTQSequence> &seqdb, DNASequence &genome)
 {
 
@@ -55,7 +55,7 @@ void AssignRefContigLocations(vector<T_AlignmentCandidate *> &alignmentPtrs,
 }
 
 template <typename T_RefSequence>
-void AssignGenericRefContigName(vector<T_AlignmentCandidate *> &alignmentPtrs,
+void AssignGenericRefContigName(std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                                 T_RefSequence &genome)
 {
     UInt i;
@@ -65,7 +65,7 @@ void AssignGenericRefContigName(vector<T_AlignmentCandidate *> &alignmentPtrs,
     }
 }
 
-void StoreRankingStats(vector<T_AlignmentCandidate *> &alignments,
+void StoreRankingStats(std::vector<T_AlignmentCandidate *> &alignments,
                        VarianceAccumulator<float> &accumPValue,
                        VarianceAccumulator<float> &accumWeight)
 {
@@ -78,7 +78,7 @@ void StoreRankingStats(vector<T_AlignmentCandidate *> &alignments,
     }
 }
 
-void AssignMapQV(vector<T_AlignmentCandidate *> &alignmentPtrs)
+void AssignMapQV(std::vector<T_AlignmentCandidate *> &alignmentPtrs)
 {
     int i;
     int mapQV = 1;
@@ -102,14 +102,15 @@ void ScaleMapQVByClusterSize(T_AlignmentCandidate &alignment, MappingParameters 
     }
 }
 
-void StoreMapQVs(SMRTSequence &read, vector<T_AlignmentCandidate *> &alignmentPtrs,
+void StoreMapQVs(SMRTSequence &read, std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                  MappingParameters &params)
 {
     //
     // Only weight alignments for mapqv against eachother if they are overlapping.
     //
     int a;
-    vector<set<int> > partitions;  // Each set contains alignments that overlap on the read.
+    std::vector<std::set<int> >
+        partitions;  // Each set contains alignments that overlap on the read.
     DistanceMatrixScoreFunction<DNASequence, FASTQSequence> distScoreFn;
     distScoreFn.del = params.deletion;
     distScoreFn.ins = params.insertion;
@@ -148,20 +149,20 @@ void StoreMapQVs(SMRTSequence &read, vector<T_AlignmentCandidate *> &alignmentPt
                                    params.minFractionToBeConsideredOverlapping);
 
     int p;
-    set<int>::iterator partIt, partEnd;
+    std::set<int>::iterator partIt, partEnd;
 
     //
     // For each partition, store where on the read it begins, and where
     // it ends.
     //
-    vector<int> partitionBeginPos, partitionEndPos;
+    std::vector<int> partitionBeginPos, partitionEndPos;
     partitionBeginPos.resize(partitions.size());
     partitionEndPos.resize(partitions.size());
-    fill(partitionBeginPos.begin(), partitionBeginPos.end(), -1);
-    fill(partitionEndPos.begin(), partitionEndPos.end(), -1);
-    vector<char> assigned;
+    std::fill(partitionBeginPos.begin(), partitionBeginPos.end(), -1);
+    std::fill(partitionEndPos.begin(), partitionEndPos.end(), -1);
+    std::vector<char> assigned;
     assigned.resize(alignmentPtrs.size());
-    fill(assigned.begin(), assigned.end(), false);
+    std::fill(assigned.begin(), assigned.end(), false);
 
     for (p = 0; p < int(partitions.size()); p++) {
         partEnd = partitions[p].end();
@@ -234,7 +235,7 @@ void StoreMapQVs(SMRTSequence &read, vector<T_AlignmentCandidate *> &alignmentPt
 
     float mapQVDenominator = 0;
     for (p = 0; p < int(partitions.size()); p++) {
-        set<int>::iterator nextIt;
+        std::set<int>::iterator nextIt;
         if (partitions[p].size() == 0) {
             continue;
         }
@@ -302,7 +303,7 @@ void StoreMapQVs(SMRTSequence &read, vector<T_AlignmentCandidate *> &alignmentPt
 
 //--------------------SEARCH & CHECK ALIGNMENTS-------------------//
 template <typename T_Sequence>
-bool CheckForSufficientMatch(T_Sequence &read, vector<T_AlignmentCandidate *> &alignmentPtrs,
+bool CheckForSufficientMatch(T_Sequence &read, std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                              MappingParameters &params)
 {
     (void)(read);
@@ -313,7 +314,7 @@ bool CheckForSufficientMatch(T_Sequence &read, vector<T_AlignmentCandidate *> &a
     }
 }
 
-int FindMaxLengthAlignment(vector<T_AlignmentCandidate *> alignmentPtrs, int &maxLengthIndex)
+int FindMaxLengthAlignment(std::vector<T_AlignmentCandidate *> alignmentPtrs, int &maxLengthIndex)
 {
     int i;
     int maxLength = 0;
@@ -380,23 +381,23 @@ bool AlignmentsOverlap(T_AlignmentCandidate &alnA, T_AlignmentCandidate &alnB,
     float ovpPercent = 0;
     if (alnAEnd - alnAStart > 0 and alnBEnd - alnBStart > 0) {
         // overlap percentage: maximum overlap percent in A and B.
-        ovpPercent =
-            max(float(ovp) / float(alnAEnd - alnAStart), float(ovp) / float(alnBEnd - alnBStart));
+        ovpPercent = std::max(float(ovp) / float(alnAEnd - alnAStart),
+                              float(ovp) / float(alnBEnd - alnBStart));
     }
 
     // returns true when an overlap is found.
     return (ovpPercent > minPercentOverlap);
 }
 
-void PartitionOverlappingAlignments(vector<T_AlignmentCandidate *> &alignmentPtrs,
-                                    vector<set<int> > &partitions, float minOverlap)
+void PartitionOverlappingAlignments(std::vector<T_AlignmentCandidate *> &alignmentPtrs,
+                                    std::vector<std::set<int> > &partitions, float minOverlap)
 {
     if (alignmentPtrs.size() == 0) {
         partitions.clear();
         return;
     }
 
-    set<int>::iterator setIt, setEnd;
+    std::set<int>::iterator setIt, setEnd;
     int i, p;
     bool overlapFound = false;
     for (i = 0; i < int(alignmentPtrs.size()); i++) {
@@ -418,14 +419,15 @@ void PartitionOverlappingAlignments(vector<T_AlignmentCandidate *> &alignmentPtr
         // partition with it as the first element.
         //
         if (overlapFound == false) {
-            partitions.push_back(set<int>());
+            partitions.push_back(std::set<int>());
             partitions[partitions.size() - 1].insert(i);
         }
     }
 }
 
 //--------------------FILTER ALIGNMENTS---------------------------//
-int RemoveLowQualitySDPAlignments(int readLength, vector<T_AlignmentCandidate *> &alignmentPtrs,
+int RemoveLowQualitySDPAlignments(int readLength,
+                                  std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                                   MappingParameters &params)
 {
     // Just a hack.  For now, assume there is at least 1 match per 50 bases.
@@ -454,18 +456,18 @@ int RemoveLowQualitySDPAlignments(int readLength, vector<T_AlignmentCandidate *>
 }
 
 template <typename T_Sequence>
-int RemoveLowQualityAlignments(T_Sequence &read, vector<T_AlignmentCandidate *> &alignmentPtrs,
+int RemoveLowQualityAlignments(T_Sequence &read, std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                                MappingParameters &params)
 {
     PB_UNUSED(read);
     if (params.verbosity > 0) {
-        cout << "checking at least " << alignmentPtrs.size()
-             << " alignments to see if they are accurate." << endl;
+        std::cout << "checking at least " << alignmentPtrs.size()
+                  << " alignments to see if they are accurate." << std::endl;
     }
     for (size_t i = 0; i < MIN(static_cast<size_t>(params.nCandidates), alignmentPtrs.size());
          i++) {
         if (params.verbosity > 0) {
-            cout << "Quality check  " << i << " " << alignmentPtrs[i]->score << endl;
+            std::cout << "Quality check  " << i << " " << alignmentPtrs[i]->score << std::endl;
         }
         if (alignmentPtrs[i]->blocks.size() == 0 or alignmentPtrs[i]->score > params.maxScore) {
             //
@@ -475,11 +477,11 @@ int RemoveLowQualityAlignments(T_Sequence &read, vector<T_AlignmentCandidate *> 
             // removed as well.  Do that all at once.
             //
             if (alignmentPtrs[i]->blocks.size() == 0 and params.verbosity > 0) {
-                cout << "Removing empty alignment " << alignmentPtrs[i]->qName << endl;
+                std::cout << "Removing empty alignment " << alignmentPtrs[i]->qName << std::endl;
             }
             if (params.verbosity > 0) {
-                cout << alignmentPtrs[i]->qName << " alignment " << i << " is too low of a score."
-                     << alignmentPtrs[i]->score << endl;
+                std::cout << alignmentPtrs[i]->qName << " alignment " << i
+                          << " is too low of a score." << alignmentPtrs[i]->score << std::endl;
             }
             for (size_t deletedIndex = i; deletedIndex < alignmentPtrs.size(); deletedIndex++) {
                 delete alignmentPtrs[deletedIndex];
@@ -489,10 +491,10 @@ int RemoveLowQualityAlignments(T_Sequence &read, vector<T_AlignmentCandidate *> 
             break;
         } else {
             if (params.verbosity > 0) {
-                cout << "Keeping alignment " << i << " " << alignmentPtrs[i]->qPos << " "
-                     << alignmentPtrs[i]->qLength << " " << alignmentPtrs[i]->tName << " "
-                     << alignmentPtrs[i]->tPos << " " << alignmentPtrs[i]->tLength
-                     << " from score: " << alignmentPtrs[i]->score << endl;
+                std::cout << "Keeping alignment " << i << " " << alignmentPtrs[i]->qPos << " "
+                          << alignmentPtrs[i]->qLength << " " << alignmentPtrs[i]->tName << " "
+                          << alignmentPtrs[i]->tPos << " " << alignmentPtrs[i]->tLength
+                          << " from score: " << alignmentPtrs[i]->score << std::endl;
             }
         }
     }
@@ -500,10 +502,10 @@ int RemoveLowQualityAlignments(T_Sequence &read, vector<T_AlignmentCandidate *> 
 }
 
 //FIXME: move to class ReadAlignments
-int RemoveOverlappingAlignments(vector<T_AlignmentCandidate *> &alignmentPtrs,
+int RemoveOverlappingAlignments(std::vector<T_AlignmentCandidate *> &alignmentPtrs,
                                 MappingParameters &params)
 {
-    vector<unsigned char> alignmentIsContained;
+    std::vector<unsigned char> alignmentIsContained;
     alignmentIsContained.resize(alignmentPtrs.size());
     std::fill(alignmentIsContained.begin(), alignmentIsContained.end(), false);
 
@@ -546,23 +548,24 @@ int RemoveOverlappingAlignments(vector<T_AlignmentCandidate *> &alignmentPtrs,
                         alignmentIsContained[j] = true;
                     }
                     if (params.verbosity >= 2) {
-                        cout << "alignment " << i << " is contained in " << j << endl;
-                        cout << aref->tAlignedSeqPos << " " << alignmentPtrs[j]->tAlignedSeqPos
-                             << " " << aref->tAlignedSeqPos + aref->tAlignedSeqLength << " "
-                             << alignmentPtrs[j]->tAlignedSeqPos +
-                                    alignmentPtrs[j]->tAlignedSeqLength
-                             << endl;
+                        std::cout << "alignment " << i << " is contained in " << j << std::endl;
+                        std::cout << aref->tAlignedSeqPos << " " << alignmentPtrs[j]->tAlignedSeqPos
+                                  << " " << aref->tAlignedSeqPos + aref->tAlignedSeqLength << " "
+                                  << alignmentPtrs[j]->tAlignedSeqPos +
+                                         alignmentPtrs[j]->tAlignedSeqLength
+                                  << std::endl;
                     }
                 } else if (alignmentPtrs[j]->GenomicTBegin() <= aref->GenomicTBegin() and
                            alignmentPtrs[j]->GenomicTEnd() >= aref->GenomicTEnd() and
                            alignmentPtrs[i]->tIndex == alignmentPtrs[j]->tIndex) {
                     if (params.verbosity >= 2) {
-                        cout << "ALIGNMENT " << j << " is contained in " << i << endl;
-                        cout << alignmentPtrs[j]->tAlignedSeqPos << " " << aref->tAlignedSeqPos
-                             << " "
-                             << alignmentPtrs[j]->tAlignedSeqPos +
-                                    alignmentPtrs[j]->tAlignedSeqLength
-                             << " " << aref->tAlignedSeqPos + aref->tAlignedSeqLength << endl;
+                        std::cout << "ALIGNMENT " << j << " is contained in " << i << std::endl;
+                        std::cout << alignmentPtrs[j]->tAlignedSeqPos << " " << aref->tAlignedSeqPos
+                                  << " "
+                                  << alignmentPtrs[j]->tAlignedSeqPos +
+                                         alignmentPtrs[j]->tAlignedSeqLength
+                                  << " " << aref->tAlignedSeqPos + aref->tAlignedSeqLength
+                                  << std::endl;
                     }
                     if (alignmentPtrs[j]->score <= aref->score) {
                         alignmentIsContained[i] = true;
@@ -587,7 +590,7 @@ int RemoveOverlappingAlignments(vector<T_AlignmentCandidate *> &alignmentPtrs,
 }
 
 // Delete all alignments from index startIndex in vector, inclusive.
-void DeleteAlignments(vector<T_AlignmentCandidate *> &alignmentPtrs, int startIndex)
+void DeleteAlignments(std::vector<T_AlignmentCandidate *> &alignmentPtrs, int startIndex)
 {
     int i;
     for (i = startIndex; i < int(alignmentPtrs.size()); i++) {
@@ -598,7 +601,7 @@ void DeleteAlignments(vector<T_AlignmentCandidate *> &alignmentPtrs, int startIn
 
 //--------------------REFINE ALIGNMENTS---------------------------//
 template <typename T_RefSequence, typename T_Sequence>
-void RefineAlignment(vector<T_Sequence *> &bothQueryStrands, T_RefSequence &genome,
+void RefineAlignment(std::vector<T_Sequence *> &bothQueryStrands, T_RefSequence &genome,
                      T_AlignmentCandidate &alignmentCandidate, MappingParameters &params,
                      MappingBuffers &mappingBuffers)
 {
@@ -816,15 +819,16 @@ void RefineAlignment(vector<T_Sequence *> &bothQueryStrands, T_RefSequence &geno
         //
         int k;
         if (params.bandSize == 0) {
-            k = abs(drift) * 1.5;
+            k = std::abs(drift) * 1.5;
         } else {
             k = params.bandSize;
         }
         if (params.verbosity > 0) {
-            cout << "drift: " << drift << " qlen: " << alignmentCandidate.qAlignedSeq.length
-                 << " tlen: " << alignmentCandidate.tAlignedSeq.length << " k: " << k << endl;
-            cout << "aligning in " << k << " * " << alignmentCandidate.tAlignedSeq.length << " "
-                 << k * alignmentCandidate.tAlignedSeq.length << endl;
+            std::cout << "drift: " << drift << " qlen: " << alignmentCandidate.qAlignedSeq.length
+                      << " tlen: " << alignmentCandidate.tAlignedSeq.length << " k: " << k
+                      << std::endl;
+            std::cout << "aligning in " << k << " * " << alignmentCandidate.tAlignedSeq.length
+                      << " " << k * alignmentCandidate.tAlignedSeq.length << std::endl;
         }
         if (k < 10) {
             k = 10;
@@ -860,19 +864,19 @@ void RefineAlignment(vector<T_Sequence *> &bothQueryStrands, T_RefSequence &geno
         alignmentCandidate.ReassignQSequence(qSeq);
 
         if (params.verbosity >= 2) {
-            cout << "refining target: " << endl;
-            alignmentCandidate.tAlignedSeq.PrintSeq(cout);
-            cout << "refining query: " << endl;
-            static_cast<DNASequence *>(&alignmentCandidate.qAlignedSeq)->PrintSeq(cout);
-            cout << endl;
+            std::cout << "refining target: " << std::endl;
+            alignmentCandidate.tAlignedSeq.PrintSeq(std::cout);
+            std::cout << "refining query: " << std::endl;
+            static_cast<DNASequence *>(&alignmentCandidate.qAlignedSeq)->PrintSeq(std::cout);
+            std::cout << std::endl;
         }
         PairwiseLocalAlign(qSeq, tSeq, k, params, alignmentCandidate, mappingBuffers, Fit);
     }
 }
 
 template <typename T_RefSequence, typename T_Sequence>
-void RefineAlignments(vector<T_Sequence *> &bothQueryStrands, T_RefSequence &genome,
-                      vector<T_AlignmentCandidate *> &alignmentPtrs, MappingParameters &params,
+void RefineAlignments(std::vector<T_Sequence *> &bothQueryStrands, T_RefSequence &genome,
+                      std::vector<T_AlignmentCandidate *> &alignmentPtrs, MappingParameters &params,
                       MappingBuffers &mappingBuffers)
 {
 
@@ -890,23 +894,23 @@ void RefineAlignments(vector<T_Sequence *> &bothQueryStrands, T_RefSequence &gen
     }
 }
 
-vector<T_AlignmentCandidate *> SelectAlignmentsToPrint(vector<T_AlignmentCandidate *> alignmentPtrs,
-                                                       MappingParameters &params,
-                                                       const int &associatedRandInt)
+std::vector<T_AlignmentCandidate *> SelectAlignmentsToPrint(
+    std::vector<T_AlignmentCandidate *> alignmentPtrs, MappingParameters &params,
+    const int &associatedRandInt)
 {
     if (params.placeRandomly) {
         assert(params.hitPolicy.IsRandombest());
     }
 
     if (alignmentPtrs.size() == 0) {
-        return vector<T_AlignmentCandidate *>({});
+        return std::vector<T_AlignmentCandidate *>({});
     }
 
     std::sort(alignmentPtrs.begin(), alignmentPtrs.end(), SortAlignmentPointersByScore());
 
     // Apply filter criteria and hit policy.
     // Shallow copy AlignmentCandidate pointers.
-    vector<T_AlignmentCandidate *> filtered;
+    std::vector<T_AlignmentCandidate *> filtered;
     for (auto ptr : alignmentPtrs) {
         if (params.filterCriteria.Satisfy(ptr)) {
             filtered.push_back(ptr);
@@ -919,7 +923,8 @@ vector<T_AlignmentCandidate *> SelectAlignmentsToPrint(vector<T_AlignmentCandida
 
 // The full read is not the subread, and does not have masked off characters.
 void PrintAlignment(T_AlignmentCandidate &alignment, SMRTSequence &fullRead,
-                    MappingParameters &params, AlignmentContext &alignmentContext, ostream &outFile
+                    MappingParameters &params, AlignmentContext &alignmentContext,
+                    std::ostream &outFile
 #ifdef USE_PBBAM
                     ,
                     SMRTSequence &subread, PacBio::BAM::IRecordWriter *bamWriterPtr
@@ -968,16 +973,18 @@ void PrintAlignment(T_AlignmentCandidate &alignment, SMRTSequence &fullRead,
                 SummaryOutput::Print(alignment, outFile);
             }
         }
-    } catch (ostream::failure f) {
-        cout << "ERROR writing to output file. The output drive may be full, or you  " << endl;
-        cout << "may not have proper write permissions." << endl;
-        exit(1);
+    } catch (std::ostream::failure f) {
+        std::cout << "ERROR writing to output file. The output drive may be full, or you  "
+                  << std::endl;
+        std::cout << "may not have proper write permissions." << std::endl;
+        std::exit(EXIT_FAILURE);
     }
 }
 
-// Print all alignments in vector<T_AlignmentCandidate*> alignmentPtrs
-void PrintAlignments(vector<T_AlignmentCandidate *> alignmentPtrs, SMRTSequence &read,
-                     MappingParameters &params, ostream &outFile, AlignmentContext alignmentContext,
+// Print all alignments in std::vector<T_AlignmentCandidate*> alignmentPtrs
+void PrintAlignments(std::vector<T_AlignmentCandidate *> alignmentPtrs, SMRTSequence &read,
+                     MappingParameters &params, std::ostream &outFile,
+                     AlignmentContext alignmentContext,
 #ifdef USE_PBBAM
                      SMRTSequence &subread, PacBio::BAM::IRecordWriter *bamWriterPtr,
 #endif
@@ -1004,8 +1011,8 @@ void PrintAlignments(vector<T_AlignmentCandidate *> alignmentPtrs, SMRTSequence 
             //
             aref->score = 0;
             if (params.verbosity > 0) {
-                cout << "Zero blocks found for " << aref->qName << " " << aref->qAlignedSeqPos
-                     << " " << aref->tAlignedSeqPos << endl;
+                std::cout << "Zero blocks found for " << aref->qName << " " << aref->qAlignedSeqPos
+                          << " " << aref->tAlignedSeqPos << std::endl;
             }
             continue;
         }
@@ -1044,24 +1051,24 @@ void PrintAlignments(vector<T_AlignmentCandidate *> alignmentPtrs, SMRTSequence 
     }
 }
 
-void PrintAlignmentPtrs(vector<T_AlignmentCandidate *> &alignmentPtrs, ostream &out)
+void PrintAlignmentPtrs(std::vector<T_AlignmentCandidate *> &alignmentPtrs, std::ostream &out)
 {
     for (int alignmentIndex = 0; alignmentIndex < int(alignmentPtrs.size()); alignmentIndex++) {
-        out << "[" << alignmentIndex << "/" << alignmentPtrs.size() << "]" << endl;
+        out << "[" << alignmentIndex << "/" << alignmentPtrs.size() << "]" << std::endl;
         T_AlignmentCandidate *alignment = alignmentPtrs[alignmentIndex];
         alignment->Print(out);
     }
-    out << endl;
+    out << std::endl;
 }
 
-void PrintUnaligned(const SMRTSequence &unalignedRead, ostream &unalignedFilePtr,
+void PrintUnaligned(const SMRTSequence &unalignedRead, std::ostream &unalignedFilePtr,
                     const bool noPrintUnalignedSeqs)
 {
     if (noPrintUnalignedSeqs) {
-        string s = unalignedRead.GetTitle();
+        std::string s = unalignedRead.GetTitle();
         SMRTTitle st(s);
         if (st.isSMRTTitle)
-            unalignedFilePtr << st.ToString() << endl;
+            unalignedFilePtr << st.ToString() << std::endl;
         else
             //size_t pos = s.rfind("/");
             //if (pos != string::npos)
@@ -1083,8 +1090,8 @@ void PrintUnaligned(const SMRTSequence &unalignedRead, ostream &unalignedFilePtr
 //   outFilePtr        - where to print alignments for subreads.
 //   unalignedFilePtr  - where to print sequences for unaligned subreads.
 void PrintAllReadAlignments(ReadAlignments &allReadAlignments, AlignmentContext &alignmentContext,
-                            ostream &outFilePtr, ostream &unalignedFilePtr,
-                            MappingParameters &params, vector<SMRTSequence> &subreads,
+                            std::ostream &outFilePtr, std::ostream &unalignedFilePtr,
+                            MappingParameters &params, std::vector<SMRTSequence> &subreads,
 #ifdef USE_PBBAM
                             PacBio::BAM::IRecordWriter *bamWriterPtr,
 #endif

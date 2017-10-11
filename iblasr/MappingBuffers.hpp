@@ -9,8 +9,6 @@
 #include <tuples/TupleList.hpp>
 #include <vector>
 
-using namespace std;
-
 //
 // Define a list of buffers that are meant to grow to high-water
 // marks, and not shrink down past that.   The memory is reused rather
@@ -19,29 +17,29 @@ using namespace std;
 class MappingBuffers
 {
 public:
-    vector<int> hpInsScoreMat, insScoreMat;
-    vector<int> kbandScoreMat;
-    vector<Arrow> hpInsPathMat, insPathMat;
-    vector<Arrow> kbandPathMat;
-    vector<int> scoreMat;
-    vector<Arrow> pathMat;
-    vector<int> affineScoreMat;
-    vector<Arrow> affinePathMat;
-    vector<ChainedMatchPos> matchPosList;
-    vector<ChainedMatchPos> rcMatchPosList;
-    vector<BasicEndpoint<ChainedMatchPos> > globalChainEndpointBuffer;
-    vector<Fragment> sdpFragmentSet, sdpPrefixFragmentSet, sdpSuffixFragmentSet;
+    std::vector<int> hpInsScoreMat, insScoreMat;
+    std::vector<int> kbandScoreMat;
+    std::vector<Arrow> hpInsPathMat, insPathMat;
+    std::vector<Arrow> kbandPathMat;
+    std::vector<int> scoreMat;
+    std::vector<Arrow> pathMat;
+    std::vector<int> affineScoreMat;
+    std::vector<Arrow> affinePathMat;
+    std::vector<ChainedMatchPos> matchPosList;
+    std::vector<ChainedMatchPos> rcMatchPosList;
+    std::vector<BasicEndpoint<ChainedMatchPos> > globalChainEndpointBuffer;
+    std::vector<Fragment> sdpFragmentSet, sdpPrefixFragmentSet, sdpSuffixFragmentSet;
     TupleList<PositionDNATuple> sdpCachedTargetTupleList;
     TupleList<PositionDNATuple> sdpCachedTargetPrefixTupleList;
     TupleList<PositionDNATuple> sdpCachedTargetSuffixTupleList;
     std::vector<int> sdpCachedMaxFragmentChain;
-    vector<double> probMat;
-    vector<double> optPathProbMat;
-    vector<float> lnSubPValueMat;
-    vector<float> lnInsPValueMat;
-    vector<float> lnDelPValueMat;
-    vector<float> lnMatchPValueMat;
-    vector<int> clusterNumBases;
+    std::vector<double> probMat;
+    std::vector<double> optPathProbMat;
+    std::vector<float> lnSubPValueMat;
+    std::vector<float> lnInsPValueMat;
+    std::vector<float> lnDelPValueMat;
+    std::vector<float> lnMatchPValueMat;
+    std::vector<int> clusterNumBases;
     ClusterList clusterList;
     ClusterList revStrandClusterList;
 
@@ -50,29 +48,29 @@ public:
 
 inline void MappingBuffers::Reset(void)
 {
-    vector<int>().swap(hpInsScoreMat);
-    vector<int>().swap(insScoreMat);
-    vector<int>().swap(kbandScoreMat);
-    vector<Arrow>().swap(hpInsPathMat);
-    vector<Arrow>().swap(insPathMat);
-    vector<Arrow>().swap(kbandPathMat);
-    vector<int>().swap(scoreMat);
-    vector<Arrow>().swap(pathMat);
-    vector<ChainedMatchPos>().swap(matchPosList);
-    vector<ChainedMatchPos>().swap(rcMatchPosList);
-    vector<BasicEndpoint<ChainedMatchPos> >().swap(globalChainEndpointBuffer);
-    vector<Fragment>().swap(sdpFragmentSet);
-    vector<Fragment>().swap(sdpPrefixFragmentSet);
-    vector<Fragment>().swap(sdpSuffixFragmentSet);
+    std::vector<int>().swap(hpInsScoreMat);
+    std::vector<int>().swap(insScoreMat);
+    std::vector<int>().swap(kbandScoreMat);
+    std::vector<Arrow>().swap(hpInsPathMat);
+    std::vector<Arrow>().swap(insPathMat);
+    std::vector<Arrow>().swap(kbandPathMat);
+    std::vector<int>().swap(scoreMat);
+    std::vector<Arrow>().swap(pathMat);
+    std::vector<ChainedMatchPos>().swap(matchPosList);
+    std::vector<ChainedMatchPos>().swap(rcMatchPosList);
+    std::vector<BasicEndpoint<ChainedMatchPos> >().swap(globalChainEndpointBuffer);
+    std::vector<Fragment>().swap(sdpFragmentSet);
+    std::vector<Fragment>().swap(sdpPrefixFragmentSet);
+    std::vector<Fragment>().swap(sdpSuffixFragmentSet);
     sdpCachedTargetTupleList.Reset();
     sdpCachedTargetPrefixTupleList.Reset();
     sdpCachedTargetSuffixTupleList.Reset();
-    vector<int>().swap(sdpCachedMaxFragmentChain);
-    vector<double>().swap(probMat);
-    vector<double>().swap(optPathProbMat);
-    vector<float>().swap(lnSubPValueMat);
-    vector<float>().swap(lnInsPValueMat);
-    vector<float>().swap(lnDelPValueMat);
-    vector<float>().swap(lnMatchPValueMat);
-    vector<int>().swap(clusterNumBases);
+    std::vector<int>().swap(sdpCachedMaxFragmentChain);
+    std::vector<double>().swap(probMat);
+    std::vector<double>().swap(optPathProbMat);
+    std::vector<float>().swap(lnSubPValueMat);
+    std::vector<float>().swap(lnInsPValueMat);
+    std::vector<float>().swap(lnDelPValueMat);
+    std::vector<float>().swap(lnMatchPValueMat);
+    std::vector<int>().swap(clusterNumBases);
 }

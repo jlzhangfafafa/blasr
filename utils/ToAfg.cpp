@@ -14,31 +14,31 @@
 #include <SMRTSequence.hpp>
 #include <utils.hpp>
 
-using namespace std;
 void PrintUsage() {
-        cout << "usage: toAfg input.filetype output.filetype" << endl
-                 << "                                         [-minSubreadLength l] " << endl
-                 << "                                         [-regionTable regions_file] " << endl
-                 << "                                         [-noSplitSubreads]" << endl
-                 << "                                         [-useccsdenovo]" << endl
-                 << "                                         [-uniformQV QV]" << endl 
-        << "Print reads stored in a file (pls|fasta|fastq) as an afg." << endl;
+        std::cout << "usage: toAfg input.filetype output.filetype" << std::endl
+                 << "                                         [-minSubreadLength l] " << std::endl
+                 << "                                         [-regionTable regions_file] " << std::endl
+                 << "                                         [-noSplitSubreads]" << std::endl
+                 << "                                         [-useccsdenovo]" << std::endl
+                 << "                                         [-uniformQV QV]" << std::endl
+        << "Print reads stored in a file (pls|fasta|fastq) as an afg." << std::endl;
 }
+
 int main(int argc, char* argv[]) {
 
-    string inputFileName, outputFileName;
+    std::string inputFileName, outputFileName;
 
     if (argc < 2) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
-    vector<string> inputFileNames;
+    std::vector<std::string> inputFileNames;
     inputFileName = argv[1];
     outputFileName = argv[2];
     int argi = 3;
     RegionTable regionTable;
-    string regionsFOFNName = "";
-    vector<string> regionFileNames;
+    std::string regionsFOFNName = "";
+    std::vector<std::string> regionFileNames;
     bool splitSubreads = true;
     bool useCCS = false;
     bool useUniformQV = false;
@@ -63,11 +63,11 @@ int main(int argc, char* argv[]) {
         }
         else {
             PrintUsage();
-            cout << "ERROR! Option " << argv[argi] << " is not supported." << endl;
+            std::cout << "ERROR! Option " << argv[argi] << " is not supported." << std::endl;
         }
         argi++;
     }
-         
+
     if (FileOfFileNames::IsFOFN(inputFileName)) {
         FileOfFileNames::FOFNToList(inputFileName, inputFileNames);
     }
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    ofstream fastaOut;
+    std::ofstream fastaOut;
     CrucialOpen(outputFileName, fastaOut);
     HDFRegionTableReader hdfRegionReader;
     AfgBasWriter afgWriter;
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]) {
             hdfRegionReader.Initialize(regionFileNames[plsFileIndex]);
             hdfRegionReader.ReadTable(regionTable);
         }
-        
+
         ReaderAgglomerate reader;
         // reader.SkipReadQuality(); // should have been taken care of by *Filter modules
         if (useCCS){
@@ -110,10 +110,10 @@ int main(int argc, char* argv[]) {
             reader.IgnoreCCS();
         }
         reader.Initialize(inputFileNames[plsFileIndex]);
-        CCSSequence seq; 
+        CCSSequence seq;
         int seqIndex = 0;
-        vector<ReadInterval> subreadIntervals;
-        while (reader.GetNext(seq)){ 
+        std::vector<ReadInterval> subreadIntervals;
+        while (reader.GetNext(seq)){
             ++seqIndex;
 
             if (useUniformQV && seq.qual.data != NULL){
@@ -142,8 +142,8 @@ int main(int argc, char* argv[]) {
             }
 
             if (seq.length == 0 and subreadIntervals.size() > 0) {
-                cout << "WARNING! A high quality interval region exists for a read of length 0." <<endl;
-                cout << "  The offending ZMW number is " << seq.HoleNumber() << endl;
+                std::cout << "WARNING! A high quality interval region exists for a read of length 0." <<std::endl;
+                std::cout << "  The offending ZMW number is " << seq.HoleNumber() << std::endl;
                 seq.Free();
                 continue;
             }
@@ -151,8 +151,8 @@ int main(int argc, char* argv[]) {
 
             for (size_t intvIndex = 0; intvIndex < subreadIntervals.size(); intvIndex++) {
                 SMRTSequence subreadSequence;
-                
-                DNALength subreadStart = static_cast<DNALength>(subreadIntervals[intvIndex].start) > hqReadStart ? 
+
+                DNALength subreadStart = static_cast<DNALength>(subreadIntervals[intvIndex].start) > hqReadStart ?
                                    static_cast<DNALength>(subreadIntervals[intvIndex].start) : hqReadStart;
                 DNALength subreadEnd   = static_cast<DNALength>(subreadIntervals[intvIndex].end) < hqReadEnd ?
                                    static_cast<DNALength>(subreadIntervals[intvIndex].end) : hqReadEnd;
@@ -162,11 +162,11 @@ int main(int argc, char* argv[]) {
 
                 subreadSequence.SubreadStart(subreadStart);
                 subreadSequence.SubreadEnd  (subreadEnd);
-                subreadSequence.ReferenceSubstring(seq, subreadStart, subreadLength);      
+                subreadSequence.ReferenceSubstring(seq, subreadStart, subreadLength);
 
-            
-                stringstream titleStream;
-                titleStream << seq.title << "/" << subreadIntervals[intvIndex].start 
+
+                std::stringstream titleStream;
+                titleStream << seq.title << "/" << subreadIntervals[intvIndex].start
                                          << "_" << subreadIntervals[intvIndex].end;
                 subreadSequence.CopyTitle(titleStream.str());
                 afgWriter.Write(subreadSequence);

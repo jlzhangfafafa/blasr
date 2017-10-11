@@ -5,7 +5,7 @@
 
 template <typename T_Sequence>
 bool GetNextReadThroughSemaphore(ReaderAgglomerate &reader, MappingParameters &params,
-                                 T_Sequence &read, string &readGroupId, int &associatedRandInt,
+                                 T_Sequence &read, std::string &readGroupId, int &associatedRandInt,
                                  MappingSemaphores &semaphores)
 {
     // Wait on a semaphore
@@ -129,7 +129,8 @@ int CountZero(unsigned char *ptr, int length)
     return nZero;
 }
 
-void MakeSubreadIntervals(vector<SMRTSequence> &subreads, vector<ReadInterval> &subreadIntervals)
+void MakeSubreadIntervals(std::vector<SMRTSequence> &subreads,
+                          std::vector<ReadInterval> &subreadIntervals)
 {
     subreadIntervals.clear();
     for (auto subread : subreads) {
@@ -138,7 +139,7 @@ void MakeSubreadIntervals(vector<SMRTSequence> &subreads, vector<ReadInterval> &
     }
 }
 
-int GetIndexOfConcordantTemplate(const vector<ReadInterval> &subreadIntervals)
+int GetIndexOfConcordantTemplate(const std::vector<ReadInterval> &subreadIntervals)
 {
     assert(subreadIntervals.size() != 0);
     if (subreadIntervals.size() == 1)
@@ -155,7 +156,7 @@ int GetIndexOfConcordantTemplate(const vector<ReadInterval> &subreadIntervals)
         // Zmw has more than two subreads, look for the median-length subread
         // in subreadIntervals[1:-1]. The first and last subreads are not
         // considered because they are usually non-full-pass.
-        vector<ReadInterval> intervals;
+        std::vector<ReadInterval> intervals;
         intervals.insert(intervals.begin(), subreadIntervals.begin() + 1,
                          subreadIntervals.end() - 1);
         std::sort(intervals.begin(), intervals.end(),

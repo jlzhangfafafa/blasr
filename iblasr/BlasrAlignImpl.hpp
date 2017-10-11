@@ -6,7 +6,7 @@ template <typename T_Sequence, typename T_RefSequence, typename T_SuffixArray,
 void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_SuffixArray &sarray,
              BWT &bwt, SeqBoundaryFtr<FASTQSequence> &seqBoundary, T_TupleCountTable &ct,
              SequenceIndexDatabase<FASTQSequence> &seqdb, MappingParameters &params,
-             MappingMetrics &metrics, vector<T_AlignmentCandidate *> &alignmentPtrs,
+             MappingMetrics &metrics, std::vector<T_AlignmentCandidate *> &alignmentPtrs,
              MappingBuffers &mappingBuffers, MappingIPC *mapData, MappingSemaphores &semaphores)
 {
     bool matchFound;
@@ -64,13 +64,13 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
                 sem_wait(&semaphores.writer);
 #endif
             }
-            *mapData->anchorFilePtr << read.title << endl;
+            *mapData->anchorFilePtr << read.title << std::endl;
             for (i = 0; i < mappingBuffers.matchPosList.size(); i++) {
-                *mapData->anchorFilePtr << mappingBuffers.matchPosList[i] << endl;
+                *mapData->anchorFilePtr << mappingBuffers.matchPosList[i] << std::endl;
             }
-            *mapData->anchorFilePtr << readRC.title << " (RC) " << endl;
+            *mapData->anchorFilePtr << readRC.title << " (RC) " << std::endl;
             for (i = 0; i < mappingBuffers.rcMatchPosList.size(); i++) {
-                *mapData->anchorFilePtr << mappingBuffers.rcMatchPosList[i] << endl;
+                *mapData->anchorFilePtr << mappingBuffers.rcMatchPosList[i] << std::endl;
             }
 
             if (params.nProc > 1) {
@@ -94,9 +94,10 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
         PValueWeightor lisPValue(read, genome, ct.tm, &ct);
         MultiplicityPValueWeightor lisPValueByWeight(genome);
 
-        LISSumOfLogPWeightor<T_GenomeSequence, vector<ChainedMatchPos> > lisPValueByLogSum(genome);
+        LISSumOfLogPWeightor<T_GenomeSequence, std::vector<ChainedMatchPos> > lisPValueByLogSum(
+            genome);
 
-        LISSizeWeightor<vector<ChainedMatchPos> > lisWeightFn;
+        LISSizeWeightor<std::vector<ChainedMatchPos> > lisWeightFn;
 
         IntervalSearchParameters intervalSearchParameters;
         intervalSearchParameters.globalChainType = params.globalChainType;
@@ -148,13 +149,13 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
 
         if (params.pValueType == 0) {
             if (params.printDotPlots) {
-                ofstream dotPlotOut;
-                string dotPlotName = string(read.title) + ".anchors";
+                std::ofstream dotPlotOut;
+                std::string dotPlotName = std::string(read.title) + ".anchors";
                 CrucialOpen(dotPlotName, dotPlotOut, std::ios::out);
                 for (size_t mp = 0; mp < mappingBuffers.matchPosList.size(); mp++) {
                     dotPlotOut << mappingBuffers.matchPosList[mp].q << " "
                                << mappingBuffers.matchPosList[mp].t << " "
-                               << mappingBuffers.matchPosList[mp].l << " " << endl;
+                               << mappingBuffers.matchPosList[mp].l << " " << std::endl;
                 }
                 dotPlotOut.close();
             }
@@ -250,15 +251,16 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
         topIntEnd = topIntervals.end();
         if (params.verbosity > 0) {
             int topintind = 0;
-            cout << "Top " << topIntervals.size() << " Intervals" << endl;
+            std::cout << "Top " << topIntervals.size() << " Intervals" << std::endl;
             for (topIntIt = topIntervals.begin(); topIntIt != topIntEnd; ++topIntIt) {
-                cout << "top interval " << topintind << ", " << (*topIntIt) << endl;
+                std::cout << "top interval " << topintind << ", " << (*topIntIt) << std::endl;
                 if (params.verbosity > 2) {
                     for (size_t m = 0; m < (*topIntIt).matches.size(); m++) {
-                        cout << " (" << (*topIntIt).matches[m].q << ", " << (*topIntIt).matches[m].t
-                             << ", " << (*topIntIt).matches[m].l << ") ";
+                        std::cout << " (" << (*topIntIt).matches[m].q << ", "
+                                  << (*topIntIt).matches[m].t << ", " << (*topIntIt).matches[m].l
+                                  << ") ";
                     }
-                    cout << endl;
+                    std::cout << std::endl;
                 }
                 ++topintind;
             }
@@ -277,9 +279,9 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
                        params.indel, params.sdpTupleSize, params.useSeqDB, seqdb, alignmentPtrs,
                        params, mappingBuffers, params.startRead);
 
-        /*    cout << read.title << endl;
+        /*    std::cout << read.title << std::endl;
               for (i = 0; i < alignmentPtrs.size(); i++) {
-              cout << alignmentPtrs[i]->clusterScore << " " << alignmentPtrs[i]->score << endl;
+              std::cout << alignmentPtrs[i]->clusterScore << " " << alignmentPtrs[i]->score << std::endl;
               }
               */
         StoreRankingStats(alignmentPtrs, accumPValue, accumWeight);
@@ -347,7 +349,7 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
     // Now remove overlapping alignments.
     //
 
-    vector<T_Sequence *> bothQueryStrands;
+    std::vector<T_Sequence *> bothQueryStrands;
     bothQueryStrands.resize(2);
     bothQueryStrands[Forward] = &read;
     bothQueryStrands[Reverse] = &readRC;
@@ -384,20 +386,21 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
         // Handle this by bounding the min match by the smallest and
         // largest values for which there are precomputed statistics.
 
-        int boundedMinWordMatchLength =
-            min(max(params.minMatchLength, PacBio::AnchorDistributionTable::anchorMinKValues[0]),
-                PacBio::AnchorDistributionTable::anchorMinKValues[1]);
+        int boundedMinWordMatchLength = std::min(
+            std::max(params.minMatchLength, PacBio::AnchorDistributionTable::anchorMinKValues[0]),
+            PacBio::AnchorDistributionTable::anchorMinKValues[1]);
 
         //
         // Do a similar bounding for match length and accuracy.
         //
-        int boundedMatchLength = min(max((int)alignmentPtrs[0]->qAlignedSeq.length,
-                                         PacBio::AnchorDistributionTable::anchorReadLengths[0]),
-                                     PacBio::AnchorDistributionTable::anchorReadLengths[1]);
+        int boundedMatchLength =
+            std::min(std::max((int)alignmentPtrs[0]->qAlignedSeq.length,
+                              PacBio::AnchorDistributionTable::anchorReadLengths[0]),
+                     PacBio::AnchorDistributionTable::anchorReadLengths[1]);
         int boundedPctSimilarity =
-            min(max((int)alignmentPtrs[0]->pctSimilarity,
-                    PacBio::AnchorDistributionTable::anchorReadAccuracies[0]),
-                PacBio::AnchorDistributionTable::anchorReadAccuracies[1]);
+            std::min(std::max((int)alignmentPtrs[0]->pctSimilarity,
+                              PacBio::AnchorDistributionTable::anchorReadAccuracies[0]),
+                     PacBio::AnchorDistributionTable::anchorReadAccuracies[1]);
 
         lookupValue = LookupAnchorDistribution(
             boundedMatchLength, boundedMinWordMatchLength, boundedPctSimilarity, meanAnchorsPerRead,
@@ -433,7 +436,7 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
                      clusterIndex++) {
                     if (mappingBuffers.clusterList.numBases[clusterIndex] >=
                         scaledExpectedClusterSize) {
-                        //          cout << mappingBuffers.clusterList.numBases[clusterIndex] << " " << scaledExpectedClusterSize << " " << meanAnchorBasesPerRead << " " << sdAnchorBasesPerRead << endl;
+                        //          std::cout << mappingBuffers.clusterList.numBases[clusterIndex] << " " << scaledExpectedClusterSize << " " << meanAnchorBasesPerRead << " " << sdAnchorBasesPerRead << std::endl;
                         ++numSignificantClusters;
                         totalSignificantClusterSize += meanAnchorBasesPerRead;
                     }
@@ -470,7 +473,7 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
                 << (*intvIt).size << " " << (*intvIt).pValue << " " << (*intvIt).nAnchors << " "
                 << read.length << " " << alignmentPtrs[0]->score << " "
                 << alignmentPtrs[0]->pctSimilarity << " "
-                << " " << minExpAnchors << " " << alignmentPtrs[0]->qAlignedSeq.length << endl;
+                << " " << minExpAnchors << " " << alignmentPtrs[0]->qAlignedSeq.length << std::endl;
 
             if (params.nProc > 1) {
 #ifdef __APPLE__
@@ -499,8 +502,9 @@ void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_Suff
 }
 
 template <typename T_Sequence>
-void MapRead(T_Sequence &read, T_Sequence &readRC, vector<T_AlignmentCandidate *> &alignmentPtrs,
-             MappingBuffers &mappingBuffers, MappingIPC *mapData, MappingSemaphores &semaphores)
+void MapRead(T_Sequence &read, T_Sequence &readRC,
+             std::vector<T_AlignmentCandidate *> &alignmentPtrs, MappingBuffers &mappingBuffers,
+             MappingIPC *mapData, MappingSemaphores &semaphores)
 {
     DNASuffixArray sarray;
     TupleCountTable<T_GenomeSequence, DNATuple> ct;
@@ -545,7 +549,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                     WeightedIntervalSet &weightedIntervals, int mutationCostMatrix[][5], int ins,
                     int del, int sdpTupleSize, int useSeqDB,
                     SequenceIndexDatabase<TDBSequence> &seqDB,
-                    vector<T_AlignmentCandidate *> &alignments, MappingParameters &params,
+                    std::vector<T_AlignmentCandidate *> &alignments, MappingParameters &params,
                     MappingBuffers &mappingBuffers, int procId)
 {
     (void)(mutationCostMatrix);
@@ -553,7 +557,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
     (void)(del);
     (void)(procId);
 
-    vector<T_QuerySequence *> forrev;
+    std::vector<T_QuerySequence *> forrev;
     forrev.resize(2);
     forrev[Forward] = &read;
     forrev[Reverse] = &rcRead;
@@ -606,9 +610,9 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         (void)(endOverlappedContigIndex);
 
         if (params.verbosity > 0) {
-            cout << "aligning interval: "
-                 << "read_length=" << read.length << "; interval=" << (*intvIt)
-                 << "; max_insertion_rate=" << params.approximateMaxInsertionRate << endl;
+            std::cout << "aligning interval: "
+                      << "read_length=" << read.length << "; interval=" << (*intvIt)
+                      << "; max_insertion_rate=" << params.approximateMaxInsertionRate << std::endl;
         }
         assert(matchIntervalEnd >= matchIntervalStart);
 
@@ -693,8 +697,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         // Look to see if a read overhangs the beginning of a contig.
         //
         if (params.verbosity > 2) {
-            cout << "Check for prefix/suffix overlap on interval: " << (*intvIt).qStart << " ?> "
-                 << (*intvIt).start - intervalContigStartPos << endl;
+            std::cout << "Check for prefix/suffix overlap on interval: " << (*intvIt).qStart
+                      << " ?> " << (*intvIt).start - intervalContigStartPos << std::endl;
         }
         if ((*intvIt).qStart > (*intvIt).start - intervalContigStartPos) {
             readOverlapsContigStart = true;
@@ -705,13 +709,13 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         // Look to see if the read overhangs the end of a contig.
         //
         if (params.verbosity > 2) {
-            cout << "Check for suffix/prefix overlap on interval, read overhang: "
-                 << read.length - (*intvIt).qEnd << " ?> " << matchIntervalEnd - (*intvIt).end
-                 << endl;
+            std::cout << "Check for suffix/prefix overlap on interval, read overhang: "
+                      << read.length - (*intvIt).qEnd << " ?> " << matchIntervalEnd - (*intvIt).end
+                      << std::endl;
         }
         if (read.length - (*intvIt).qEnd > matchIntervalEnd - (*intvIt).end) {
             if (params.verbosity > 2) {
-                cout << "read overlaps genome end." << endl;
+                std::cout << "read overlaps genome end." << std::endl;
             }
             readOverlapsContigEnd = true;
             endOverlappedContigIndex = seqDBIndex;
@@ -735,7 +739,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
 
                 intervalContigStartPos = genome.MakeRCCoordinate(intervalContigStartPos) + 1;
                 intervalContigEndPos = genome.MakeRCCoordinate(intervalContigEndPos - 1);
-                swap(intervalContigStartPos, intervalContigEndPos);
+                std::swap(intervalContigStartPos, intervalContigEndPos);
                 alignment->tAlignedSeqPos = rcAlignedSeqPos;
                 alignment->tStrand = Reverse;
             } else {
@@ -760,12 +764,12 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         ConfigureQuery(alignment->qStrand == Forward ? read : rcRead);
 
         if (params.verbosity > 1) {
-            cout << "aligning read, qstrand is " << alignment->qStrand << ", tstrand is "
-                 << alignment->tStrand << endl;
-            static_cast<DNASequence *>(&(alignment->qAlignedSeq))->PrintSeq(cout);
-            cout << endl << "aligning reference" << endl;
-            static_cast<DNASequence *>(&(alignment->tAlignedSeq))->PrintSeq(cout);
-            cout << endl;
+            std::cout << "aligning read, qstrand is " << alignment->qStrand << ", tstrand is "
+                      << alignment->tStrand << std::endl;
+            static_cast<DNASequence *>(&(alignment->qAlignedSeq))->PrintSeq(std::cout);
+            std::cout << std::endl << "aligning reference" << std::endl;
+            static_cast<DNASequence *>(&(alignment->tAlignedSeq))->PrintSeq(std::cout);
+            std::cout << std::endl;
         }
 
         //
@@ -805,8 +809,8 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                 //
                 size_t m;
 
-                vector<ChainedMatchPos> *matches;
-                vector<ChainedMatchPos> rcMatches;
+                std::vector<ChainedMatchPos> *matches;
+                std::vector<ChainedMatchPos> rcMatches;
                 Alignment anchorsOnly;
                 DNASequence tAlignedSeq;
                 FASTQSequence qAlignedSeq;
@@ -830,7 +834,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                 // The first step to refining between anchors only is to make
                 // the anchors relative to the tAlignedSeq.
 
-                matches = (vector<ChainedMatchPos> *)&(*intvIt).matches;
+                matches = (std::vector<ChainedMatchPos> *)&(*intvIt).matches;
                 tAlignedSeq = alignment->tAlignedSeq;
                 qAlignedSeq = alignment->qAlignedSeq;
 
@@ -869,11 +873,11 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
 
                 /*
                    Uncomment to get a dot plot
-                   ofstream matchFile;
+                   std::ofstream matchFile;
                    matchFile.open("matches.txt");
-                   matchFile << "q t l " << endl;
+                   matchFile << "q t l " << std::endl;
                    for (m = 0; matches->size() > 0 and m < matches->size() - 1; m++) {
-                   matchFile << (*matches)[m].q << " " << (*matches)[m].t << " " << (*matches)[m].l << endl;
+                   matchFile << (*matches)[m].q << " " << (*matches)[m].t << " " << (*matches)[m].l << std::endl;
                    }
                    */
                 DNASequence tSubSeq;
@@ -1075,7 +1079,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                 //
                 // Align the entire end of the read if it is short enough.
                 //
-                readSuffixLength = min(read.length - lastAlignedQPos, maximumExtendLength);
+                readSuffixLength = std::min(read.length - lastAlignedQPos, maximumExtendLength);
                 if (readSuffixLength > 0) {
                     readSuffix.ReferenceSubstring(read, lastAlignedQPos, readSuffixLength);
                 } else {
@@ -1086,7 +1090,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                 // Align The entire end of the genome up to the maximum extend length;
                 //
                 genomeSuffixLength =
-                    min(intervalContigEndPos - lastAlignedTPos, maximumExtendLength);
+                    std::min(intervalContigEndPos - lastAlignedTPos, maximumExtendLength);
                 if (genomeSuffixLength > 0) {
                     if (alignment->tStrand == Forward) {
                         genomeSuffix.Copy(genome, lastAlignedTPos, genomeSuffixLength);
@@ -1119,13 +1123,13 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                     // the original alignment left off.
                     //
                     if (params.verbosity > 0) {
-                        cout << "forward extended an alignment of score " << alignment->score
-                             << " with score " << forwardScore << " by "
-                             << extendedAlignmentForward.blocks.size() << " blocks and length "
-                             << extendedAlignmentForward
-                                    .blocks[extendedAlignmentForward.blocks.size() - 1]
-                                    .qPos
-                             << endl;
+                        std::cout << "forward extended an alignment of score " << alignment->score
+                                  << " with score " << forwardScore << " by "
+                                  << extendedAlignmentForward.blocks.size() << " blocks and length "
+                                  << extendedAlignmentForward
+                                         .blocks[extendedAlignmentForward.blocks.size() - 1]
+                                         .qPos
+                                  << std::endl;
                     }
                     extendedAlignmentForward.tAlignedSeqPos = lastAlignedTPos;
 
@@ -1143,7 +1147,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                 DNALength firstAlignedQPos = alignment->qPos + alignment->qAlignedSeqPos;
                 DNALength firstAlignedTPos = alignment->tPos + alignment->tAlignedSeqPos;
 
-                readPrefixLength = min(firstAlignedQPos, maximumExtendLength);
+                readPrefixLength = std::min(firstAlignedQPos, maximumExtendLength);
                 if (readPrefixLength > 0) {
                     readPrefix.ReferenceSubstring(read, firstAlignedQPos - readPrefixLength,
                                                   readPrefixLength);
@@ -1152,7 +1156,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                 }
 
                 genomePrefixLength =
-                    min(firstAlignedTPos - intervalContigStartPos, maximumExtendLength);
+                    std::min(firstAlignedTPos - intervalContigStartPos, maximumExtendLength);
                 if (genomePrefixLength > 0) {
                     if (alignment->tStrand == 0) {
                         genomePrefix.Copy(genome, firstAlignedTPos - genomePrefixLength,
@@ -1183,13 +1187,13 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                     // extended alignment so that when it is appended, the
                     // coordinates match correctly.
                     if (params.verbosity > 0) {
-                        cout << "reverse extended an alignment of score " << alignment->score
-                             << " with score " << reverseScore << " by "
-                             << extendedAlignmentReverse.blocks.size() << " blocks and length "
-                             << extendedAlignmentReverse
-                                    .blocks[extendedAlignmentReverse.blocks.size() - 1]
-                                    .qPos
-                             << endl;
+                        std::cout << "reverse extended an alignment of score " << alignment->score
+                                  << " with score " << reverseScore << " by "
+                                  << extendedAlignmentReverse.blocks.size() << " blocks and length "
+                                  << extendedAlignmentReverse
+                                         .blocks[extendedAlignmentReverse.blocks.size() - 1]
+                                         .qPos
+                                  << std::endl;
                     }
                     extendedAlignmentReverse.tAlignedSeqPos = firstAlignedTPos - genomePrefixLength;
                     extendedAlignmentReverse.qAlignedSeqPos = firstAlignedQPos - readPrefixLength;
@@ -1231,9 +1235,9 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
         }
 
         if (params.verbosity > 0) {
-            cout << "interval align score: " << alignScore << endl;
+            std::cout << "interval align score: " << alignScore << std::endl;
             StickPrintAlignment(*alignment, (DNASequence &)alignment->qAlignedSeq,
-                                (DNASequence &)alignment->tAlignedSeq, cout, 0,
+                                (DNASequence &)alignment->tAlignedSeq, std::cout, 0,
                                 alignment->tAlignedSeqPos);
         }
         ComputeAlignmentStats(*alignment, alignment->qAlignedSeq.seq, alignment->tAlignedSeq.seq,
@@ -1287,7 +1291,7 @@ void PairwiseLocalAlign(T_Sequence &qSeq, T_RefSequence &tSeq, int k, MappingPar
 
         alignment.score = kbandScore;
         if (params.verbosity >= 2) {
-            cout << "align score: " << kbandScore << endl;
+            std::cout << "align score: " << kbandScore << std::endl;
         }
     } else {
 
@@ -1298,7 +1302,7 @@ void PairwiseLocalAlign(T_Sequence &qSeq, T_RefSequence &tSeq, int k, MappingPar
                                       k, mappingBuffers.scoreMat, mappingBuffers.pathMat, alignment,
                                       idsScoreFn, alignType);
             if (params.verbosity >= 2) {
-                cout << "ids score fn score: " << qvAwareScore << endl;
+                std::cout << "ids score fn score: " << qvAwareScore << std::endl;
             }
         } else {
             qvAwareScore = KBandAlign(qSeq, tSeq, SMRTDistanceMatrix,
@@ -1307,7 +1311,7 @@ void PairwiseLocalAlign(T_Sequence &qSeq, T_RefSequence &tSeq, int k, MappingPar
                                       k, mappingBuffers.scoreMat, mappingBuffers.pathMat, alignment,
                                       scoreFn, alignType);
             if (params.verbosity >= 2) {
-                cout << "qv score fn score: " << qvAwareScore << endl;
+                std::cout << "qv score fn score: " << qvAwareScore << std::endl;
             }
         }
         alignment.sumQVScore = qvAwareScore;
@@ -1336,9 +1340,10 @@ void FlankTAlignedSeq(T_AlignmentCandidate *alignment, SequenceIndexDatabase<FAS
     newTAlignedSeqPos =
         UInt((alignment->tAlignedSeqPos > UInt(flankSize)) ? (alignment->tAlignedSeqPos - flankSize)
                                                            : 0);
-    newTAlignedSeqLen = min(alignment->tAlignedSeqPos + alignment->tAlignedSeqLength + flankSize,
-                            alignment->tLength) -
-                        newTAlignedSeqPos;
+    newTAlignedSeqLen =
+        std::min(alignment->tAlignedSeqPos + alignment->tAlignedSeqLength + flankSize,
+                 alignment->tLength) -
+        newTAlignedSeqPos;
 
     if (alignment->tStrand == 0) {
         forwardTPos = newTAlignedSeqPos;
@@ -1386,7 +1391,7 @@ void AlignSubreadToAlignmentTarget(ReadAlignments &allReadAlignments, SMRTSequen
                                    SMRTSequence &unrolledRead, T_AlignmentCandidate *alignment,
                                    int passDirection, ReadInterval &subreadInterval,
                                    int subreadIndex, MappingParameters &params,
-                                   MappingBuffers &mappingBuffers, ostream &threadOut)
+                                   MappingBuffers &mappingBuffers, std::ostream &threadOut)
 {
     assert(passDirection == 0 or passDirection == 1);
     //
@@ -1445,16 +1450,16 @@ void AlignSubreadToAlignmentTarget(ReadAlignments &allReadAlignments, SMRTSequen
     if (params.verbosity >= 3) {
         threadOut << "zmw " << unrolledRead.zmwData.holeNumber << ", subreadIndex " << subreadIndex
                   << ", passDirection " << passDirection << ", subreadInterval ["
-                  << subreadInterval.start << ", " << subreadInterval.end << ")" << endl
-                  << "Exploded score " << explodedScore << endl
+                  << subreadInterval.start << ", " << subreadInterval.end << ")" << std::endl
+                  << "Exploded score " << explodedScore << std::endl
                   << "StickPrintAlignment subread-reference alignment which has"
                   << " the " << (sameAlignmentPassDirection ? "same" : "different")
                   << " direction as the ccs-reference (or the "
-                  << "longestSubread-reference) alignment. " << endl
-                  << "subread: " << endl;
+                  << "longestSubread-reference) alignment. " << std::endl
+                  << "subread: " << std::endl;
         static_cast<DNASequence *>(&alignedRead)->PrintSeq(threadOut);
-        threadOut << endl;
-        threadOut << "alignedRefSeq: " << endl;
+        threadOut << std::endl;
+        threadOut << "alignedRefSeq: " << std::endl;
         static_cast<DNASequence *>(&alignedRefSequence)->PrintSeq(threadOut);
         StickPrintAlignment(exploded, (DNASequence &)alignedRead, (DNASequence &)alignedRefSequence,
                             threadOut, exploded.qAlignedSeqPos, exploded.tAlignedSeqPos);
@@ -1527,9 +1532,9 @@ void AlignSubreadToAlignmentTarget(ReadAlignments &allReadAlignments, SMRTSequen
             exploded.tName = alignment->tName;
             exploded.tIndex = alignment->tIndex;
 
-            stringstream namestrm;
+            std::stringstream namestrm;
             namestrm << "/" << subreadInterval.start << "_" << subreadInterval.end;
-            exploded.qName = string(unrolledRead.title) + namestrm.str();
+            exploded.qName = std::string(unrolledRead.title) + namestrm.str();
 
             //
             // Don't call AssignRefContigLocation as the coordinates
@@ -1540,7 +1545,7 @@ void AlignSubreadToAlignmentTarget(ReadAlignments &allReadAlignments, SMRTSequen
             T_AlignmentCandidate *alignmentPtr = new T_AlignmentCandidate;
             // Refine concordant alignments
             if (params.refineConcordantAlignments) {
-                vector<SMRTSequence *> vquery;
+                std::vector<SMRTSequence *> vquery;
                 vquery.push_back(&unrolledRead);
                 SMRTSequence rcUnrolledRead;
                 unrolledRead.MakeRC(rcUnrolledRead);
@@ -1575,10 +1580,10 @@ void AlignSubreadToAlignmentTarget(ReadAlignments &allReadAlignments, SMRTSequen
             }
         }  // End of exploded score <= maxScore.
         if (params.verbosity >= 3) {
-            threadOut << "exploded score: " << exploded.score << endl
-                      << "exploded alignment: " << endl;
+            threadOut << "exploded score: " << exploded.score << std::endl
+                      << "exploded alignment: " << std::endl;
             exploded.Print(threadOut);
-            threadOut << endl;
+            threadOut << std::endl;
         }
     }  // End of exploded.blocks.size() > 0.
 }

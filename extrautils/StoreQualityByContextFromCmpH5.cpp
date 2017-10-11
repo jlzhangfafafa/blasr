@@ -18,36 +18,37 @@ public:
 
 void PrintUsage()
 {
-    cout << "cmpH5StoreQualityByContext - grab quality values from cmp.h5 files until minimum "
-            "requirements for the number of times a context has been sampled are met."
-         << endl;
-    cout << "usage: cmpH5StoreQualityByContext aligned_reads.cmp.h5  output.qbc  [options] "
-         << endl;
-    cout << "options: " << endl
-         << " -contextLength L   The length of the context to sample (default: 5) " << endl
-         << " -minSamples S(500) Report pass if all contexts are sampled" << endl
-         << "                    at least S times." << endl
-         << " -maxSamples S(1000) Stop sampling a context once it has reached" << endl
-         << "                    S samples." << endl
-         << " -onlyMaxLength" << endl
-         << "                     Whether or not to store only the length of the" << endl
-         << "                     longest subread as part of the length model." << endl
-         << endl;
+    std::cout << "cmpH5StoreQualityByContext - grab quality values from cmp.h5 files until minimum "
+                 "requirements for the number of times a context has been sampled are met."
+              << std::endl;
+    std::cout << "usage: cmpH5StoreQualityByContext aligned_reads.cmp.h5  output.qbc  [options] "
+              << std::endl;
+    std::cout << "options: " << std::endl
+              << " -contextLength L   The length of the context to sample (default: 5) "
+              << std::endl
+              << " -minSamples S(500) Report pass if all contexts are sampled" << std::endl
+              << "                    at least S times." << std::endl
+              << " -maxSamples S(1000) Stop sampling a context once it has reached" << std::endl
+              << "                    S samples." << std::endl
+              << " -onlyMaxLength" << std::endl
+              << "                     Whether or not to store only the length of the" << std::endl
+              << "                     longest subread as part of the length model." << std::endl
+              << std::endl;
 }
 
 int main(int argc, char* argv[])
 {
-    string outFileName;
-    int contextLength = 5;
+    std::string outFileName;
+    unsigned contextLength = 5;
     int minSamples = 500;
     int maxSamples = 1000;
     if (argc < 3) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     int argi = 1;
-    string cmpH5FileName;
+    std::string cmpH5FileName;
     cmpH5FileName = argv[argi++];
     outFileName = argv[argi++];
     int minAverageQual = 0;
@@ -64,16 +65,16 @@ int main(int argc, char* argv[])
             onlyMaxLength = true;
         } else {
             PrintUsage();
-            cout << "ERROR, bad option: " << argv[argi] << endl;
-            exit(1);
+            std::cout << "ERROR, bad option: " << argv[argi] << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         ++argi;
     }
-    map<string, ScoredLength> maxLengthMap;
+    std::map<std::string, ScoredLength> maxLengthMap;
     OutputSampleListSet samples(contextLength);
     SMRTSequence read;
 
-    ofstream sampleOut;
+    std::ofstream sampleOut;
     CrucialOpen(outFileName, sampleOut, std::ios::out | std::ios::binary);
     int fileNameIndex;
 
@@ -93,19 +94,19 @@ int main(int argc, char* argv[])
     cmpReader.IncludeField("PreBaseFrames");
 
     if (cmpReader.Initialize(cmpH5FileName, H5F_ACC_RDWR) == 0) {
-        cout << "ERROR, could not open the cmp file." << endl;
-        exit(1);
+        std::cout << "ERROR, could not open the cmp file." << std::endl;
+        std::exit(EXIT_FAILURE);
     }
-    cout << "Reading cmp file." << endl;
+    std::cout << "Reading cmp file." << std::endl;
 
     CmpFile cmpFile;
 
     cmpReader.ReadAlignmentDescriptions(cmpFile);
     cmpReader.ReadStructure(cmpFile);
-    cout << "done reading structure." << endl;
+    std::cout << "done reading structure." << std::endl;
     int alignmentIndex;
     int nAlignments = cmpReader.alnInfoGroup.GetNAlignments();
-    vector<int> alignmentToBaseMap;
+    std::vector<int> alignmentToBaseMap;
 
     for (alignmentIndex = 0; alignmentIndex < nAlignments and !samples.Sufficient();
          alignmentIndex++) {
@@ -117,7 +118,7 @@ int main(int argc, char* argv[])
         cmpReader.ReadAlignmentArray(alignmentIndex, alignmentArray);
         Alignment alignment;
         ByteAlignmentToAlignment(alignmentArray, alignment);
-        string readSequence, refSequence;
+        std::string readSequence, refSequence;
         readSequence.resize(alignmentArray.size());
         refSequence.resize(alignmentArray.size());
         DNASequence readDNA, refDNA;
@@ -147,9 +148,9 @@ int main(int argc, char* argv[])
         } else {
             int score = (cmpAlignment.GetNMatch() - cmpAlignment.GetNMismatch() -
                          cmpAlignment.GetNInsertions() - cmpAlignment.GetNDeletions());
-            stringstream nameStrm;
+            std::stringstream nameStrm;
             nameStrm << cmpAlignment.GetMovieId() << "_" << cmpAlignment.GetHoleNumber();
-            string nameStr = nameStrm.str();
+            std::string nameStr = nameStrm.str();
             if (maxLengthMap.find(nameStr) == maxLengthMap.end()) {
                 maxLengthMap[nameStr] = ScoredLength(score, subreadLength);
             }
@@ -176,7 +177,7 @@ int main(int argc, char* argv[])
                 if (RefChar[alignmentArray[ab]] != ' ') {
                     nb++;
                 }
-                if (ab == 0 or nb == contextLength / 2) break;
+                if (ab == 0 or nb == static_cast<int>(contextLength) / 2) break;
                 ab--;
             }
 
@@ -185,7 +186,8 @@ int main(int argc, char* argv[])
             // characters, counted by ne.
             //
             ae = a + 1;
-            while (ae < alignmentArray.size() and ne < contextLength / 2) {
+            while (ae < static_cast<int>(alignmentArray.size()) and
+                   ne < static_cast<int>(contextLength) / 2) {
                 if (RefChar[alignmentArray[ae]] != ' ') {
                     ne++;
                 }
@@ -195,11 +197,11 @@ int main(int argc, char* argv[])
             //
             // Make sure there are no edge effects that prevent a context of the correct length from being assigned.
             //
-            if (nb + ne + 1 != contextLength) {
+            if (nb + ne + 1 != static_cast<int>(contextLength)) {
                 continue;
             }
             int ai;
-            string context;
+            std::string context;
             for (ai = ab; ai < ae; ai++) {
                 if (RefChar[alignmentArray[ai]] != ' ') {
                     context.push_back(RefChar[alignmentArray[ai]]);
@@ -246,11 +248,10 @@ int main(int argc, char* argv[])
             sample.Resize(sampleLength);
             if (sampleLength > 0) {
                 int seqPos = alignmentToBaseMap[aq];
-                if (seqPos < read.length) {
+                if (seqPos < static_cast<int>(read.length)) {
                     sample.CopyFromSeq(read, seqPos, sampleLength);
-                    string nucs;
-                    int n;
-                    for (n = 0; n < sample.nucleotides.size(); n++) {
+                    std::string nucs;
+                    for (size_t n = 0; n < sample.nucleotides.size(); n++) {
                         char c = sample.nucleotides[n];
                         assert(c == 'A' or c == 'T' or c == 'G' or c == 'C');
                         nucs.push_back(sample.nucleotides[n]);
@@ -263,9 +264,9 @@ int main(int argc, char* argv[])
     }
 
     if (onlyMaxLength) {
-        map<string, ScoredLength>::iterator maxScoreIt;
+        std::map<std::string, ScoredLength>::iterator maxScoreIt;
         for (maxScoreIt = maxLengthMap.begin(); maxScoreIt != maxLengthMap.end(); ++maxScoreIt) {
-            cout << maxScoreIt->second.length << endl;
+            std::cout << maxScoreIt->second.length << std::endl;
             samples.lengths.push_back(maxScoreIt->second.length);
         }
     }

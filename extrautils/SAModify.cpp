@@ -10,9 +10,9 @@
 
 void PrintUsage()
 {
-    cout << "samodify changes word size of input suffix array." << endl;
-    cout << "Usage: samodify in.sa genome.fasta out.sa [-blt p]" << endl;
-    cout << "       -blt p  Build a lookup table on prefixes of length 'p' " << endl;
+    std::cout << "samodify changes word size of input suffix array." << std::endl;
+    std::cout << "Usage: samodify in.sa genome.fasta out.sa [-blt p]" << std::endl;
+    std::cout << "       -blt p  Build a lookup table on prefixes of length 'p' " << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -20,13 +20,13 @@ int main(int argc, char* argv[])
 
     if (argc < 4) {
         PrintUsage();
-        exit(1);
+        std::exit(EXIT_FAILURE);
     }
     int argi = 1;
-    string saInFile = argv[argi++];
-    string genomeFileName = argv[argi++];
-    string saOutFile = argv[argi++];
-    vector<string> inFiles;
+    std::string saInFile = argv[argi++];
+    std::string genomeFileName = argv[argi++];
+    std::string saOutFile = argv[argi++];
+    std::vector<std::string> inFiles;
 
     int doBLT = 0;
     int doBLCP = 0;
@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
             lcpLength = atoi(argv[++argi]);
         } else {
             PrintUsage();
-            cout << "Bad option: " << argv[argi] << endl;
-            exit(1);
+            std::cout << "Bad option: " << argv[argi] << std::endl;
+            std::exit(EXIT_FAILURE);
         }
         ++argi;
     }
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     }
 
     if (doBLCP) {
-        cout << "LCP Table not yet implemented." << endl;
+        std::cout << "LCP Table not yet implemented." << std::endl;
     }
 
     sa.Write(saOutFile);

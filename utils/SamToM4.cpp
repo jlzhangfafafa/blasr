@@ -29,13 +29,13 @@
 
 char VERSION[] = "v0.1.0";
 char PERFORCE_VERSION_STRING[] = "$Change: 126414 $";
- 
+
 int main(int argc, char* argv[]) {
-    string program = "samtom4";
-    string versionString = VERSION;
+    std::string program = "samtom4";
+    std::string versionString = VERSION;
     AppendPerforceChangelist(PERFORCE_VERSION_STRING, versionString);
 
-    string samFileName, refFileName, outFileName;
+    std::string samFileName, refFileName, outFileName;
     bool printHeader = false;
     bool parseSmrtTitle = false;
     bool useShortRefName = false;
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     clp.RegisterPreviousFlagsAsHidden();
     clp.RegisterFlagOption("header",            &printHeader,
                            "Print M4 header.");
-    clp.RegisterFlagOption("useShortRefName",   &useShortRefName, 
+    clp.RegisterFlagOption("useShortRefName",   &useShortRefName,
                            "Use abbreviated reference names obtained "
                            "from file.sam instead of using full names "
                            "from reference.fasta.");
@@ -61,8 +61,8 @@ int main(int argc, char* argv[]) {
 
     clp.ParseCommandLine(argc, argv);
 
-    ostream * outFilePtr = &cout;
-	ofstream outFileStrm;
+    std::ostream * outFilePtr = &std::cout;
+	std::ofstream outFileStrm;
 	if (outFileName != "") {
 		CrucialOpen(outFileName, outFileStrm, std::ios::out);
 		outFilePtr = &outFileStrm;
@@ -80,50 +80,50 @@ int main(int argc, char* argv[]) {
     //
     // Configure the file log.
     //
-    string command;
+    std::string command;
     CommandLineParser::CommandLineToString(argc, argv, command);
 
     //
     // Read necessary input.
     //
-    vector<FASTASequence> references;
+    std::vector<FASTASequence> references;
     fastaReader.ReadAllSequences(references);
 
     AlignmentSet<SAMFullReferenceSequence, SAMReadGroup, SAMAlignment> alignmentSet;
-    samReader.ReadHeader(alignmentSet); 
+    samReader.ReadHeader(alignmentSet);
 
     //
-    // The order of references in vector<FASTASequence> references and
+    // The order of references in std::vector<FASTASequence> references and
     // AlignmentSet<, , >alignmentSet.references can be different.
     // Rearrange alignmentSet.references such that it is ordered in
-    // exactly the same way as vector<FASTASequence> references.
+    // exactly the same way as std::vector<FASTASequence> references.
     //
     alignmentSet.RearrangeReferences(references);
 
     //
-    // Map short names for references obtained from file.sam to 
+    // Map short names for references obtained from file.sam to
     // full names obtained from reference.fasta
     //
-    map<string, string> shortRefNameToFull;
-    map<string, string>::iterator it;
+    std::map<std::string, std::string> shortRefNameToFull;
+    std::map<std::string, std::string>::iterator it;
     assert(references.size() == alignmentSet.references.size());
     if (!useShortRefName) {
         for (size_t i = 0; i < references.size(); i++) {
-            string shortRefName = alignmentSet.references[i].GetSequenceName();
-            string fullRefName(references[i].title); 
+            std::string shortRefName = alignmentSet.references[i].GetSequenceName();
+            std::string fullRefName(references[i].title);
             if (shortRefNameToFull.find(shortRefName) != shortRefNameToFull.end()) {
-                cout << "ERROR, Found more than one reference " << shortRefName << "in sam header" << endl;
-                exit(1);
-            } 
+                std::cout << "ERROR, Found more than one reference " << shortRefName << "in sam header" << std::endl;
+                std::exit(EXIT_FAILURE);
+            }
             shortRefNameToFull[shortRefName] = fullRefName;
             alignmentSet.references[i].sequenceName = fullRefName;
         }
     }
 
     // Map reference name obtained from SAM file to indices
-    map<string, int> refNameToIndex;
+    std::map<std::string, int> refNameToIndex;
     for (size_t i = 0; i < references.size(); i++) {
-        string refName = alignmentSet.references[i].GetSequenceName();
+        std::string refName = alignmentSet.references[i].GetSequenceName();
         refNameToIndex[refName] = i;
     }
 
@@ -131,19 +131,19 @@ int main(int argc, char* argv[]) {
     // Store the alignments.
     //
     SAMAlignment samAlignment;
-    size_t alignIndex = 0; 
+    size_t alignIndex = 0;
 
     //
-    // For 150K, each chip produces about 300M sequences 
+    // For 150K, each chip produces about 300M sequences
     // (not including quality values and etc.).
-    // Let's assume that the sam file and reference data can 
-    // fit in the memory. 
+    // Let's assume that the sam file and reference data can
+    // fit in the memory.
     // Need to scale for larger sequal data in the future.
     //
     if (printHeader)
         IntervalOutput::PrintHeader(*outFilePtr);
 
-    // The socre matrix does not matter because we will use the 
+    // The socre matrix does not matter because we will use the
     // aligner's score from SAM file anyway.
     DistanceMatrixScoreFunction<DNASequence, DNASequence> distScoreFn;
 
@@ -156,20 +156,20 @@ int main(int argc, char* argv[]) {
             //convert shortRefName to fullRefName
             it = shortRefNameToFull.find(samAlignment.rName);
             if (it == shortRefNameToFull.end()) {
-                cout << "ERROR, Could not find " << samAlignment.rName << " in the reference repository." << endl;
-                exit(1);
+                std::cout << "ERROR, Could not find " << samAlignment.rName << " in the reference repository." << std::endl;
+                std::exit(EXIT_FAILURE);
             }
             samAlignment.rName = (*it).second;
         }
 
         // The padding character 'P' is not supported
-        if (samAlignment.cigar.find('P') != string::npos) {
-            cout << "WARNING. Could not process sam record with 'P' in its cigar string."
-                 << endl;
+        if (samAlignment.cigar.find('P') != std::string::npos) {
+            std::cout << "WARNING. Could not process sam record with 'P' in its cigar string."
+                 << std::endl;
             continue;
         }
 
-        vector<AlignmentCandidate<> > convertedAlignments;
+        std::vector<AlignmentCandidate<> > convertedAlignments;
 
         //
         // Keep reference as forward.
@@ -179,11 +179,11 @@ int main(int argc, char* argv[]) {
         bool keepRefAsForward = false;
 
         SAMAlignmentsToCandidates(samAlignment, references, refNameToIndex,
-                                  convertedAlignments, parseSmrtTitle, 
+                                  convertedAlignments, parseSmrtTitle,
                                   keepRefAsForward);
 
         if (convertedAlignments.size() > 1) {
-            cout << "WARNING. Ignore an alignment which has multiple segments." << endl;
+            std::cout << "WARNING. Ignore an alignment which has multiple segments." << std::endl;
             continue;
         }
 
@@ -191,19 +191,19 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < 1; i++) {
             AlignmentCandidate<> & alignment = convertedAlignments[i];
 
-            ComputeAlignmentStats(alignment, alignment.qAlignedSeq.seq, 
+            ComputeAlignmentStats(alignment, alignment.qAlignedSeq.seq,
                                   alignment.tAlignedSeq.seq, distScoreFn);
 
             // Use aligner's score from SAM file anyway.
             alignment.score = samAlignment.as;
             alignment.mapQV = samAlignment.mapQV;
 
-            // Since SAM only has the aligned sequence, many info of the 
-            // original query (e.g. the full length) is missing. 
+            // Since SAM only has the aligned sequence, many info of the
+            // original query (e.g. the full length) is missing.
             // Overwrite alignment.qLength (which is length of the query
-            // in the SAM alignment) with xq (which is the length of the 
-            // original query sequence saved by blasr) right before printing 
-            // the output so that one can reconstruct a blasr m4 record from 
+            // in the SAM alignment) with xq (which is the length of the
+            // original query sequence saved by blasr) right before printing
+            // the output so that one can reconstruct a blasr m4 record from
             // a blasr sam alignment.
             if (samAlignment.xq!=0)
                 alignment.qLength = samAlignment.xq;

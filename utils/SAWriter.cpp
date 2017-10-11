@@ -12,22 +12,22 @@
 
 
 void PrintUsage() {
-  cout << "usage: sawriter saOut fastaIn [fastaIn2 fastaIn3 ...] [-blt p] [-larsson] [-4bit] [-manmy] [-kar]" << endl;
-  cout << "   or  sawriter fastaIn  (writes to fastIn.sa)." << endl;
-  cout << "       -blt p      Build a lookup table on prefixes of length 'p'. This speeds " << endl
-       << "                   up lookups considerably (more than the LCP table), but misses matches " << endl
-       << "                   less than p when searching." << endl;
-  cout << "       -4bit       Read in (one) fasta file as a compressed sequence file." << endl;
-  cout << "       -larsson  (default)  Uses the method of Larsson and Sadakane to build the array." << endl;
-  cout << "       -mamy      Uses the method of MAnber and MYers to build the array (slower than larsson, " << endl
-       << "                   and produces the same result. This is mainly for double checking"<<endl
-       << "                   the correctness of larsson)." << endl
-       << "       -kark       Use Karkkainen DS3 method for building the suffix array.  This will probably be more "<<endl
-       << "                   slow than larsson, but takes only an extra N/(sqrt 3) extra space." << endl
-       << "       -mafe       (disabled for now!) Use the lightweight construction algorithm from Manzini and Ferragina" << endl
-       << "       -welter     Use lightweight (sort of light) suffix array construction.  This is a bit more slow than" << endl
-       << "                   normal larsson." << endl
-       << "       -welterweight N use a difference cover of size N for building the suffix array.  Valid values are 7,32,64,111, and 2281." << endl;
+  std::cout << "usage: sawriter saOut fastaIn [fastaIn2 fastaIn3 ...] [-blt p] [-larsson] [-4bit] [-manmy] [-kar]" << std::endl;
+  std::cout << "   or  sawriter fastaIn  (writes to fastIn.sa)." << std::endl;
+  std::cout << "       -blt p      Build a lookup table on prefixes of length 'p'. This speeds " << std::endl
+       << "                   up lookups considerably (more than the LCP table), but misses matches " << std::endl
+       << "                   less than p when searching." << std::endl;
+  std::cout << "       -4bit       Read in (one) fasta file as a compressed sequence file." << std::endl;
+  std::cout << "       -larsson  (default)  Uses the method of Larsson and Sadakane to build the array." << std::endl;
+  std::cout << "       -mamy      Uses the method of MAnber and MYers to build the array (slower than larsson, " << std::endl
+       << "                   and produces the same result. This is mainly for double checking"<<std::endl
+       << "                   the correctness of larsson)." << std::endl
+       << "       -kark       Use Karkkainen DS3 method for building the suffix array.  This will probably be more "<<std::endl
+       << "                   slow than larsson, but takes only an extra N/(sqrt 3) extra space." << std::endl
+       << "       -mafe       (disabled for now!) Use the lightweight construction algorithm from Manzini and Ferragina" << std::endl
+       << "       -welter     Use lightweight (sort of light) suffix array construction.  This is a bit more slow than" << std::endl
+       << "                   normal larsson." << std::endl
+       << "       -welterweight N use a difference cover of size N for building the suffix array.  Valid values are 7,32,64,111, and 2281." << std::endl;
 
 
 }
@@ -36,17 +36,17 @@ int main(int argc, char* argv[]) {
 
   if (argc < 2) {
     PrintUsage();
-    exit(1);
+    std::exit(EXIT_FAILURE);
   }
   else if (strcmp(argv[1], "-h") == 0 or
            strcmp(argv[1], "-help") == 0 or
            strcmp(argv[1], "--help") == 0) {
     PrintUsage();
-    exit(0);
+    std::exit(EXIT_SUCCESS);
   }
   int argi = 1;
-  string saFile = argv[argi++];
-  vector<string> inFiles;
+  std::string saFile = argv[argi++];
+  std::vector<std::string> inFiles;
 
   int doBLT = 1;
   int bltPrefixLength = 8;
@@ -68,13 +68,13 @@ int main(int argc, char* argv[]) {
         if (argi < argc - 1) {
           bltPrefixLength = atoi(argv[++argi]);
           if (bltPrefixLength == 0) {
-            cout << argv[argi] << " is not a valid lookup table length." << endl;
-            exit(1);
+            std::cout << argv[argi] << " is not a valid lookup table length." << std::endl;
+            std::exit(EXIT_FAILURE);
           }
         }
         else {
-          cout << "Please specify a lookup table length." << endl;
-          exit(1);
+          std::cout << "Please specify a lookup table length." << std::endl;
+          std::exit(EXIT_FAILURE);
         }
       }
       else if (strcmp(argv[argi], "-mamy") == 0) {
@@ -103,17 +103,17 @@ int main(int argc, char* argv[]) {
           diffCoverSize = atoi(argv[++argi]);
         }
         else {
-          cout << "Please specify a difference cover size.  Valid values are 7,32,64,111, and 2281.  Larger values use less memory but may be slower." << endl;
-          exit(1);
+          std::cout << "Please specify a difference cover size.  Valid values are 7,32,64,111, and 2281.  Larger values use less memory but may be slower." << std::endl;
+          std::exit(EXIT_FAILURE);
         }
         if ( ! (diffCoverSize == 7 or
                 diffCoverSize == 32 or
                 diffCoverSize == 64 or
                 diffCoverSize == 111 or
                 diffCoverSize == 2281) ) {
-          cout << "The difference cover size must be one of 7,32,64,111, or 2281." << endl;
-          cout << "Larger numbers use less space but are more slow." << endl;
-          exit(1);
+          std::cout << "The difference cover size must be one of 7,32,64,111, or 2281." << std::endl;
+          std::cout << "Larger numbers use less space but are more slow." << std::endl;
+          std::exit(EXIT_FAILURE);
         }
       }
       else if (strcmp(argv[argi], "-4bit") == 0) {
@@ -123,12 +123,12 @@ int main(int argc, char* argv[]) {
                strcmp(argv[argi], "-help") == 0 or
                strcmp(argv[argi], "--help") == 0) {
         PrintUsage();
-        exit(0);
+        std::exit(EXIT_SUCCESS);
       }
       else {
         PrintUsage();
-        cout << "ERROR, bad option: " << argv[argi] << endl;
-        exit(1);
+        std::cout << "ERROR, bad option: " << argv[argi] << std::endl;
+        std::exit(EXIT_FAILURE);
       }
     }
     ++argi;
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
       }
       else {
         while(reader.ConcatenateNext(seq)) {
-          cout << "added " << seq.title << endl;
+          std::cout << "added " << seq.title << std::endl;
         }
       }
     }
@@ -174,26 +174,26 @@ int main(int argc, char* argv[]) {
   }
   else {
     assert(inFiles.size() == 1);
-    cout << "reading compressed sequence." << endl;
+    std::cout << "reading compressed sequence." << std::endl;
     compSeq.Read(inFiles[0]);
     seq.seq = compSeq.seq;
     seq.length = compSeq.length;
     compSeq.RemoveCompressionCounts();
-    cout << "done." << endl;
+    std::cout << "done." << std::endl;
   }
 
   //
   // For now, do not allow creation of suffix arrays on sequences > 4G.
   //
   if (seq.length >= UINT_MAX) {
-    cout << "ERROR, references greater than " << UINT_MAX << " bases are not supported." << endl;
-    cout << "Consider breaking the reference into multiple files, running alignment. " << endl;
-    cout << "against each file, and merging the result." << endl;
-    exit(1);
+    std::cout << "ERROR, references greater than " << UINT_MAX << " bases are not supported." << std::endl;
+    std::cout << "Consider breaking the reference into multiple files, running alignment. " << std::endl;
+    std::cout << "against each file, and merging the result." << std::endl;
+    std::exit(EXIT_FAILURE);
   }
-  vector<int> alphabet;
+  std::vector<int> alphabet;
 
-  SuffixArray<Nucleotide, vector<int> >  sa;
+  SuffixArray<Nucleotide, std::vector<int> >  sa;
   //  sa.InitTwoBitDNAAlphabet(alphabet);
   //  sa.InitAsciiCharDNAAlphabet(alphabet);
   sa.InitThreeBitDNAAlphabet(alphabet);

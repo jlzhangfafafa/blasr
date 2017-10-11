@@ -2,7 +2,10 @@
 include(CheckCXXCompilerFlag)
 
 # shared CXX flags for all source code & tests
-set(BLASR_FLAGS "-std=c++11 -pedantic -Wno-long-long -Wall -Wextra -Wno-return-type -Wno-overloaded-virtual -Wno-unused-parameter -Wno-div-by-zero -MMD -MP -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer -Wno-unused-variable")
+set(BLASR_FLAGS "-pedantic -Wno-long-long -Wall -Wextra -Wno-return-type -Wno-overloaded-virtual -Wno-unused-parameter -Wno-div-by-zero -MMD -MP -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free -fno-omit-frame-pointer -Wno-unused-variable")
+set(CMAKE_CXX_STANDARD          14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS        OFF)
 
 # gperftools support
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND APPLE)
@@ -46,24 +49,6 @@ endif()
 
 set(BLASR_FLAGS "${BLASR_FLAGS} -DUSE_PBBAM")
 set(BLASR_FLAGS "${BLASR_FLAGS} -DCMAKE_BUILD")
-
-if (HDF5_INCLUDE_DIR)
-    message(FATAL_ERROR "Please specify HDF5_INCLUDE_DIRS not HDF5_INCLUDE_DIR!")
-endif()
-if (HDF5_LIBRARY)
-    message(FATAL_ERROR "Please specify HDF5_LIBRARIES not HDF5_LIBRARY!")
-endif()
-
-if (NOT HDF5_INCLUDE_DIRS OR NOT HDF5_LIBRARIES)
-    find_package(HDF5 REQUIRED)
-    if (HDF5_ROOT)
-        SET_PROPERTY(GLOBAL PROPERTY HDF5_LINKER_FLAG_GLOBAL "-L${HDF5_ROOT}/lib")
-    endif()
-else()
-    SET_PROPERTY(GLOBAL PROPERTY HDF5_LINKER_FLAG_GLOBAL "-L${HDF5_LIBRARIES}")
-    find_library(HDF5_LIBRARIES_     hdf5    ${HDF5_LIBRARIES} NO_CMAKE_SYSTEM_PATH)
-    find_library(HDF5_CPP_LIBRARIES hdf5_cpp ${HDF5_LIBRARIES} NO_CMAKE_SYSTEM_PATH)
-endif()
 
 if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(BLASR_LINKER_FLAGS "${BLASR_LINKER_FLAGS} -lrt")

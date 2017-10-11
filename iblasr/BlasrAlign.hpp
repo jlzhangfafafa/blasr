@@ -10,12 +10,13 @@ template <typename T_Sequence, typename T_RefSequence, typename T_SuffixArray,
 void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_SuffixArray &sarray,
              BWT &bwt, SeqBoundaryFtr<FASTQSequence> &seqBoundary, T_TupleCountTable &ct,
              SequenceIndexDatabase<FASTQSequence> &seqdb, MappingParameters &params,
-             MappingMetrics &metrics, vector<T_AlignmentCandidate *> &alignmentPtrs,
+             MappingMetrics &metrics, std::vector<T_AlignmentCandidate *> &alignmentPtrs,
              MappingBuffers &mappingBuffers, MappingIPC *mapData, MappingSemaphores &semaphores);
 
 template <typename T_Sequence>
-void MapRead(T_Sequence &read, T_Sequence &readRC, vector<T_AlignmentCandidate *> &alignmentPtrs,
-             MappingBuffers &mappingBuffers, MappingIPC *mapData, MappingSemaphores &semaphores);
+void MapRead(T_Sequence &read, T_Sequence &readRC,
+             std::vector<T_AlignmentCandidate *> &alignmentPtrs, MappingBuffers &mappingBuffers,
+             MappingIPC *mapData, MappingSemaphores &semaphores);
 
 /*
 void MapReads(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData);
@@ -27,7 +28,7 @@ void AlignIntervals(T_TargetSequence &genome, T_QuerySequence &read, T_QuerySequ
                     WeightedIntervalSet &weightedIntervals, int mutationCostMatrix[][5], int ins,
                     int del, int sdpTupleSize, int useSeqDB,
                     SequenceIndexDatabase<TDBSequence> &seqDB,
-                    vector<T_AlignmentCandidate *> &alignments, MappingParameters &params,
+                    std::vector<T_AlignmentCandidate *> &alignments, MappingParameters &params,
                     MappingBuffers &mappingBuffers, int procId = 0);
 
 template <typename T_RefSequence, typename T_Sequence>
@@ -61,6 +62,6 @@ void AlignSubreadToAlignmentTarget(ReadAlignments &allReadAlignments, SMRTSequen
                                    SMRTSequence &unrolledRead, T_AlignmentCandidate *alignment,
                                    int passDirection, ReadInterval &subreadInterval,
                                    int subreadIndex, MappingParameters &params,
-                                   MappingBuffers &mappingBuffers, ostream &threadOut);
+                                   MappingBuffers &mappingBuffers, std::ostream &threadOut);
 
 #include "BlasrAlignImpl.hpp"
