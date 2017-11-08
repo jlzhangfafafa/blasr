@@ -40,6 +40,10 @@ Prefer a custom libz implementation?
     cmake -GNinja -DZLIB_INCLUDE_DIRS=/your/location/zlib/include \
                   -DZLIB_LIBRARIES=/your/location/zlib/libz.so ..
 
+Are htslib libraries and include folders in different locations?
+    cmake -GNinja -DHTSLIB_INCLUDE_DIR=/your/location/htslib \
+                  -DHTSLIB_LIB_DIR=/your/location/htslib ..
+
 Are you on MacOS? Install homebrew and install following dependencies and
 use the default instructions above:
 
