@@ -14,7 +14,7 @@ module load ninja/1.7.1
 module load cmake/3.2.2
 module load hdf5-tools/1.8.14
 module load zlib/1.2.8
-module load htslib/1.3.1
+module load htslib
 
 echo "#############################"
 echo "# PRE-BUILD HOOK"
@@ -47,7 +47,7 @@ module purge
 module load gcc/4.9.2
 module load hdf5-tools/1.8.14
 module load zlib/1.2.8-cloudflare
-module load htslib/1.3.1
+module load htslib
 module load samtools
 module load cram/0.7
 
