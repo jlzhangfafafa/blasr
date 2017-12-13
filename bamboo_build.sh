@@ -17,21 +17,21 @@ mkdir -p staging/blasr/bin
 
 set +x
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
-module load git/2.8.3
-module load gcc/6.4.0
-module load ccache/3.2.3
+module load git
+module load gcc
+module load ccache
 export CCACHE_DIR=/mnt/secondary/Share/tmp/bamboo.mobs.ccachedir
 export CCACHE_COMPILERCHECK='%compiler% -dumpversion'
-module load boost/1.60
+module load boost
 if [[ $BOOST_ROOT =~ /include ]]; then
   set -x
   BOOST_ROOT=$(dirname $BOOST_ROOT)
   set +x
 fi
-module load ninja/1.7.1
-module load cmake/3.7.2
-module load hdf5-tools/1.8.19
-module load zlib/1.2.8
+module load ninja
+module load cmake
+module load hdf5-tools
+module load zlib
 module load htslib
 set -x
 
