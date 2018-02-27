@@ -55,8 +55,8 @@ python configure.py \
    PBBAM_INC=$PWD/../pbbam/include \
    PBBAM_LIB=$PWD/../pbbam/build/lib \
    BOOST_INC=$BOOST_ROOT/include \
-  HTSLIB_INC=$(pkg-config --cflags-only-I htslib|awk '{print $1}'|sed -e 's/^-I//') \
-  HTSLIB_LIB=$(pkg-config --libs-only-L htslib|awk '{print $1}'|sed -e 's/^-L//')
+HTSLIB_CFLAGS=$(pkg-config --cflags htslib) \
+  HTSLIB_LIBS=$(pkg-config --libs htslib)
 make -j libpbdata LDLIBS=-lpbbam
 make -j libpbihdf
 make -j libblasr
@@ -84,8 +84,8 @@ LIBPBIHDF_INC=$PWD/../blasr_libcpp/hdf \
 LIBPBDATA_LIB=$PWD/../blasr_libcpp/pbdata \
 LIBPBIHDF_LIB=$PWD/../blasr_libcpp/hdf \
  LIBBLASR_LIB=$PWD/../blasr_libcpp/alignment \
-   HTSLIB_INC=$(pkg-config --cflags-only-I htslib|awk '{print $1}'|sed -e 's/^-I//') \
-   HTSLIB_LIB=$(pkg-config --libs-only-L htslib|awk '{print $1}'|sed -e 's/^-L//')
+HTSLIB_CFLAGS=$(pkg-config --cflags htslib) \
+  HTSLIB_LIBS=$(pkg-config --libs htslib)
 VERBOSE=1 make
 VERBOSE=1 CXXFLAGS="-std=c++14 -O3 -g" make -C utils
 cp -a blasr          ../../staging/blasr/bin/
