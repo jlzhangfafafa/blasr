@@ -6,14 +6,14 @@ echo "# LOAD MODULES"
 type module >& /dev/null || source /mnt/software/Modules/current/init/bash
 module purge
 module load git
-module load gcc/6.4.0
-module load ccache/3.3.4
-module load boost/1.60
-module load ninja/1.7.1
-module load cmake/3.2.2
-module load hdf5-tools/1.8.19
-module load zlib/1.2.8
-module load htslib/1.3.1
+module load gcc
+module load ccache
+module load boost
+module load ninja
+module load cmake
+module load hdf5-tools
+module load zlib
+module load htslib
 export CCACHE_COMPILERCHECK='%compiler% -dumpversion'
 
 echo "#############################"
@@ -45,12 +45,12 @@ echo "# TEST"
 export PATH=$PWD/build:$PATH
 mkdir -p test-reports
 module purge
-module load gcc/6.4.0
-module load hdf5-tools/1.8.19
-module load zlib/1.2.8
-module load htslib/1.3.1
+module load gcc
+module load hdf5-tools
+module load zlib
+module load htslib
 module load samtools
-module load cram/0.7
+module load cram
 
 make -f cram.mk \
     XUNIT="--xunit-file=$PWD/test-reports/blasr-cram_xunit.xml" \

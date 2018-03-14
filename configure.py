@@ -100,7 +100,7 @@ def compose_defines_pacbio(envin):
             'LIBBLASR_INC', 'LIBBLASR_LIB', 'LIBBLASR_LIBFLAGS',
             'HDF5_INC', 'HDF5_LIB', 'HDF5_LIBFLAGS',
             'PBBAM_INC', 'PBBAM_LIB', 'PBBAM_LIBFLAGS',
-            'HTSLIB_INC', 'HTSLIB_LIB', 'HTSLIB_LIBFLAGS',
+            'HTSLIB_CFLAGS', 'HTSLIB_LIBS',
             'BOOST_INC',
             'GCC_LIB',
             'ZLIB_LIB', 'ZLIB_LIBFLAGS',
@@ -165,7 +165,7 @@ def set_defs_defaults(env, nopbbam, with_szlib):
     #setifenvf(defaults, env, 'PREBUILT', get_PREBUILT)
     pbbam_defaults = {
         'PBBAM_LIBFLAGS': '-lpbbam',
-        'HTSLIB_LIBFLAGS': '-lhts',
+        'HTSLIB_LIBS': '-lhts',
         'ZLIB_LIBFLAGS': '-lz',
         #'PTHREAD_LIBFLAGS': '-lpthread',
         #'DL_LIBFLAGS': '-ldl', # neeeded by HDF5 always
