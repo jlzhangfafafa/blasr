@@ -102,12 +102,12 @@ cd -
 if [[ -z $NEXUS_URL ]]; then
   exit 0
 fi
-md5sum  blasr-${VERSION}.tgz | awk -e '{print $1}' >| ../blasr-${VERSION}.tgz.md5
-sha1sum blasr-${VERSION}.tgz | awk -e '{print $1}' >| ../blasr-${VERSION}.tgz.sha1
+md5sum  tarballs/blasr-${VERSION}.tgz | awk -e '{print $1}' >| tarballs/blasr-${VERSION}.tgz.md5
+sha1sum tarballs/blasr-${VERSION}.tgz | awk -e '{print $1}' >| tarballs/blasr-${VERSION}.tgz.sha1
 
-curl -vn --upload-file ../blasr-${VERSION}.tgz \
+curl -vn --upload-file tarballs/blasr-${VERSION}.tgz \
   $NEXUS_URL/blasr-${VERSION}.tgz
-curl -vn --upload-file ../blasr_libcpp-${VERSION}.tgz.md5 \
+curl -vn --upload-file tarballs/blasr_libcpp-${VERSION}.tgz.md5 \
   $NEXUS_URL/blasr-${VERSION}.tgz.md5
-curl -vn --upload-file ../blasr_libcpp-${VERSION}.tgz.sha1 \
+curl -vn --upload-file tarballs/blasr_libcpp-${VERSION}.tgz.sha1 \
   $NEXUS_URL/blasr-${VERSION}.tgz.sha1
