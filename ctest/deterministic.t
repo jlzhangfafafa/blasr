@@ -1,5 +1,5 @@
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
 Test blasr with input bam which has:
 (1) insertionQV, deletionQV, deletionTag, substitutionQV, substitutionTag
@@ -13,7 +13,7 @@ and then check if output is determined.
   $ outfile=$OUTDIR/$name.m4
   $ stdfile=$STDDIR/$name.m4
   $ rm -f $outfile
-  $ $EXEC $infile  $DATDIR/lambda_ref.fasta -m 4 --out $outfile && echo $?
+  $ $BLASR_EXE $infile  $DATDIR/lambda_ref.fasta -m 4 --out $outfile && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -26,7 +26,7 @@ and then check if output is determined.
   $ outfile=$OUTDIR/$name.m4
   $ stdfile=$STDDIR/$name.m4
   $ rm -f $outfile
-  $ $EXEC $infile  $DATDIR/lambda_ref.fasta -m 4 --out $outfile && echo $?
+  $ $BLASR_EXE $infile  $DATDIR/lambda_ref.fasta -m 4 --out $outfile && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -39,7 +39,7 @@ and then check if output is determined.
   $ outfile=$OUTDIR/$name.m4
   $ stdfile=$STDDIR/$name.m4
   $ rm -f $outfile
-  $ $EXEC $infile  $DATDIR/lambda_ref.fasta -m 4 --out $outfile && echo $?
+  $ $BLASR_EXE $infile  $DATDIR/lambda_ref.fasta -m 4 --out $outfile && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0

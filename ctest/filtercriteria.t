@@ -1,5 +1,5 @@
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
   $ NAME=test_filtercriteria
   $ DATDIR=$DATDIR/$NAME
@@ -12,7 +12,7 @@ Test --minPctSimilarity
   $ R=$DATDIR/lambdaNEB.fa
   $ O=$OUTDIR/min_pct_similarity_90.m4
 
-  $ $EXEC $I $R --out $O -m 4 --minPctSimilarity 90
+  $ $BLASR_EXE $I $R --out $O -m 4 --minPctSimilarity 90
   [INFO]* (glob)
   [INFO]* (glob)
   $ echo $?
@@ -21,7 +21,7 @@ Test --minPctSimilarity
   0
 
   $ O=$OUTDIR/min_aln_len_1000.m4
-  $ $EXEC $I $R --out $O -m 4 --minAlnLength 1000
+  $ $BLASR_EXE $I $R --out $O -m 4 --minAlnLength 1000
   [INFO]* (glob)
   [INFO]* (glob)
   $ echo $?

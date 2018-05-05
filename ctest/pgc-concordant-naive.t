@@ -4,7 +4,7 @@ See BlasrAlignImpl.hpp:1496 for all combos.
 See how pgc-concordant-zmw-0.bam and pgc-concordant-zmw-1.bam are designed.
 
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
   $ Q=$DATDIR/test-pgc/pgc-query-concordant-zmw-0.bam
   $ T=$DATDIR/test-pgc/target.fasta 
@@ -16,7 +16,7 @@ Set up
   CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 Test m4 output
   $ O=$OUTDIR/pgc-concordant-zmw-0.m4
-  $ $EXEC $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -28,7 +28,7 @@ Test m4 output
 
 Test m5 output
   $ O=$OUTDIR/pgc-concordant-zmw-0.m5
-  $ $EXEC $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -40,7 +40,7 @@ Test m5 output
 
 Test sam output
   $ O=$OUTDIR/pgc-concordant-zmw-0.sam
-  $ $EXEC $Q $T --sam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T --sam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -52,7 +52,7 @@ Test sam output
 
 Test bam output
   $ O=$OUTDIR/pgc-concordant-zmw-0.bam
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -62,7 +62,7 @@ Test zmw-1 bam
 
 Test m4 output
   $ O=$OUTDIR/pgc-concordant-zmw-1.m4
-  $ $EXEC $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -74,7 +74,7 @@ Test m4 output
 
 Test m5 output
   $ O=$OUTDIR/pgc-concordant-zmw-1.m5
-  $ $EXEC $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -86,7 +86,7 @@ Test m5 output
 
 Test sam output
   $ O=$OUTDIR/pgc-concordant-zmw-1.sam
-  $ $EXEC $Q $T --sam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T --sam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -99,7 +99,7 @@ Test sam output
 
 Test bam output
   $ O=$OUTDIR/pgc-concordant-zmw-1.bam
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --placeGapConsistently --concordant && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0

@@ -1,9 +1,9 @@
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
 Test --concordant
   $ rm -rf $OUTDIR/concordant_subset.sam $OUTDIR/tmp1 $OUTDIR/tmp2
-  $ $EXEC $DATDIR/ecoli_lp.fofn $DATDIR/ecoli_reference.fasta --concordant --refineConcordantAlignments -m 4 --out $OUTDIR/concordant_subset.m4 --nproc 12 --holeNumbers 1--10000 --sa $DATDIR/ecoli_reference.sa
+  $ $BLASR_EXE $DATDIR/ecoli_lp.fofn $DATDIR/ecoli_reference.fasta --concordant --refineConcordantAlignments -m 4 --out $OUTDIR/concordant_subset.m4 --nproc 12 --holeNumbers 1--10000 --sa $DATDIR/ecoli_reference.sa
   [INFO]* (glob)
   [INFO]* (glob)
   $ sort $OUTDIR/concordant_subset.m4 > $OUTDIR/tmp1
@@ -13,7 +13,7 @@ Updated in 2016_10_05  --> changed output format from sam to m4, isolate concord
 Test --concordant FMR1 case (the 'typical subread' is selected as template for concordant mapping)
   $ FOFN=$DATDIR/FMR1_concordant.fofn
   $ REF=$DATDIR/FMR1_130CGG.fasta
-  $ $EXEC $FOFN $REF --concordant --refineConcordantAlignments --out $OUTDIR/FMR1_zmw_37927.m4 -m 4 --holeNumbers 37927
+  $ $BLASR_EXE $FOFN $REF --concordant --refineConcordantAlignments --out $OUTDIR/FMR1_zmw_37927.m4 -m 4 --holeNumbers 37927
   [INFO]* (glob)
   [INFO]* (glob)
   $ diff $OUTDIR/FMR1_zmw_37927.m4 $STDDIR/$UPDATEDATE/FMR1_zmw_37927.m4

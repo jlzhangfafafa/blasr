@@ -5,9 +5,15 @@ project(
   default_options : [
     'buildtype=release',
     'warning_level=3',
-    'cpp_std=c++14'],
+    'cpp_std=c++11',
+    'b_ndebug=false'],
   license : 'BSD-3',
-  meson_version : '>= 0.41.1')
+  meson_version : '>= 0.46.0')
+
+# TODO:
+# try to reenable 'b_ndebug=true'
+# this will require replacing a number of asserts
+# with proper throw statements
 
 ############
 # CXXFLAGS #
@@ -28,17 +34,6 @@ endforeach
 # dependencies #
 ################
 
-# HDF5
-libhdf5_cflags = []
-if get_option('HDF5_CFLAGS') != ''
-  libhdf5_cflags = get_option('HDF5_CFLAGS').split(' ')
-endif
-
-libhdf5_libs = []
-if get_option('HDF5_LIBS') != ''
-  libhdf5_libs = get_option('HDF5_LIBS').split(' ')
-endif
-
 # threads
 blasr_thread_dep = dependency('threads', required : true)
 
@@ -47,6 +42,11 @@ blasr_pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
 
 # libblasr
 blasr_libblasr_dep = dependency('libblasr', fallback : ['blasr_libcpp', 'libblasr_dep'])
+
+# zlib
+blasr_zlib_dep = dependency('zlib', required : true)
+
+blasr_deps = [blasr_thread_dep, blasr_pbbam_dep, blasr_libblasr_dep, blasr_zlib_dep]
 
 ########################
 # sources + executable #
@@ -83,35 +83,41 @@ subdir('extrautils')
 subdir('utils')
 
 blasr_static_impl = static_library(
-  'blasr_impl',
-  [blasr_sources, blasr_git_commit_id],
+  'blasr_impl', [
+    blasr_sources,
+    blasr_git_commit_id],
   install : false,
   dependencies : blasr_libblasr_dep,
   cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1'])
 
 blasr_main = executable(
-  'blasr',
-  files('Blasr.cpp'),
+  'blasr', files([
+    'Blasr.cpp']),
   install : true,
-  dependencies : [blasr_libblasr_dep, blasr_pbbam_dep, blasr_thread_dep],
+  dependencies : blasr_deps,
   link_with : blasr_static_impl,
-  cpp_args : [libhdf5_cflags, blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'],
-  link_args : libhdf5_libs)
+  cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'])
 
 blasr_utils_sawriter = executable(
-  'sawriter',
-  files('utils/SAWriter.cpp'),
+  'sawriter', files([
+    'utils/SAWriter.cpp']),
   install : true,
-  dependencies : [blasr_libblasr_dep, blasr_pbbam_dep, blasr_thread_dep],
+  dependencies : blasr_deps,
   link_with : blasr_static_impl,
-  cpp_args : [libhdf5_cflags, blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'],
-  link_args : libhdf5_libs)
+  cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'])
 
 blasr_utils_toAfg = executable(
-  'toAfg',
-  files('utils/ToAfg.cpp'),
+  'toAfg', files([
+    'utils/ToAfg.cpp']),
   install : true,
-  dependencies : [blasr_libblasr_dep, blasr_pbbam_dep, blasr_thread_dep],
+  dependencies : blasr_deps,
   link_with : blasr_static_impl,
-  cpp_args : [libhdf5_cflags, blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'],
-  link_args : libhdf5_libs)
+  cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'])
+
+#########
+# tests #
+#########
+
+if get_option('tests')
+  subdir('ctest')
+endif

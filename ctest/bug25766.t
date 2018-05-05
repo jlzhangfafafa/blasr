@@ -1,10 +1,10 @@
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
 bug_25766, added an option --minRawSubreadScore
   $ BASFILE=$DATDIR/lambda_bax.fofn
   $ REF=$DATDIR/lambda_ref.fasta
-  $ $EXEC $BASFILE $REF --out $TMP1 --minRawSubreadScore 700 --nproc 18
+  $ $BLASR_EXE $BASFILE $REF --out $TMP1 --minRawSubreadScore 700 --nproc 18
   [INFO]* (glob)
   [INFO]* (glob)
   $ echo $?

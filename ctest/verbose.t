@@ -1,8 +1,8 @@
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
 Test alignment score
-  $ $EXEC $DATDIR/lambda_bax.fofn  $DATDIR/lambda_ref.fasta --holeNumbers 1--200 -V 3 > $TMP1
+  $ $BLASR_EXE $DATDIR/lambda_bax.fofn  $DATDIR/lambda_ref.fasta --holeNumbers 1--200 -V 3 > $TMP1
   [INFO]* (glob)
   [INFO]* (glob)
   $ echo $?
