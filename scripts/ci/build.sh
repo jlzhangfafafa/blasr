@@ -1,59 +1,31 @@
-#!/bin/bash
-set -euo pipefail
+#!/usr/bin/env bash
+set -e
 
-echo "#############################"
-echo "# LOAD MODULES"
-type module >& /dev/null || source /mnt/software/Modules/current/init/bash
-module purge
-module load git
-module load gcc
-CCACHE_BASEDIR=$PWD
-module load ccache
-module load boost
-module load ninja
-module load cmake
-module load hdf5-tools
-module load zlib
-module load htslib
+echo "#########"
+echo "# BUILD #"
+echo "#########"
 
-echo "#############################"
-echo "# PRE-BUILD HOOK"
-echo "## Check formatting"
-./tools/check-formatting --all
+# in order to make shared libraries consumable
+# by conda and other package managers
+default_LDFLAGS="-static-libstdc++ -static-libgcc"
 
-(cd libcpp && git clean -xdf)
-(cd pbbam && git clean -xdf)
+CURRENT_BUILD_DIR="build"
 
-echo "#############################"
-echo "# BUILD"
-rm -rf build
-mkdir -p build
-cd build
-cmake \
-    -DCMAKE_BUILD_TYPE=ReleaseWithAssert \
-    -DHDF5_ROOT=$HDF5_DIR \
-    -GNinja \
-  ..
-sed -i -e 's@/-I@/ -I@g' build.ninja
-ninja
-cd ..
+# 1. configure
+# '--wrap-mode nofallback' prevents meson from downloading
+# stuff from the internet or using subprojects.
+echo "## Configuring source (${CURRENT_BUILD_DIR})"
+CPPFLAGS="${HDF5_CFLAGS}" \
+LDFLAGS="${default_LDFLAGS} ${HDF5_LIBS}" \
+  meson \
+    --wrap-mode nofallback \
+    -Dtests="${ENABLED_TESTS:-false}" \
+    "${CURRENT_BUILD_DIR}" .
 
-echo "#############################"
-echo "# TEST"
+# 2. build
+echo "## Building source (${CURRENT_BUILD_DIR})"
+ninja -C "${CURRENT_BUILD_DIR}" -v
 
-export PATH=$PWD/build:$PATH
-mkdir -p test-reports
-module purge
-module load gcc
-module load hdf5-tools
-module load zlib
-module load htslib
-module load samtools
-module load cram
-
-#make -f cram.mk \
-#    XUNIT="--xunit-file=$PWD/test-reports/blasr-cram_xunit.xml" \
-#    cramfast
-make -f cram.mk \
-    cramfast
-exit $?
+# 3. tests
+echo "## Tests (${CURRENT_BUILD_DIR})"
+ninja -C "${CURRENT_BUILD_DIR}" -v test
