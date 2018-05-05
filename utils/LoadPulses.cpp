@@ -422,8 +422,16 @@ UInt ComputeRequiredMemoryForThisField(
         Field          & thisField,
         HDFBasReader   & hdfBasReader,
         HDFPlsReader   & hdfPlsReader,
-        const bool     & useBaseFile,
-        const bool     & usePulseFile) {
+        const bool     &
+#ifndef NDEBUG
+        useBaseFile
+#endif
+        ,
+        const bool     &
+#ifndef	NDEBUG
+        usePulseFile
+#endif
+) {
     if (thisField.type == BasField) {
         assert(useBaseFile);
         return hdfBasReader.GetFieldSize(thisField.name);
