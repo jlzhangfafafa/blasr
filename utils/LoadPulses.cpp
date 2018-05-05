@@ -432,7 +432,7 @@ UInt ComputeRequiredMemoryForThisField(
         assert(usePulseFile);
         return hdfPlsReader.GetFieldSize(thisField.name);
     }
-    assert(false);
+    throw std::runtime_error{"Unknown Field type"};
 }
 
 //
