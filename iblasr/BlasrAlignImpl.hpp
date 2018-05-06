@@ -1,6 +1,8 @@
 // Author: Mark Chaisson
 #pragma once
 
+#include "BlasrUtils.hpp"
+
 template <typename T_Sequence, typename T_RefSequence, typename T_SuffixArray,
           typename T_TupleCountTable>
 void MapRead(T_Sequence &read, T_Sequence &readRC, T_RefSequence &genome, T_SuffixArray &sarray,
