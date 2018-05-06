@@ -422,8 +422,16 @@ UInt ComputeRequiredMemoryForThisField(
         Field          & thisField,
         HDFBasReader   & hdfBasReader,
         HDFPlsReader   & hdfPlsReader,
-        const bool     & useBaseFile,
-        const bool     & usePulseFile) {
+        const bool     &
+#ifndef NDEBUG
+        useBaseFile
+#endif
+        ,
+        const bool     &
+#ifndef	NDEBUG
+        usePulseFile
+#endif
+) {
     if (thisField.type == BasField) {
         assert(useBaseFile);
         return hdfBasReader.GetFieldSize(thisField.name);
@@ -432,7 +440,7 @@ UInt ComputeRequiredMemoryForThisField(
         assert(usePulseFile);
         return hdfPlsReader.GetFieldSize(thisField.name);
     }
-    assert(false);
+    throw std::runtime_error{"Unknown Field type"};
 }
 
 //

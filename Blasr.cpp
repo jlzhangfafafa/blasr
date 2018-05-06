@@ -872,10 +872,6 @@ void MapReads(MappingData<T_SuffixArray, T_GenomeSequence, T_Tuple> *mapData)
         sem_post(&semaphores.reader);
 #endif
     }
-    if (params.nProc > 1) {
-        pthread_exit(NULL);
-    }
-    threadOut.close();
 }
 
 int main(int argc, char* argv[]) {
