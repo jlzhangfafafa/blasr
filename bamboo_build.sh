@@ -39,8 +39,31 @@ if [[ $USER == bamboo ]]; then
   export CCACHE_TEMPDIR=/scratch/bamboo.ccache_tempdir
 fi
 
+case "${bamboo_planRepository_branchName}" in
+  develop|master)
+    PREFIX_ARG="/mnt/software/b/blasr/${bamboo_planRepository_branchName}"
+    BUILD_NUMBER="${bamboo_globalBuildNumber:-0}"
+    ;;
+  *)
+    BUILD_NUMBER="0"
+    ;;
+esac
+
 # call the main build+test scripts
 export CURRENT_BUILD_DIR="build"
 export ENABLED_TESTS="true"
+
+# TODO(dseifert)
+# HDF5 doesn't have pkg-config files yet
+export CPPFLAGS="${HDF5_CFLAGS}"
+export LDFLAGS="-static-libstdc++ -static-libgcc ${HDF5_LIBS}"
+
 bash scripts/ci/build.sh
 bash scripts/ci/test.sh
+
+if [[ -z ${PREFIX_ARG+x} ]]; then
+  echo "Not installing anything (branch: ${bamboo_planRepository_branchName}), exiting."
+  exit 0
+fi
+
+bash scripts/ci/install.sh
