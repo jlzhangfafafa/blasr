@@ -8,23 +8,23 @@
 #include <set>
 #include <string>
 
-#include <datastructures/alignment/ByteAlignment.h>
-#include <CommandLineParser.hpp>
-#include <HDFBasReader.hpp>
-#include <HDFCCSReader.hpp>
-#include <HDFCmpFile.hpp>
-#include <HDFPlsReader.hpp>
-#include <alignment/CmpAlignment.hpp>
-#include <datastructures/alignment/AlignmentMap.hpp>
-#include <datastructures/alignment/CmpFile.hpp>
-#include <files/BaseSequenceIO.hpp>
-#include <loadpulses/MetricField.hpp>
-#include <loadpulses/MovieAlnIndexLookupTable.hpp>
-#include <reads/BaseFile.hpp>
-#include <reads/PulseFile.hpp>
-#include <reads/ReadType.hpp>
-#include <utils/FileOfFileNames.hpp>
-#include <utils/TimeUtils.hpp>
+#include <alignment/datastructures/alignment/ByteAlignment.h>
+#include <alignment/datastructures/alignment/AlignmentMap.hpp>
+#include <alignment/datastructures/alignment/CmpFile.hpp>
+#include <alignment/files/BaseSequenceIO.hpp>
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <hdf/HDFBasReader.hpp>
+#include <hdf/HDFCCSReader.hpp>
+#include <hdf/HDFCmpFile.hpp>
+#include <hdf/HDFPlsReader.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/alignment/CmpAlignment.hpp>
+#include <pbdata/loadpulses/MetricField.hpp>
+#include <pbdata/loadpulses/MovieAlnIndexLookupTable.hpp>
+#include <pbdata/reads/BaseFile.hpp>
+#include <pbdata/reads/PulseFile.hpp>
+#include <pbdata/reads/ReadType.hpp>
+#include <pbdata/utils/TimeUtils.hpp>
 
 typedef std::map<std::string, int> MovieNameToArrayIndex;
 typedef std::map<std::string, bool> MetricOptionsMap;

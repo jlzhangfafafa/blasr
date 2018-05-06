@@ -1,15 +1,15 @@
 #include <string>
 #include <vector>
 
-#include <Types.h>
-#include <CompressedSequence.hpp>
-#include <FASTAReader.hpp>
-#include <FASTASequence.hpp>
-#include <NucConversion.hpp>
-#include <algorithms/sorting/Karkkainen.hpp>
-#include <algorithms/sorting/qsufsort.hpp>
-#include <suffixarray/SuffixArray.hpp>
-#include <suffixarray/ssort.hpp>
+#include <pbdata/Types.h>
+#include <alignment/algorithms/sorting/Karkkainen.hpp>
+#include <alignment/algorithms/sorting/qsufsort.hpp>
+#include <alignment/suffixarray/SuffixArray.hpp>
+#include <alignment/suffixarray/ssort.hpp>
+#include <pbdata/CompressedSequence.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/NucConversion.hpp>
 
 void PrintUsage()
 {

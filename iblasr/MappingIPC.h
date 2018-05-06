@@ -4,18 +4,18 @@
 
 #include "MappingParameters.h"
 
-#include <FASTASequence.hpp>
-#include <FASTQSequence.hpp>
-#include <MappingMetrics.hpp>
-#include <bwt/BWT.hpp>
-#include <files/ReaderAgglomerate.hpp>
-#include <metagenome/SequenceIndexDatabase.hpp>
-#include <reads/RegionTable.hpp>
-#include <suffixarray/SuffixArrayTypes.hpp>
-#include <tuples/CompressedDNATuple.hpp>
-#include <tuples/DNATuple.hpp>
-#include <tuples/TupleCountTable.hpp>
-#include <tuples/TupleList.hpp>
+#include <alignment/MappingMetrics.hpp>
+#include <alignment/bwt/BWT.hpp>
+#include <alignment/files/ReaderAgglomerate.hpp>
+#include <alignment/suffixarray/SuffixArrayTypes.hpp>
+#include <alignment/tuples/CompressedDNATuple.hpp>
+#include <alignment/tuples/DNATuple.hpp>
+#include <alignment/tuples/TupleCountTable.hpp>
+#include <alignment/tuples/TupleList.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/FASTQSequence.hpp>
+#include <pbdata/metagenome/SequenceIndexDatabase.hpp>
+#include <pbdata/reads/RegionTable.hpp>
 /*
  * This structure contains pointers to all required data structures
  * for mapping reads to a suffix array and evaluating the significance

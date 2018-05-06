@@ -22,6 +22,7 @@ project(
 blasr_warning_flags = []
 cpp = meson.get_compiler('cpp')
 foreach cflag: [
+  '-Wno-delete-non-virtual-dtor',
   '-Wno-non-virtual-dtor',
   '-Wno-unused-but-set-variable',
   '-Wno-unused-variable']
@@ -29,6 +30,15 @@ foreach cflag: [
       blasr_warning_flags += cflag
     endif
 endforeach
+
+if cpp.get_id() == 'clang'
+  foreach cflag: [
+    '-Wno-overloaded-virtual']
+      if cpp.has_argument(cflag)
+        blasr_warning_flags += cflag
+      endif
+  endforeach
+endif
 
 ################
 # dependencies #

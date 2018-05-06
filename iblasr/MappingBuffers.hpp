@@ -1,12 +1,14 @@
 // Author: Mark Chaisson
+
 #pragma once
 
-#include <algorithms/alignment/sdp/SDPFragment.hpp>
-#include <algorithms/anchoring/BasicEndpoint.hpp>
-#include <datastructures/anchoring/ClusterList.hpp>
-#include <datastructures/anchoring/MatchPos.hpp>
-#include <tuples/DNATuple.hpp>
-#include <tuples/TupleList.hpp>
+#include <alignment/algorithms/alignment/sdp/SDPFragment.hpp>
+#include <alignment/algorithms/anchoring/BasicEndpoint.hpp>
+#include <alignment/datastructures/anchoring/ClusterList.hpp>
+#include <alignment/datastructures/anchoring/MatchPos.hpp>
+#include <alignment/tuples/DNATuple.hpp>
+#include <alignment/tuples/TupleList.hpp>
+
 #include <vector>
 
 //

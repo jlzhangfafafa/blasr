@@ -5,16 +5,16 @@
 
 #include <vector>
 
-#include <algorithms/alignment/AlignmentFormats.hpp>
-#include <datastructures/alignment/FilterCriteria.hpp>
-#include <datastructures/anchoring/AnchorParameters.hpp>
-#include <files/BaseSequenceIO.hpp>
-#include <format/SAMPrinter.hpp>
-#include <qvs/QualityValue.hpp>
-#include <reads/ReadType.hpp>
-#include <tuples/TupleMetrics.hpp>
-#include <utils/FileOfFileNames.hpp>
-#include <utils/RangeUtils.hpp>
+#include <alignment/algorithms/alignment/AlignmentFormats.hpp>
+#include <alignment/datastructures/alignment/FilterCriteria.hpp>
+#include <alignment/datastructures/anchoring/AnchorParameters.hpp>
+#include <alignment/files/BaseSequenceIO.hpp>
+#include <alignment/format/SAMPrinter.hpp>
+#include <alignment/tuples/TupleMetrics.hpp>
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <alignment/utils/RangeUtils.hpp>
+#include <pbdata/qvs/QualityValue.hpp>
+#include <pbdata/reads/ReadType.hpp>
 
 class MappingParameters
 {

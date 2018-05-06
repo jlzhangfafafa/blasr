@@ -1,12 +1,13 @@
 #include <string>
 #include <vector>
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-#include "NucConversion.hpp"
-#include "algorithms/sorting/qsufsort.hpp"
-#include "suffixarray/SuffixArray.hpp"
-#include "suffixarray/SuffixArrayTypes.hpp"
-#include "suffixarray/ssort.hpp"
+
+#include <alignment/algorithms/sorting/qsufsort.hpp>
+#include <alignment/suffixarray/SuffixArray.hpp>
+#include <alignment/suffixarray/SuffixArrayTypes.hpp>
+#include <alignment/suffixarray/ssort.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/NucConversion.hpp>
 
 void PrintUsage()
 {

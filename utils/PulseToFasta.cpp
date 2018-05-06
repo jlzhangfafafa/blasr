@@ -2,18 +2,18 @@
 #include <string>
 #include <vector>
 
-#include <CommandLineParser.hpp>
-#include <HDFPlsReader.hpp>
-#include <HDFRegionTableReader.hpp>
-#include <HDFUtils.hpp>
-#include <SMRTSequence.hpp>
-#include <files/ReaderAgglomerate.hpp>
-#include <reads/ReadInterval.hpp>
-#include <reads/RegionTable.hpp>
-#include <utils.hpp>
-#include <utils/FileOfFileNames.hpp>
-#include <utils/RegionUtils.hpp>
-#include <utils/TimeUtils.hpp>
+#include <alignment/files/ReaderAgglomerate.hpp>
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <alignment/utils/RegionUtils.hpp>
+#include <hdf/HDFPlsReader.hpp>
+#include <hdf/HDFRegionTableReader.hpp>
+#include <hdf/HDFUtils.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/SMRTSequence.hpp>
+#include <pbdata/reads/ReadInterval.hpp>
+#include <pbdata/reads/RegionTable.hpp>
+#include <pbdata/utils.hpp>
+#include <pbdata/utils/TimeUtils.hpp>
 
 char VERSION[] = "v1.0.0";
 char PERFORCE_VERSION_STRING[] = "$Change: 126414 $";
