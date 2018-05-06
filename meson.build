@@ -119,5 +119,13 @@ blasr_utils_toAfg = executable(
 #########
 
 if get_option('tests')
+  blasr_clang_formatter = find_program('tools/check-formatting')
+  test(
+    'blasr formatting check',
+    blasr_clang_formatter,
+    args : [
+      '--all'],
+    workdir : meson.source_root())
+
   subdir('ctest')
 endif
