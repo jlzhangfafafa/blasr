@@ -1,10 +1,10 @@
-#include "bwt/BWT.hpp"
-#include "suffixarray/SuffixArray.hpp"
-#include "suffixarray/SuffixArrayTypes.hpp"
-
 #include <cstring>
 #include <iostream>
 #include <string>
+
+#include <alignment/bwt/BWT.hpp>
+#include <alignment/suffixarray/SuffixArray.hpp>
+#include <alignment/suffixarray/SuffixArrayTypes.hpp>
 
 int main(int argc, char* argv[])
 {

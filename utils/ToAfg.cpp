@@ -3,16 +3,16 @@
 #include <string>
 #include <vector>
 
-#include <HDFPlsReader.hpp>
-#include <HDFRegionTableReader.hpp>
-#include <SMRTSequence.hpp>
-#include <amos/AfgBasWriter.hpp>
-#include <files/ReaderAgglomerate.hpp>
-#include <reads/ReadInterval.hpp>
-#include <reads/RegionTable.hpp>
-#include <utils.hpp>
-#include <utils/FileOfFileNames.hpp>
-#include <utils/RegionUtils.hpp>
+#include <alignment/files/ReaderAgglomerate.hpp>
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <alignment/utils/RegionUtils.hpp>
+#include <hdf/HDFPlsReader.hpp>
+#include <hdf/HDFRegionTableReader.hpp>
+#include <pbdata/SMRTSequence.hpp>
+#include <pbdata/amos/AfgBasWriter.hpp>
+#include <pbdata/reads/ReadInterval.hpp>
+#include <pbdata/reads/RegionTable.hpp>
+#include <pbdata/utils.hpp>
 
 void PrintUsage()
 {

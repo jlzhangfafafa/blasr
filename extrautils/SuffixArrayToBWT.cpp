@@ -1,12 +1,11 @@
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-
-#include "bwt/BWT.hpp"
-#include "suffixarray/SuffixArray.hpp"
-#include "suffixarray/SuffixArrayTypes.hpp"
-
 #include <fstream>
 #include <iostream>
+
+#include <alignment/bwt/BWT.hpp>
+#include <alignment/suffixarray/SuffixArray.hpp>
+#include <alignment/suffixarray/SuffixArrayTypes.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
 
 int main(int argc, char* argv[])
 {

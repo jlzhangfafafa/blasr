@@ -1,9 +1,11 @@
 #pragma once
 
-#include <LibBlasrConfig.h>
-#include <CommandLineParser.hpp>
-#include <datastructures/alignment/FilterCriteria.hpp>
 #include <string>
+
+#include <LibBlasrConfig.h>
+
+#include <alignment/datastructures/alignment/FilterCriteria.hpp>
+#include <pbdata/CommandLineParser.hpp>
 
 /// Register options for filtering alignments.
 void RegisterFilterOptions(CommandLineParser& clp, int& minAlnLength, float& minPctSimilarity,

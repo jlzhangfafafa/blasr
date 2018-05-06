@@ -3,14 +3,14 @@
 #include <string>
 #include <vector>
 
-#include "CommandLineParser.hpp"
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-#include "tuples/CompressedDNATuple.hpp"
-#include "tuples/DNATuple.hpp"
-#include "tuples/TupleCountTable.hpp"
-#include "tuples/TupleMetrics.hpp"
-#include "utils.hpp"
+#include <alignment/tuples/CompressedDNATuple.hpp>
+#include <alignment/tuples/DNATuple.hpp>
+#include <alignment/tuples/TupleCountTable.hpp>
+#include <alignment/tuples/TupleMetrics.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/utils.hpp>
 
 #ifdef COMPRESSED
 typedef TupleCountTable<FASTASequence, CompressedDNATuple<FASTASequence> > CountTable;

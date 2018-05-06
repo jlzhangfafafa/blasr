@@ -1,8 +1,9 @@
 #include <iostream>
 #include <string>
-#include "suffixarray/SuffixArray.hpp"
-#include "suffixarray/SuffixArrayTypes.hpp"
-#include "utils.hpp"
+
+#include <alignment/suffixarray/SuffixArray.hpp>
+#include <alignment/suffixarray/SuffixArrayTypes.hpp>
+#include <pbdata/utils.hpp>
 
 int main(int argc, char* argv[])
 {

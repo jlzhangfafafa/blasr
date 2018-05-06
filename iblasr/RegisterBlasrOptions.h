@@ -17,9 +17,11 @@
  * ============================================================================
  */
 
-#include <LibBlasrConfig.h>
-#include <CommandLineParser.hpp>
 #include <sstream>
+
+#include <LibBlasrConfig.h>
+
+#include <pbdata/CommandLineParser.hpp>
 
 #include "MappingParameters.h"
 #include "RegisterFilterOptions.h"

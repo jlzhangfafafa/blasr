@@ -1,16 +1,16 @@
 #include <iostream>
 
-#include <ChangeListID.hpp>
-#include <CommandLineParser.hpp>
-#include <FASTAReader.hpp>
-#include <FASTASequence.hpp>
-#include <HDFCmpFile.hpp>
-#include <datastructures/alignment/AlignmentCandidate.hpp>
-#include <datastructures/alignment/SAMToAlignmentCandidateAdapter.hpp>
-#include <datastructures/alignmentset/AlignmentSetToCmpH5Adapter.hpp>
-#include <format/StickAlignmentPrinter.hpp>
-#include <sam/SAMReader.hpp>
-#include <utils/TimeUtils.hpp>
+#include <alignment/datastructures/alignment/AlignmentCandidate.hpp>
+#include <alignment/datastructures/alignment/SAMToAlignmentCandidateAdapter.hpp>
+#include <alignment/datastructures/alignmentset/AlignmentSetToCmpH5Adapter.hpp>
+#include <alignment/format/StickAlignmentPrinter.hpp>
+#include <hdf/HDFCmpFile.hpp>
+#include <pbdata/ChangeListID.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/sam/SAMReader.hpp>
+#include <pbdata/utils/TimeUtils.hpp>
 
 char VERSION[] = "v1.0.0";
 char PERFORCE_VERSION_STRING[] = "$Change: 141782 $";

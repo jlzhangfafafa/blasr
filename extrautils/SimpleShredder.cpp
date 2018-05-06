@@ -1,12 +1,13 @@
 #include <sstream>
 #include <string>
-#include "CommandLineParser.hpp"
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-#include "FASTQSequence.hpp"
-#include "metagenome/FindRandomSequence.hpp"
-#include "statistics/StatUtils.hpp"
-#include "utils.hpp"
+
+#include <alignment/statistics/StatUtils.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/FASTQSequence.hpp>
+#include <pbdata/metagenome/FindRandomSequence.hpp>
+#include <pbdata/utils.hpp>
 
 int main(int argc, char* argv[])
 {
