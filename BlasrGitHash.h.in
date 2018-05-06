@@ -44,7 +44,6 @@ namespace {
 constexpr char BlasrGitSha1Int[] = "@BLASR_GIT_SHA1@";
 }
 
-std::string BlasrGitSha1()
-{ return BlasrGitSha1Int; }
+std::string BlasrGitSha1() { return BlasrGitSha1Int; }
 
-} // ::PacBio
+}  // ::PacBio

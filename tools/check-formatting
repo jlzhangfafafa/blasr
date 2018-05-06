@@ -6,7 +6,7 @@ CLANGFORMAT="${TOOLSPATH}/${PLATFORM}/clang-format -style=file"
 
 if [ "$1" == "--all" ]
 then
-    find ctest iblasr extrautils \( -name \*.cpp -or -name \*.h -or -name \*.hpp \) -print0 \
+    find . ctest iblasr extrautils -name LibBlasrConfig.h -prune -o \( -name \*.cpp -or -name \*.h -or -name \*.hpp \) -print0 \
     | xargs -n1 -0 ${CLANGFORMAT} -output-replacements-xml \
     | grep -c "<replacement " > /dev/null
     grepCode=$?

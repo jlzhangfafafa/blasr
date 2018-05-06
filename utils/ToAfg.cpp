@@ -4,27 +4,30 @@
 #include <vector>
 
 #include <HDFPlsReader.hpp>
-#include <amos/AfgBasWriter.hpp>
 #include <HDFRegionTableReader.hpp>
-#include <reads/RegionTable.hpp>
-#include <reads/ReadInterval.hpp>
+#include <SMRTSequence.hpp>
+#include <amos/AfgBasWriter.hpp>
 #include <files/ReaderAgglomerate.hpp>
+#include <reads/ReadInterval.hpp>
+#include <reads/RegionTable.hpp>
+#include <utils.hpp>
 #include <utils/FileOfFileNames.hpp>
 #include <utils/RegionUtils.hpp>
-#include <SMRTSequence.hpp>
-#include <utils.hpp>
 
-void PrintUsage() {
-        std::cout << "usage: toAfg input.filetype output.filetype" << std::endl
-                 << "                                         [-minSubreadLength l] " << std::endl
-                 << "                                         [-regionTable regions_file] " << std::endl
-                 << "                                         [-noSplitSubreads]" << std::endl
-                 << "                                         [-useccsdenovo]" << std::endl
-                 << "                                         [-uniformQV QV]" << std::endl
-        << "Print reads stored in a file (pls|fasta|fastq) as an afg." << std::endl;
+void PrintUsage()
+{
+    std::cout << "usage: toAfg input.filetype output.filetype" << std::endl
+              << "                                         [-minSubreadLength l] " << std::endl
+              << "                                         [-regionTable regions_file] "
+              << std::endl
+              << "                                         [-noSplitSubreads]" << std::endl
+              << "                                         [-useccsdenovo]" << std::endl
+              << "                                         [-uniformQV QV]" << std::endl
+              << "Print reads stored in a file (pls|fasta|fastq) as an afg." << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
 
     std::string inputFileName, outputFileName;
 
@@ -47,21 +50,16 @@ int main(int argc, char* argv[]) {
     while (argi < argc) {
         if (strcmp(argv[argi], "-regionTable") == 0) {
             regionsFOFNName = argv[++argi];
-        }
-        else if (strcmp(argv[argi], "-noSplitSubreads") == 0) {
+        } else if (strcmp(argv[argi], "-noSplitSubreads") == 0) {
             splitSubreads = false;
-        }
-        else if (strcmp(argv[argi], "-minSubreadLength") == 0) {
+        } else if (strcmp(argv[argi], "-minSubreadLength") == 0) {
             minSubreadLength = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-useccsdenovo") == 0) {
+        } else if (strcmp(argv[argi], "-useccsdenovo") == 0) {
             useCCS = true;
-        }
-        else if (strcmp(argv[argi], "-uniformQV") == 0) {
+        } else if (strcmp(argv[argi], "-uniformQV") == 0) {
             useUniformQV = true;
             uniformQV = atoi(argv[++argi]);
-        }
-        else {
+        } else {
             PrintUsage();
             std::cout << "ERROR! Option " << argv[argi] << " is not supported." << std::endl;
         }
@@ -70,18 +68,15 @@ int main(int argc, char* argv[]) {
 
     if (FileOfFileNames::IsFOFN(inputFileName)) {
         FileOfFileNames::FOFNToList(inputFileName, inputFileNames);
-    }
-    else {
+    } else {
         inputFileNames.push_back(inputFileName);
     }
     if (regionsFOFNName == "") {
         regionFileNames = inputFileNames;
-    }
-    else {
+    } else {
         if (FileOfFileNames::IsFOFN(regionsFOFNName)) {
             FileOfFileNames::FOFNToList(regionsFOFNName, regionFileNames);
-        }
-        else {
+        } else {
             regionFileNames.push_back(regionsFOFNName);
         }
     }
@@ -90,7 +85,7 @@ int main(int argc, char* argv[]) {
     CrucialOpen(outputFileName, fastaOut);
     HDFRegionTableReader hdfRegionReader;
     AfgBasWriter afgWriter;
-    if (useUniformQV){
+    if (useUniformQV) {
         afgWriter.SetDefaultQuality(uniformQV);
     }
 
@@ -104,7 +99,7 @@ int main(int argc, char* argv[]) {
 
         ReaderAgglomerate reader;
         // reader.SkipReadQuality(); // should have been taken care of by *Filter modules
-        if (useCCS){
+        if (useCCS) {
             reader.UseCCS();
         } else {
             reader.IgnoreCCS();
@@ -113,11 +108,11 @@ int main(int argc, char* argv[]) {
         CCSSequence seq;
         int seqIndex = 0;
         std::vector<ReadInterval> subreadIntervals;
-        while (reader.GetNext(seq)){
+        while (reader.GetNext(seq)) {
             ++seqIndex;
 
-            if (useUniformQV && seq.qual.data != NULL){
-                for (DNALength qvIndex = 0; qvIndex < seq.length; qvIndex++){
+            if (useUniformQV && seq.qual.data != NULL) {
+                for (DNALength qvIndex = 0; qvIndex < seq.length; qvIndex++) {
                     seq.qual[qvIndex] = uniformQV;
                 }
             }
@@ -130,44 +125,48 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-
             DNALength hqReadStart, hqReadEnd;
             int score;
             GetReadTrimCoordinates(seq, seq.zmwData, regionTable, hqReadStart, hqReadEnd, score);
 
             if (regionTable.HasHoleNumber(seq.HoleNumber())) {
-                subreadIntervals = regionTable[seq.HoleNumber()].SubreadIntervals(seq.length, true, true);
+                subreadIntervals =
+                    regionTable[seq.HoleNumber()].SubreadIntervals(seq.length, true, true);
             } else {
                 subreadIntervals = {};
             }
 
             if (seq.length == 0 and subreadIntervals.size() > 0) {
-                std::cout << "WARNING! A high quality interval region exists for a read of length 0." <<std::endl;
+                std::cout
+                    << "WARNING! A high quality interval region exists for a read of length 0."
+                    << std::endl;
                 std::cout << "  The offending ZMW number is " << seq.HoleNumber() << std::endl;
                 seq.Free();
                 continue;
             }
 
-
             for (size_t intvIndex = 0; intvIndex < subreadIntervals.size(); intvIndex++) {
                 SMRTSequence subreadSequence;
 
-                DNALength subreadStart = static_cast<DNALength>(subreadIntervals[intvIndex].start) > hqReadStart ?
-                                   static_cast<DNALength>(subreadIntervals[intvIndex].start) : hqReadStart;
-                DNALength subreadEnd   = static_cast<DNALength>(subreadIntervals[intvIndex].end) < hqReadEnd ?
-                                   static_cast<DNALength>(subreadIntervals[intvIndex].end) : hqReadEnd;
+                DNALength subreadStart =
+                    static_cast<DNALength>(subreadIntervals[intvIndex].start) > hqReadStart
+                        ? static_cast<DNALength>(subreadIntervals[intvIndex].start)
+                        : hqReadStart;
+                DNALength subreadEnd =
+                    static_cast<DNALength>(subreadIntervals[intvIndex].end) < hqReadEnd
+                        ? static_cast<DNALength>(subreadIntervals[intvIndex].end)
+                        : hqReadEnd;
                 DNALength subreadLength = subreadEnd - subreadStart;
 
                 if (subreadLength < DNALength(minSubreadLength)) continue;
 
                 subreadSequence.SubreadStart(subreadStart);
-                subreadSequence.SubreadEnd  (subreadEnd);
+                subreadSequence.SubreadEnd(subreadEnd);
                 subreadSequence.ReferenceSubstring(seq, subreadStart, subreadLength);
 
-
                 std::stringstream titleStream;
-                titleStream << seq.title << "/" << subreadIntervals[intvIndex].start
-                                         << "_" << subreadIntervals[intvIndex].end;
+                titleStream << seq.title << "/" << subreadIntervals[intvIndex].start << "_"
+                            << subreadIntervals[intvIndex].end;
                 subreadSequence.CopyTitle(titleStream.str());
                 afgWriter.Write(subreadSequence);
             }

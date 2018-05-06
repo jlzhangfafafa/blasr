@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-set -e
+set -vex
 
-echo "################"
-echo "# DEPENDENCIES #"
-echo "################"
+################
+# DEPENDENCIES #
+################
 
-echo "## Load modules"
+## Load modules"
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
 
 module purge
@@ -39,6 +39,8 @@ if [[ $USER == bamboo ]]; then
   export CCACHE_TEMPDIR=/scratch/bamboo.ccache_tempdir
 fi
 
-# call the main build script
+# call the main build+test scripts
+export CURRENT_BUILD_DIR="build"
 export ENABLED_TESTS="true"
 bash scripts/ci/build.sh
+bash scripts/ci/test.sh
