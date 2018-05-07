@@ -47,6 +47,9 @@ endif
 # threads
 blasr_thread_dep = dependency('threads', required : true)
 
+# boost
+blasr_boost_dep = dependency('boost', required : true)
+
 # pbbam
 blasr_pbbam_dep = dependency('pbbam', fallback : ['pbbam', 'pbbam_dep'])
 
@@ -56,7 +59,7 @@ blasr_libblasr_dep = dependency('libblasr', fallback : ['blasr_libcpp', 'libblas
 # zlib
 blasr_zlib_dep = dependency('zlib', required : true)
 
-blasr_deps = [blasr_thread_dep, blasr_pbbam_dep, blasr_libblasr_dep, blasr_zlib_dep]
+blasr_deps = [blasr_thread_dep, blasr_boost_dep, blasr_pbbam_dep, blasr_libblasr_dep, blasr_zlib_dep]
 
 ########################
 # sources + executable #
@@ -97,7 +100,7 @@ blasr_static_impl = static_library(
     blasr_sources,
     blasr_git_commit_id],
   install : false,
-  dependencies : blasr_libblasr_dep,
+  dependencies : blasr_deps,
   cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1'])
 
 blasr_main = executable(
