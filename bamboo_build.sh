@@ -41,11 +41,11 @@ fi
 
 case "${bamboo_planRepository_branchName}" in
   develop|master)
-    PREFIX_ARG="/mnt/software/b/blasr/${bamboo_planRepository_branchName}"
-    BUILD_NUMBER="${bamboo_globalBuildNumber:-0}"
+    export PREFIX_ARG="/mnt/software/b/blasr/${bamboo_planRepository_branchName}"
+    export BUILD_NUMBER="${bamboo_globalBuildNumber:-0}"
     ;;
   *)
-    BUILD_NUMBER="0"
+    export BUILD_NUMBER="0"
     ;;
 esac
 
