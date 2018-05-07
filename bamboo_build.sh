@@ -5,7 +5,7 @@ set -vex
 # DEPENDENCIES #
 ################
 
-## Load modules"
+## Load modules
 type module >& /dev/null || . /mnt/software/Modules/current/init/bash
 
 module purge
@@ -20,8 +20,16 @@ module load boost
 module load hdf5-tools
 module load cram
 
-module load libblasr
-module load pbbam
+case "${bamboo_planRepository_branchName}" in
+  master)
+    module load libblasr/master
+    module load pbbam/master
+    ;;
+  *)
+    module load libblasr/develop
+    module load pbbam/develop
+    ;;
+esac
 
 
 BOOST_ROOT="${BOOST_ROOT%/include}"
