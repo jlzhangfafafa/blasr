@@ -1,11 +1,11 @@
-#include "HDFCmpFile.hpp"
-#include "SMRTSequence.hpp"
-#include "datastructures/alignment/CmpFile.hpp"
-#include "files/ReaderAgglomerate.hpp"
-#include "format/StickAlignmentPrinter.hpp"
-#include "simulator/ContextSet.hpp"
-#include "simulator/OutputSampleListSet.hpp"
-#include "utils/FileOfFileNames.hpp"
+#include <alignment/datastructures/alignment/CmpFile.hpp>
+#include <alignment/files/ReaderAgglomerate.hpp>
+#include <alignment/format/StickAlignmentPrinter.hpp>
+#include <alignment/simulator/ContextSet.hpp>
+#include <alignment/simulator/OutputSampleListSet.hpp>
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <hdf/HDFCmpFile.hpp>
+#include <pbdata/SMRTSequence.hpp>
 
 class ScoredLength
 {

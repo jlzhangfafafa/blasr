@@ -1,47 +1,48 @@
 #define __FAST_MATH__
 
-#include <HDFCmpFile.hpp>
-#include <HDFBasReader.hpp>
-#include <HDFPlsReader.hpp>
-#include <HDFCCSReader.hpp>
-#include <datastructures/alignment/CmpFile.hpp>
-#include <alignment/CmpAlignment.hpp>
-#include <datastructures/alignment/ByteAlignment.h>
-#include <datastructures/alignment/AlignmentMap.hpp>
-#include <reads/BaseFile.hpp>
-#include <reads/PulseFile.hpp>
-#include <reads/ReadType.hpp>
-#include <loadpulses/MetricField.hpp>
-#include <loadpulses/MovieAlnIndexLookupTable.hpp>
-#include <utils/FileOfFileNames.hpp>
-#include <utils/TimeUtils.hpp>
-#include <files/BaseSequenceIO.hpp>
-#include <CommandLineParser.hpp>
-#include <map>
-#include <set>
-#include <string>
 #include <algorithm>
 #include <cassert>
-#include <numeric>
 #include <cstdio>
+#include <map>
+#include <numeric>
+#include <set>
+#include <string>
+
+#include <alignment/datastructures/alignment/ByteAlignment.h>
+#include <alignment/datastructures/alignment/AlignmentMap.hpp>
+#include <alignment/datastructures/alignment/CmpFile.hpp>
+#include <alignment/files/BaseSequenceIO.hpp>
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <hdf/HDFBasReader.hpp>
+#include <hdf/HDFCCSReader.hpp>
+#include <hdf/HDFCmpFile.hpp>
+#include <hdf/HDFPlsReader.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/alignment/CmpAlignment.hpp>
+#include <pbdata/loadpulses/MetricField.hpp>
+#include <pbdata/loadpulses/MovieAlnIndexLookupTable.hpp>
+#include <pbdata/reads/BaseFile.hpp>
+#include <pbdata/reads/PulseFile.hpp>
+#include <pbdata/reads/ReadType.hpp>
+#include <pbdata/utils/TimeUtils.hpp>
 
 typedef std::map<std::string, int> MovieNameToArrayIndex;
 typedef std::map<std::string, bool> MetricOptionsMap;
 typedef std::map<std::string, std::vector<std::string> > RequirementMap;
 
-
 char VERSION[] = "v1.1.0";
 char PERFORCE_VERSION_STRING[] = "$Change: 126407 $";
 
 // define default values for metrics
-const float NaN = 0.0/0.0;
-const UChar missingQualityValue      = 255;
-const unsigned char maxQualityValue  = 100;
+const float NaN = 0.0 / 0.0;
+const UChar missingQualityValue = 255;
+const unsigned char maxQualityValue = 100;
 const HalfWord missingFrameRateValue = USHRT_MAX;
 const unsigned int missingPulseIndex = UINT_MAX;
 
-
-void CapQualityValue(QualityValueVector<QualityValue> &vect, DNALength length, unsigned char maxQualityValue=100) {
+void CapQualityValue(QualityValueVector<QualityValue> &vect, DNALength length,
+                     unsigned char maxQualityValue = 100)
+{
     unsigned int i;
     if (vect.data == NULL) {
         return;
@@ -51,8 +52,8 @@ void CapQualityValue(QualityValueVector<QualityValue> &vect, DNALength length, u
     }
 }
 
-
-void CapQualityValues(SMRTSequence &seq, unsigned char maxQualityValue = 100) {
+void CapQualityValues(SMRTSequence &seq, unsigned char maxQualityValue = 100)
+{
     CapQualityValue(seq.qual, seq.length, maxQualityValue);
     CapQualityValue(seq.deletionQV, seq.length, maxQualityValue);
     CapQualityValue(seq.preBaseDeletionQV, seq.length, maxQualityValue);
@@ -61,17 +62,19 @@ void CapQualityValues(SMRTSequence &seq, unsigned char maxQualityValue = 100) {
     CapQualityValue(seq.mergeQV, seq.length, maxQualityValue);
 }
 
-
-int CheckCmpFileFormat(CmpFile &cmpFile) {
+int CheckCmpFileFormat(CmpFile &cmpFile)
+{
     if (cmpFile.readType != ReadType::Standard) {
-        std::cout << "ERROR! Reading pulse information into a cmp.h5 file generated from circular " << std::endl
-            << "consensus called sequences is not supported." << std::endl;
+        std::cout << "ERROR! Reading pulse information into a cmp.h5 file generated from circular "
+                  << std::endl
+                  << "consensus called sequences is not supported." << std::endl;
         std::exit(EXIT_FAILURE);
     }
     return 1;
 }
 
-void BuildRequirementMap(RequirementMap &fieldRequirements) {
+void BuildRequirementMap(RequirementMap &fieldRequirements)
+{
     fieldRequirements["StartTimeOffset"].push_back("StartFrame");
     fieldRequirements["StartTimeOffset"].push_back("NumEvent");
     fieldRequirements["StartFrame"].push_back("PreBaseFrames");
@@ -94,31 +97,30 @@ void BuildRequirementMap(RequirementMap &fieldRequirements) {
     fieldRequirements["StartFramePulse"].push_back("WidthInFrames");
 }
 
-void ExclusivelyAdd(const char *value, std::vector<std::string> &vect) {
+void ExclusivelyAdd(const char *value, std::vector<std::string> &vect)
+{
     if (find(vect.begin(), vect.end(), value) == vect.end()) {
         vect.push_back(value);
     }
 }
 
-bool AnyFieldRequiresFrameRate(std::vector<std::string> &fields) {
-    for (size_t i = 0; i < fields.size(); i++ ) {
-        if (fields[i] == "PulseWidth" or
-                fields[i] == "IPD" or
-                fields[i] == "Light" or
-                fields[i] == "StartTimeOffset" or
-                fields[i] == "StartFrame" or
-                fields[i] == "PulseWidth" or
-                fields[i] == "PreBaseFrames" or
-                fields[i] == "WidthInFrames") {
+bool AnyFieldRequiresFrameRate(std::vector<std::string> &fields)
+{
+    for (size_t i = 0; i < fields.size(); i++) {
+        if (fields[i] == "PulseWidth" or fields[i] == "IPD" or fields[i] == "Light" or
+            fields[i] == "StartTimeOffset" or fields[i] == "StartFrame" or
+            fields[i] == "PulseWidth" or fields[i] == "PreBaseFrames" or
+            fields[i] == "WidthInFrames") {
             return true;
         }
     }
     return false;
 }
 
-template<typename T>
-void Free(T* &buf) {
-    if (buf != NULL){
+template <typename T>
+void Free(T *&buf)
+{
+    if (buf != NULL) {
         delete[] buf;
     }
     buf = NULL;
@@ -130,7 +132,8 @@ void Free(T* &buf) {
 // SubstitutionQV   ClassifierQV    StartFrame    PulseWidth
 // PreBaseFrames    WidthInFrames   pkmid         IPD
 // Light            WhenStarted
-std::vector<std::string> GetAllSupportedMetrics(bool isSneakyMetricsIncluded = true) {
+std::vector<std::string> GetAllSupportedMetrics(bool isSneakyMetricsIncluded = true)
+{
     // The order of metrics matters. With -bymetric option, all fields
     // which are required for computing a metric are cached before WriteMetric()
     // and cleared afterwards. If two neighboring metrics share a subset of
@@ -174,7 +177,8 @@ std::vector<std::string> GetAllSupportedMetrics(bool isSneakyMetricsIncluded = t
 }
 
 // Return metrics to load by default.
-std::vector<std::string> GetDefaultMetrics() {
+std::vector<std::string> GetDefaultMetrics()
+{
     std::vector<std::string> defaultMetrics;
     defaultMetrics.push_back("QualityValue");
     defaultMetrics.push_back("ClassifierQV");
@@ -187,7 +191,8 @@ std::vector<std::string> GetDefaultMetrics() {
 }
 
 // Return metrics that can be computed from PulseCalls.
-std::vector<std::string> GetPulseMetrics() {
+std::vector<std::string> GetPulseMetrics()
+{
     std::vector<std::string> pulseMetrics;
     pulseMetrics.push_back("StartFrame");
     pulseMetrics.push_back("StartTimeOffset");
@@ -202,11 +207,11 @@ std::vector<std::string> GetPulseMetrics() {
 }
 
 // Return true if this metric can be computed from PulseCalls.
-bool IsPulseMetric(const std::string & metric) {
+bool IsPulseMetric(const std::string &metric)
+{
     std::vector<std::string> pulseMetrics = GetPulseMetrics();
     for (size_t i = 0; i < pulseMetrics.size(); i++) {
-        if (pulseMetrics[i] == metric)
-            return true;
+        if (pulseMetrics[i] == metric) return true;
     }
     return false;
 }
@@ -216,7 +221,8 @@ bool IsPulseMetric(const std::string & metric) {
 // (2) requested to load, and
 // (3) computable with all required fields available
 //     in either bas.h5 or pls.h5.
-std::vector<std::string> GetMetricsToLoad(std::map<std::string, bool> & metricOptions) {
+std::vector<std::string> GetMetricsToLoad(std::map<std::string, bool> &metricOptions)
+{
     std::vector<std::string> metricsToLoad;
     // Get all supported metrics.
     std::vector<std::string> supportedMetrics = GetAllSupportedMetrics();
@@ -224,7 +230,7 @@ std::vector<std::string> GetMetricsToLoad(std::map<std::string, bool> & metricOp
     for (size_t i = 0; i < supportedMetrics.size(); i++) {
         std::string metric = supportedMetrics[i];
         metricIt = metricOptions.find(metric);
-        if (metricIt!=metricOptions.end() and metricIt->second) {
+        if (metricIt != metricOptions.end() and metricIt->second) {
             // Get metrics that are required and computable
             metricsToLoad.push_back(metricIt->first);
         }
@@ -233,32 +239,32 @@ std::vector<std::string> GetMetricsToLoad(std::map<std::string, bool> & metricOp
 }
 
 void StoreDatasetFieldsFromPulseFields(MetricOptionsMap &fieldSet,
-        RequirementMap &fieldRequirements,
-        std::vector<std::string> &datasetFields) {
+                                       RequirementMap &fieldRequirements,
+                                       std::vector<std::string> &datasetFields)
+{
     size_t d;
     MetricOptionsMap::iterator optionsIt;
     for (optionsIt = fieldSet.begin(); optionsIt != fieldSet.end(); ++optionsIt) {
         if (optionsIt->second == true) {
             if (fieldRequirements.find(optionsIt->first) == fieldRequirements.end()) {
                 ExclusivelyAdd(optionsIt->first.c_str(), datasetFields);
-            }
-            else {
+            } else {
                 for (d = 0; d < fieldRequirements[optionsIt->first].size(); d++) {
-                    ExclusivelyAdd(fieldRequirements[optionsIt->first][d].c_str(), datasetFields );
+                    ExclusivelyAdd(fieldRequirements[optionsIt->first][d].c_str(), datasetFields);
                 }
             }
         }
     }
 }
 
-void ParseMetricsList(std::string metricListString, MetricOptionsMap &metricOptions) {
+void ParseMetricsList(std::string metricListString, MetricOptionsMap &metricOptions)
+{
     std::vector<std::string> metrics;
     Splice(metricListString, ",", metrics);
-    for  (size_t m = 0; m < metrics.size(); m++) {
+    for (size_t m = 0; m < metrics.size(); m++) {
         if (metricOptions.find(metrics[m]) != metricOptions.end()) {
             metricOptions[metrics[m]] = true;
-        }
-        else {
+        } else {
             std::cout << "ERROR! Metric " << metrics[m] << " is not supported." << std::endl;
             std::exit(EXIT_FAILURE);
         }
@@ -266,16 +272,17 @@ void ParseMetricsList(std::string metricListString, MetricOptionsMap &metricOpti
 }
 
 // Set default metric options to true
-void SetDefaultMetricOptions(std::map<std::string, bool> & metricOptions) {
+void SetDefaultMetricOptions(std::map<std::string, bool> &metricOptions)
+{
     std::vector<std::string> defaultMetrics = GetDefaultMetrics();
     for (size_t i = 0; i < defaultMetrics.size(); i++) {
         metricOptions[defaultMetrics[i]] = true;
     }
 }
 
-
 // Initialize all supported metric options and set all to false
-void CreateMetricOptions(std::map<std::string, bool> &metricOptions) {
+void CreateMetricOptions(std::map<std::string, bool> &metricOptions)
+{
     std::vector<std::string> supportedMetrics = GetAllSupportedMetrics();
     for (size_t i = 0; i < supportedMetrics.size(); i++) {
         metricOptions[supportedMetrics[i]] = false;
@@ -283,25 +290,23 @@ void CreateMetricOptions(std::map<std::string, bool> &metricOptions) {
 }
 
 // Check whether all fields are available or not.
-bool AreAllFieldsAvailable(
-        std::vector <Field>   & requiredFields,
-        HDFBasReader     & hdfBasReader,
-        HDFPlsReader     & hdfPlsReader,
-        const bool       & useBaseFile,
-        const bool       & usePulseFile) {
+bool AreAllFieldsAvailable(std::vector<Field> &requiredFields, HDFBasReader &hdfBasReader,
+                           HDFPlsReader &hdfPlsReader, const bool &useBaseFile,
+                           const bool &usePulseFile)
+{
     bool allAvailable = true;
 
     for (size_t i = 0; i < requiredFields.size(); i++) {
         Field field = requiredFields[i];
         if (field.type == BasField) {
-            if (!useBaseFile or !hdfBasReader.FieldIsIncluded(field.name)
-                or !hdfBasReader.includedFields[field.name]) {
+            if (!useBaseFile or !hdfBasReader.FieldIsIncluded(field.name) or
+                !hdfBasReader.includedFields[field.name]) {
                 allAvailable = false;
                 break;
             }
         } else if (field.type == PlsField) {
-            if (!usePulseFile or !hdfPlsReader.FieldIsIncluded(field.name)
-                or !hdfPlsReader.includedFields[field.name]) {
+            if (!usePulseFile or !hdfPlsReader.FieldIsIncluded(field.name) or
+                !hdfPlsReader.includedFields[field.name]) {
                 allAvailable = false;
                 break;
             }
@@ -316,33 +321,28 @@ bool AreAllFieldsAvailable(
 // If a metric can be computed from both bas and pls files (e.g.
 // StartFrame, IPD, PulseWidth, WidthInFrame), only compute it from pls.
 //
-bool CanThisMetricBeComputed (
-        const std::string     & metricName,
-        HDFBasReader     & hdfBasReader,
-        HDFPlsReader     & hdfPlsReader,
-        const bool       & useBaseFile,
-        const bool       & usePulseFile,
-        std::vector<Field>    & fieldsToBeUsed) {
+bool CanThisMetricBeComputed(const std::string &metricName, HDFBasReader &hdfBasReader,
+                             HDFPlsReader &hdfPlsReader, const bool &useBaseFile,
+                             const bool &usePulseFile, std::vector<Field> &fieldsToBeUsed)
+{
     fieldsToBeUsed.clear();
 
     FieldsRequirement fieldsRequirement = FieldsRequirement(metricName);
 
     bool metricMayBeComputedFromPls = true;
     if (fieldsRequirement.fieldsUsePlsFile.size() != 0 && usePulseFile) {
-        metricMayBeComputedFromPls = AreAllFieldsAvailable(
-                fieldsRequirement.fieldsUsePlsFile,
-                hdfBasReader, hdfPlsReader,
-                useBaseFile, usePulseFile);
+        metricMayBeComputedFromPls =
+            AreAllFieldsAvailable(fieldsRequirement.fieldsUsePlsFile, hdfBasReader, hdfPlsReader,
+                                  useBaseFile, usePulseFile);
     } else {
         metricMayBeComputedFromPls = false;
     }
 
     bool metricMayBeComputedFromBas = true;
     if (fieldsRequirement.fieldsUseBasFile.size() != 0 && useBaseFile) {
-        metricMayBeComputedFromBas = AreAllFieldsAvailable(
-                fieldsRequirement.fieldsUseBasFile,
-                hdfBasReader, hdfPlsReader,
-                useBaseFile, usePulseFile);
+        metricMayBeComputedFromBas =
+            AreAllFieldsAvailable(fieldsRequirement.fieldsUseBasFile, hdfBasReader, hdfPlsReader,
+                                  useBaseFile, usePulseFile);
     } else {
         metricMayBeComputedFromBas = false;
     }
@@ -375,16 +375,13 @@ bool CanThisMetricBeComputed (
 // Check whether metrics are computable or not. If a metric is not
 // computable, disable it with a warning or exit with an error.
 //
-void CanMetricsBeComputed(
-        MetricOptionsMap & metricOptions,
-        HDFBasReader     & hdfBasReader,
-        HDFPlsReader     & hdfPlsReader,
-        const bool       & useBaseFile,
-        const bool       & usePulseFile,
-        const bool       & failOnMissingData,
-        const std::string     & movieName) {
+void CanMetricsBeComputed(MetricOptionsMap &metricOptions, HDFBasReader &hdfBasReader,
+                          HDFPlsReader &hdfPlsReader, const bool &useBaseFile,
+                          const bool &usePulseFile, const bool &failOnMissingData,
+                          const std::string &movieName)
+{
 
-    std::map<std::string,bool>::iterator metricIt;
+    std::map<std::string, bool>::iterator metricIt;
     for (metricIt = metricOptions.begin(); metricIt != metricOptions.end(); ++metricIt) {
         std::string metricName = metricIt->first;
         if (metricName == "") {
@@ -395,19 +392,17 @@ void CanMetricsBeComputed(
             continue;
         }
         std::vector<Field> fieldsToBeUsed;
-        bool metricMayBeComputed = CanThisMetricBeComputed(metricName,
-                hdfBasReader, hdfPlsReader, useBaseFile, usePulseFile,
-                fieldsToBeUsed);
+        bool metricMayBeComputed = CanThisMetricBeComputed(
+            metricName, hdfBasReader, hdfPlsReader, useBaseFile, usePulseFile, fieldsToBeUsed);
 
         if (metricMayBeComputed == false) {
             if (failOnMissingData) {
                 std::cout << "ERROR";
-            }
-            else {
+            } else {
                 std::cout << "WARNING";
             }
-            std::cout << ": There is insufficient data to compute metric: "
-                 << metricName << " in the file " << movieName << " ";
+            std::cout << ": There is insufficient data to compute metric: " << metricName
+                      << " in the file " << movieName << " ";
             std::cout << " It will be ignored." << std::endl;
             if (failOnMissingData) {
                 std::exit(EXIT_FAILURE);
@@ -418,12 +413,18 @@ void CanMetricsBeComputed(
 }
 
 // Return size of a single field in KB.
-UInt ComputeRequiredMemoryForThisField(
-        Field          & thisField,
-        HDFBasReader   & hdfBasReader,
-        HDFPlsReader   & hdfPlsReader,
-        const bool     & useBaseFile,
-        const bool     & usePulseFile) {
+UInt ComputeRequiredMemoryForThisField(Field &thisField, HDFBasReader &hdfBasReader,
+                                       HDFPlsReader &hdfPlsReader, const bool &
+#ifndef NDEBUG
+                                                                       useBaseFile
+#endif
+                                       ,
+                                       const bool &
+#ifndef NDEBUG
+                                           usePulseFile
+#endif
+                                       )
+{
     if (thisField.type == BasField) {
         assert(useBaseFile);
         return hdfBasReader.GetFieldSize(thisField.name);
@@ -432,33 +433,28 @@ UInt ComputeRequiredMemoryForThisField(
         assert(usePulseFile);
         return hdfPlsReader.GetFieldSize(thisField.name);
     }
-    assert(false);
+    throw std::runtime_error{"Unknown Field type"};
 }
 
 //
 // Return estimated memory peak (in KB) for buffering all data using -bymetric.
 //
-UInt ComputeRequiredMemory(
-        std::vector<std::string> & metricsToLoad,
-        HDFBasReader   & hdfBasReader,
-        HDFPlsReader   & hdfPlsReader,
-        const bool     & useBaseFile,
-        const bool     & usePulseFile,
-        HDFCmpFile<CmpAlignment> & cmpReader,
-        UInt           & totalAlnLength) {
+UInt ComputeRequiredMemory(std::vector<std::string> &metricsToLoad, HDFBasReader &hdfBasReader,
+                           HDFPlsReader &hdfPlsReader, const bool &useBaseFile,
+                           const bool &usePulseFile, HDFCmpFile<CmpAlignment> &cmpReader,
+                           UInt &totalAlnLength)
+{
     UInt maxMemory = 0;
     for (size_t i = 0; i < metricsToLoad.size(); i++) {
         UInt memoryForThisMetric = 0;
         std::vector<Field> fieldsToBeUsed;
-        bool canBeComputed = CanThisMetricBeComputed(
-                metricsToLoad[i], hdfBasReader, hdfPlsReader,
-                useBaseFile, usePulseFile, fieldsToBeUsed);
+        bool canBeComputed = CanThisMetricBeComputed(metricsToLoad[i], hdfBasReader, hdfPlsReader,
+                                                     useBaseFile, usePulseFile, fieldsToBeUsed);
         (void)(canBeComputed);
 
         for (size_t j = 0; j < fieldsToBeUsed.size(); j++) {
             UInt memoryForThisField = ComputeRequiredMemoryForThisField(
-                    fieldsToBeUsed[j], hdfBasReader, hdfPlsReader,
-                    useBaseFile, usePulseFile);
+                fieldsToBeUsed[j], hdfBasReader, hdfPlsReader, useBaseFile, usePulseFile);
             memoryForThisMetric += memoryForThisField;
         }
         maxMemory = std::max(maxMemory, memoryForThisMetric);
@@ -472,8 +468,7 @@ UInt ComputeRequiredMemory(
     //
     // AlnArray and metrics to load needs to be buffered in KB.
     //
-    UInt totalAlnArrayMem = totalAlnLength / 1024 *
-                            (sizeof(unsigned int) + sizeof(unsigned char));
+    UInt totalAlnArrayMem = totalAlnLength / 1024 * (sizeof(unsigned int) + sizeof(unsigned char));
 
     //
     // It's diffcult to estimate how much memory will be used by hdf5.
@@ -499,23 +494,22 @@ UInt ComputeRequiredMemory(
 //
 // Get aligned sequence for this alignment from cmpFile
 //
-std::string GetAlignedSequenceFromCmpFile(
-        const HDFCmpFile<CmpAlignment> & cmpReader,
-        MovieAlnIndexLookupTable       & lookupTable) {
+std::string GetAlignedSequenceFromCmpFile(const HDFCmpFile<CmpAlignment> &cmpReader,
+                                          MovieAlnIndexLookupTable &lookupTable)
+{
     std::string alignedSequence;
     std::vector<unsigned char> byteAlignment;
     int alignedSequenceLength = lookupTable.offsetEnd - lookupTable.offsetBegin;
-    if (alignedSequenceLength >= 0 ) {
+    if (alignedSequenceLength >= 0) {
         alignedSequence.resize(alignedSequenceLength);
         byteAlignment.resize(alignedSequenceLength);
     }
     //
     // Read the alignment string.  All alignments
     //
-    cmpReader.refAlignGroups[lookupTable.refGroupIndex]->readGroups[lookupTable.readGroupIndex]->alignmentArray.Read(
-        lookupTable.offsetBegin,
-        lookupTable.offsetEnd,
-        &byteAlignment[0]);
+    cmpReader.refAlignGroups[lookupTable.refGroupIndex]
+        ->readGroups[lookupTable.readGroupIndex]
+        ->alignmentArray.Read(lookupTable.offsetBegin, lookupTable.offsetEnd, &byteAlignment[0]);
 
     //
     // Convert to something we can compare easily.
@@ -527,17 +521,13 @@ std::string GetAlignedSequenceFromCmpFile(
 //
 // Store info necessary for loading pulses to lookupTable.
 //
-void BuildLookupTable(
-    const int                        & movieAlignmentIndex,
-    CmpFile                          & cmpFile,
-    BaseFile                         & baseFile,
-    const bool                       & usePulseFile,
-    PulseFile                        & pulseFile,
-    HDFCmpFile<CmpAlignment>         & cmpReader,
-    const std::vector<int>                & movieAlnIndex,
-    const std::vector<std::pair<int,int> >    & toFrom,
-    const std::set<uint32_t>              & moviePartHoleNumbers,
-    MovieAlnIndexLookupTable         & lookupTable) {
+void BuildLookupTable(const int &movieAlignmentIndex, CmpFile &cmpFile, BaseFile &baseFile,
+                      const bool &usePulseFile, PulseFile &pulseFile,
+                      HDFCmpFile<CmpAlignment> &cmpReader, const std::vector<int> &movieAlnIndex,
+                      const std::vector<std::pair<int, int> > &toFrom,
+                      const std::set<uint32_t> &moviePartHoleNumbers,
+                      MovieAlnIndexLookupTable &lookupTable)
+{
     //
     // Query the cmp file for a way to look up a read based on
     // coordinate information.  For Astro reads, the coords are
@@ -555,17 +545,17 @@ void BuildLookupTable(
     //
     // Alignments are grouped by ref group id then movie id.
     //
-    int refGroupId  = cmpFile.alnInfo.alignments[alignmentIndex].GetRefGroupId();
-    int movieId     = cmpFile.alnInfo.alignments[alignmentIndex].GetMovieId();
+    int refGroupId = cmpFile.alnInfo.alignments[alignmentIndex].GetRefGroupId();
+    int movieId = cmpFile.alnInfo.alignments[alignmentIndex].GetMovieId();
     (void)(movieId);
     UInt holeNumber = cmpFile.alnInfo.alignments[alignmentIndex].GetHoleNumber();
-    int alnGroupId  = cmpFile.alnInfo.alignments[alignmentIndex].GetAlnGroupId();
+    int alnGroupId = cmpFile.alnInfo.alignments[alignmentIndex].GetAlnGroupId();
 
     if (cmpReader.refGroupIdToArrayIndex.find(refGroupId) ==
         cmpReader.refGroupIdToArrayIndex.end()) {
         std::cout << "ERROR! An alignment " << alignmentIndex
-             << " is specified with reference group " << std::endl
-             << refGroupId << " that is not found as an alignment group." << std::endl;
+                  << " is specified with reference group " << std::endl
+                  << refGroupId << " that is not found as an alignment group." << std::endl;
         std::exit(EXIT_FAILURE);
     }
     int refGroupIndex = cmpReader.refGroupIdToArrayIndex[refGroupId];
@@ -576,8 +566,8 @@ void BuildLookupTable(
     if (cmpReader.alnGroupIdToReadGroupName.find(alnGroupId) ==
         cmpReader.alnGroupIdToReadGroupName.end()) {
         std::cout << "ERROR! An alignment " << alignmentIndex
-             << " is specified with alignment group " << std::endl
-             << alnGroupId << " that is not found." << std::endl;
+                  << " is specified with alignment group " << std::endl
+                  << alnGroupId << " that is not found." << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
@@ -585,21 +575,22 @@ void BuildLookupTable(
     if (cmpReader.refAlignGroups[refGroupIndex]->experimentNameToIndex.find(readGroupName) ==
         cmpReader.refAlignGroups[refGroupIndex]->experimentNameToIndex.end()) {
         std::cout << "ERROR! An alignment " << alignmentIndex
-             << " is specified with read group name " << std::endl
-             << readGroupName << " that is not found." << std::endl;
+                  << " is specified with read group name " << std::endl
+                  << readGroupName << " that is not found." << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    int readGroupIndex = cmpReader.refAlignGroups[refGroupIndex]->experimentNameToIndex[readGroupName];
+    int readGroupIndex =
+        cmpReader.refAlignGroups[refGroupIndex]->experimentNameToIndex[readGroupName];
 
     UInt offsetBegin = cmpFile.alnInfo.alignments[alignmentIndex].GetOffsetBegin();
-    UInt offsetEnd   = cmpFile.alnInfo.alignments[alignmentIndex].GetOffsetEnd();
+    UInt offsetEnd = cmpFile.alnInfo.alignments[alignmentIndex].GetOffsetEnd();
 
     //
     // First pull out the bases corresponding to this read.
     //
     int queryStart = cmpFile.alnInfo.alignments[alignmentIndex].GetQueryStart();
-    int queryEnd   = cmpFile.alnInfo.alignments[alignmentIndex].GetQueryEnd();
+    int queryEnd = cmpFile.alnInfo.alignments[alignmentIndex].GetQueryEnd();
 
     bool skip = false;
     int readIndex, readStart, readLength, plsReadIndex;
@@ -615,47 +606,41 @@ void BuildLookupTable(
     } else {
         if (!baseFile.LookupReadIndexByHoleNumber(holeNumber, readIndex)) {
             std::cout << "ERROR! Alignment has hole number " << holeNumber
-                 << " that is not in the movie. " << std::endl;
+                      << " that is not in the movie. " << std::endl;
             std::exit(EXIT_FAILURE);
         }
-        readStart  = baseFile.readStartPositions[readIndex];
-        readLength = baseFile.readStartPositions[readIndex+1] -
-                     baseFile.readStartPositions[readIndex];
+        readStart = baseFile.readStartPositions[readIndex];
+        readLength =
+            baseFile.readStartPositions[readIndex + 1] - baseFile.readStartPositions[readIndex];
         if (usePulseFile) {
             if (!pulseFile.LookupReadIndexByHoleNumber(holeNumber, plsReadIndex)) {
                 std::cout << "ERROR! Alignment has  hole number " << holeNumber
-                     << " that is not in the movie. " << std::endl;
+                          << " that is not in the movie. " << std::endl;
                 std::exit(EXIT_FAILURE);
             }
-            assert(pulseFile.holeNumbers[plsReadIndex] ==
-                   baseFile.holeNumbers[readIndex]);
+            assert(pulseFile.holeNumbers[plsReadIndex] == baseFile.holeNumbers[readIndex]);
         }
     }
     // Save info to lookupTable
-    lookupTable.SetValue(skip, // Skip processing this or not
-        movieAlignmentIndex,
-        alignmentIndex,
-        refGroupIndex,
-        readGroupIndex,
-        holeNumber,    // cmp.h5 /AlnInfo/AlnIndex column 7
-        offsetBegin,   // cmp.h5 /AlnInfo/AlnIndex column 18
-        offsetEnd,     // cmp.h5 /AlnInfo/AlnIndex column 19
-        queryStart,    // cmp.h5 /AlnInfo/AlnIndex column 11
-        queryEnd,      // cmp.h5 /AlnInfo/AlnIndex column 12
-        readIndex,     // hole Index in BaseCalls/ZMW/HoleNumber
-        readStart,     // readStart in BaseCalls/* (e.g. *=Basecall)
-        readLength,    // readLength in BaseCalls/*
-        plsReadIndex); // readIndex in PulseCalls/ZMW/HoleNumber
+    lookupTable.SetValue(skip,  // Skip processing this or not
+                         movieAlignmentIndex, alignmentIndex, refGroupIndex, readGroupIndex,
+                         holeNumber,     // cmp.h5 /AlnInfo/AlnIndex column 7
+                         offsetBegin,    // cmp.h5 /AlnInfo/AlnIndex column 18
+                         offsetEnd,      // cmp.h5 /AlnInfo/AlnIndex column 19
+                         queryStart,     // cmp.h5 /AlnInfo/AlnIndex column 11
+                         queryEnd,       // cmp.h5 /AlnInfo/AlnIndex column 12
+                         readIndex,      // hole Index in BaseCalls/ZMW/HoleNumber
+                         readStart,      // readStart in BaseCalls/* (e.g. *=Basecall)
+                         readLength,     // readLength in BaseCalls/*
+                         plsReadIndex);  // readIndex in PulseCalls/ZMW/HoleNumber
 }
 
 //
 // Map bases of a read to pulse indices.
 //
-void MapBaseToPulseIndex(
-        BaseFile                 & baseFile,
-        PulseFile                & pulseFile,
-        MovieAlnIndexLookupTable & table,
-        std::vector<int>              & baseToPulseIndexMap) {
+void MapBaseToPulseIndex(BaseFile &baseFile, PulseFile &pulseFile, MovieAlnIndexLookupTable &table,
+                         std::vector<int> &baseToPulseIndexMap)
+{
     baseToPulseIndexMap.resize(table.readLength);
 
     int pulseStart = pulseFile.pulseStartPositions[table.plsReadIndex];
@@ -671,21 +656,17 @@ void MapBaseToPulseIndex(
 //
 // Get source read from the bas/pls file.
 //
-void GetSourceRead(CmpFile      & cmpFile,
-                   BaseFile     & baseFile,
-                   PulseFile    & pulseFile,
-                   HDFBasReader & hdfBasReader,
-                   HDFPlsReader & hdfPlsReader,
-                   HDFCCSReader<SMRTSequence> & hdfCcsReader,
-                   const bool   & useBaseFile,
-                   const bool   & usePulseFile,
-                   const bool   & useCcsOnly,
+void GetSourceRead(CmpFile &cmpFile, BaseFile &baseFile, PulseFile &pulseFile,
+                   HDFBasReader &hdfBasReader, HDFPlsReader &hdfPlsReader,
+                   HDFCCSReader<SMRTSequence> &hdfCcsReader, const bool &useBaseFile,
+                   const bool &usePulseFile, const bool &useCcsOnly,
                    //const bool   & byRead,
-                   MovieAlnIndexLookupTable & table,
-                   const std::string & alignedSequence,
-                   SMRTSequence & sourceRead,
-                   unsigned int & numPasses) {
-    (void)(baseFile); (void)(pulseFile); (void)(alignedSequence);
+                   MovieAlnIndexLookupTable &table, const std::string &alignedSequence,
+                   SMRTSequence &sourceRead, unsigned int &numPasses)
+{
+    (void)(baseFile);
+    (void)(pulseFile);
+    (void)(alignedSequence);
 
     assert(!table.skip);
     //
@@ -734,36 +715,28 @@ void GetSourceRead(CmpFile      & cmpFile,
 // AlnArray are saved in movieAlnIndex.
 // Also check whether the bas file and the cmp file match.
 //
-void BuildLookupTablesAndMakeSane(
-        CmpFile                          & cmpFile,
-        BaseFile                         & baseFile,
-        PulseFile                        & pulseFile,
-        HDFCmpFile<CmpAlignment>         & cmpReader,
-        HDFBasReader                     & hdfBasReader,
-        HDFPlsReader                     & hdfPlsReader,
-        HDFCCSReader<SMRTSequence>       & hdfCcsReader,
-        const bool                       & useBaseFile,
-        const bool                       & usePulseFile,
-        const bool                       & useCcsOnly,
-        const std::vector<int>                & movieAlnIndex,
-        const std::vector<std::pair<int,int> >    & toFrom,
-        const std::set<uint32_t>              & moviePartHoleNumbers,
-        std::vector<MovieAlnIndexLookupTable> & lookupTables) {
-    (void)(hdfPlsReader); (void)(hdfCcsReader); (void)(useCcsOnly); (void)(useBaseFile);
+void BuildLookupTablesAndMakeSane(CmpFile &cmpFile, BaseFile &baseFile, PulseFile &pulseFile,
+                                  HDFCmpFile<CmpAlignment> &cmpReader, HDFBasReader &hdfBasReader,
+                                  HDFPlsReader &hdfPlsReader,
+                                  HDFCCSReader<SMRTSequence> &hdfCcsReader, const bool &useBaseFile,
+                                  const bool &usePulseFile, const bool &useCcsOnly,
+                                  const std::vector<int> &movieAlnIndex,
+                                  const std::vector<std::pair<int, int> > &toFrom,
+                                  const std::set<uint32_t> &moviePartHoleNumbers,
+                                  std::vector<MovieAlnIndexLookupTable> &lookupTables)
+{
+    (void)(hdfPlsReader);
+    (void)(hdfCcsReader);
+    (void)(useCcsOnly);
+    (void)(useBaseFile);
 
     lookupTables.resize(movieAlnIndex.size());
     size_t movieAlignmentIndex = 0;
-    for (movieAlignmentIndex = 0; movieAlignmentIndex < movieAlnIndex.size(); movieAlignmentIndex++) {
-        BuildLookupTable(movieAlignmentIndex,
-            cmpFile,
-            baseFile,
-            usePulseFile,
-            pulseFile,
-            cmpReader,
-            movieAlnIndex,
-            toFrom,
-            moviePartHoleNumbers,
-            lookupTables[movieAlignmentIndex]);
+    for (movieAlignmentIndex = 0; movieAlignmentIndex < movieAlnIndex.size();
+         movieAlignmentIndex++) {
+        BuildLookupTable(movieAlignmentIndex, cmpFile, baseFile, usePulseFile, pulseFile, cmpReader,
+                         movieAlnIndex, toFrom, moviePartHoleNumbers,
+                         lookupTables[movieAlignmentIndex]);
     }
 
     //
@@ -777,8 +750,9 @@ void BuildLookupTablesAndMakeSane(
     // For each alignment, do sanity check and
     // cache aligned sequence in MovieAlnIndexLookupTable
     //
-    for (movieAlignmentIndex = 0; movieAlignmentIndex < movieAlnIndex.size(); movieAlignmentIndex++) {
-        MovieAlnIndexLookupTable & table = lookupTables[movieAlignmentIndex];
+    for (movieAlignmentIndex = 0; movieAlignmentIndex < movieAlnIndex.size();
+         movieAlignmentIndex++) {
+        MovieAlnIndexLookupTable &table = lookupTables[movieAlignmentIndex];
         if (table.skip) continue;
         //
         // Get aligned sequence for this alignment from cmpFile
@@ -793,15 +767,14 @@ void BuildLookupTablesAndMakeSane(
         //
         // Get sequence for this alignment from baseFile
         //
-        Nucleotide * seq = new Nucleotide[table.readLength];
+        Nucleotide *seq = new Nucleotide[table.readLength];
         baseFile.CopyArray(baseFile.baseCalls, table.readStart, table.readLength, seq);
 
         std::string readSequence;
         readSequence.resize(table.queryEnd - table.queryStart);
-        copy((char*) (seq + table.queryStart),
-             (char*) (seq + table.queryEnd),
+        copy((char *)(seq + table.queryStart), (char *)(seq + table.queryEnd),
              readSequence.begin());
-        delete []seq;
+        delete[] seq;
 
         //
         // Do a sanity check to make sure the pulses and the alignment
@@ -810,16 +783,17 @@ void BuildLookupTablesAndMakeSane(
         // read.
         //
         if (alignedSequence.size() != readSequence.size() or alignedSequence != readSequence) {
-            std::cout << "ERROR, the query sequence does not match the aligned query sequence." << std::endl
-                 << "HoleNumber: "       << cmpFile.alnInfo.alignments[table.alignmentIndex].GetHoleNumber()
-                 << ", MovieName: "      << baseFile.GetMovieName()
-                 << ", ReadIndex: "      << table.readIndex
-                 << ", qStart: "         << table.queryStart
-                 << ", qEnd: "           << table.queryEnd << std::endl
-                 << "Aligned sequence: " << std::endl
-                 << alignedSequence      << std::endl
-                 << "Original sequence: "<< std::endl
-                 << readSequence         << std::endl;
+            std::cout << "ERROR, the query sequence does not match the aligned query sequence."
+                      << std::endl
+                      << "HoleNumber: "
+                      << cmpFile.alnInfo.alignments[table.alignmentIndex].GetHoleNumber()
+                      << ", MovieName: " << baseFile.GetMovieName()
+                      << ", ReadIndex: " << table.readIndex << ", qStart: " << table.queryStart
+                      << ", qEnd: " << table.queryEnd << std::endl
+                      << "Aligned sequence: " << std::endl
+                      << alignedSequence << std::endl
+                      << "Original sequence: " << std::endl
+                      << readSequence << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
@@ -850,62 +824,63 @@ void BuildLookupTablesAndMakeSane(
 //   2, within each grouped item, offsetBegin may not begin from 0,
 //      and offsets may not be continugous.
 //
-void GroupLookupTables(
-        std::vector<MovieAlnIndexLookupTable>  & lookupTables,
-        std::vector<std::pair<UInt, UInt> > & groupedLookupTablesIndexPairs) {
+void GroupLookupTables(std::vector<MovieAlnIndexLookupTable> &lookupTables,
+                       std::vector<std::pair<UInt, UInt> > &groupedLookupTablesIndexPairs)
+{
 
     std::vector<std::pair<UInt, UInt> > refGroupIndexReadGroupIndexPairs;
     UInt movieAlignmentIndex = 0;
-    size_t preRefGroupIndex     = 0;
-    size_t preReadGroupIndex    = 0;
-    UInt pairFirst           = 0;
-    bool isVeryFirstGroup    = true;
+    size_t preRefGroupIndex = 0;
+    size_t preReadGroupIndex = 0;
+    UInt pairFirst = 0;
+    bool isVeryFirstGroup = true;
 
-    for (movieAlignmentIndex = 0; movieAlignmentIndex < lookupTables.size(); movieAlignmentIndex++) {
-        MovieAlnIndexLookupTable & lookupTable = lookupTables[movieAlignmentIndex];
+    for (movieAlignmentIndex = 0; movieAlignmentIndex < lookupTables.size();
+         movieAlignmentIndex++) {
+        MovieAlnIndexLookupTable &lookupTable = lookupTables[movieAlignmentIndex];
 
-        if (isVeryFirstGroup or
-            (lookupTable.refGroupIndex  != preRefGroupIndex or
-             lookupTable.readGroupIndex != preReadGroupIndex)) {
+        if (isVeryFirstGroup or (lookupTable.refGroupIndex != preRefGroupIndex or
+                                 lookupTable.readGroupIndex != preReadGroupIndex)) {
             // Find a new group
             if (isVeryFirstGroup) {
                 // This is the very first group
                 isVeryFirstGroup = false;
-            } else
-            if (lookupTable.refGroupIndex  == preRefGroupIndex &&
-                lookupTable.readGroupIndex != preReadGroupIndex) {
+            } else if (lookupTable.refGroupIndex == preRefGroupIndex &&
+                       lookupTable.readGroupIndex != preReadGroupIndex) {
                 // Assumption (1) has been violated
                 std::cout << "ERROR! lookupTables should have been sorted by reference"
-                     << "group index and read group index." << std::endl;
+                          << "group index and read group index." << std::endl;
                 std::exit(EXIT_FAILURE);
             } else {
                 // Find the first lookupTable of a new group, save indices of [first and last)
                 // lookupTables of the last group.
-                groupedLookupTablesIndexPairs.push_back(std::pair<UInt,UInt> (pairFirst, movieAlignmentIndex));
+                groupedLookupTablesIndexPairs.push_back(
+                    std::pair<UInt, UInt>(pairFirst, movieAlignmentIndex));
                 // Save refGroupIndex and readGroupIndex of the last group
-                std::pair<UInt,UInt> refGroupIndexReadGroupIndexPair(preRefGroupIndex, preReadGroupIndex);
+                std::pair<UInt, UInt> refGroupIndexReadGroupIndexPair(preRefGroupIndex,
+                                                                      preReadGroupIndex);
                 refGroupIndexReadGroupIndexPairs.push_back(refGroupIndexReadGroupIndexPair);
             }
 
             // Store index of the first lookupTable of the new group in lookupTables
             pairFirst = movieAlignmentIndex;
             // Store refGroupIndex and readGroupIndex of the new group
-            preRefGroupIndex  = lookupTable.refGroupIndex;
+            preRefGroupIndex = lookupTable.refGroupIndex;
             preReadGroupIndex = lookupTable.readGroupIndex;
         }
     }
     if (not isVeryFirstGroup) {
         // Save indices of [first and last) lookupTables of the very last group
-        groupedLookupTablesIndexPairs.push_back(std::pair<UInt,UInt> (pairFirst, movieAlignmentIndex));
+        groupedLookupTablesIndexPairs.push_back(
+            std::pair<UInt, UInt>(pairFirst, movieAlignmentIndex));
         // Save refGroupIndex and readGroupIndex of the very last group
-        std::pair<UInt,UInt> refGroupIndexReadGroupIndexPair(preRefGroupIndex, preReadGroupIndex);
+        std::pair<UInt, UInt> refGroupIndexReadGroupIndexPair(preRefGroupIndex, preReadGroupIndex);
         refGroupIndexReadGroupIndexPairs.push_back(refGroupIndexReadGroupIndexPair);
-    } // Do nothing, if no lookupTable exists
-
+    }  // Do nothing, if no lookupTable exists
 
     // Double check all assumptions are met
     for (size_t i = 0; i < refGroupIndexReadGroupIndexPairs.size(); i++) {
-        for (size_t j = i+1; j < refGroupIndexReadGroupIndexPairs.size(); j++) {
+        for (size_t j = i + 1; j < refGroupIndexReadGroupIndexPairs.size(); j++) {
             // Assure that assumption (1) is met. If this assertion fails,
             // then alignments in the input cmp.h5 are not grouped by
             // reference. Check /AlnInfo/AlnIndex dataset column 3.
@@ -914,39 +889,33 @@ void GroupLookupTables(
     }
     assert(groupedLookupTablesIndexPairs.size() == refGroupIndexReadGroupIndexPairs.size());
     for (size_t i = 0; i < groupedLookupTablesIndexPairs.size(); i++) {
-        UInt firstIndex     = groupedLookupTablesIndexPairs[i].first;
-        UInt lastIndex      = groupedLookupTablesIndexPairs[i].second;
-        UInt refGroupIndex  = refGroupIndexReadGroupIndexPairs[i].first;
+        UInt firstIndex = groupedLookupTablesIndexPairs[i].first;
+        UInt lastIndex = groupedLookupTablesIndexPairs[i].second;
+        UInt refGroupIndex = refGroupIndexReadGroupIndexPairs[i].first;
         UInt readGroupIndex = refGroupIndexReadGroupIndexPairs[i].second;
-        for(UInt index = firstIndex; index < lastIndex; index++) {
-            assert(lookupTables[index].refGroupIndex  == refGroupIndex);
+        for (UInt index = firstIndex; index < lastIndex; index++) {
+            assert(lookupTables[index].refGroupIndex == refGroupIndex);
             assert(lookupTables[index].readGroupIndex == readGroupIndex);
         }
     }
 }
 
-
 //
 // Read all required fields for computing the specified metric into memory,
 // unless the fields have been cached.
 //
-void CacheRequiredFieldsForMetric(
-        BaseFile                    & baseFile,
-        PulseFile                   & pulseFile,
-        HDFBasReader                & hdfBasReader,
-        HDFPlsReader                & hdfPlsReader,
-        HDFCCSReader<SMRTSequence>  & hdfCcsReader,
-        const bool                  & useBaseFile,
-        const bool                  & usePulseFile,
-        const bool                  & useCcsOnly,
-        std::vector<Field>               & cachedFields,
-        const std::string                & curMetric) {
-    (void)(hdfCcsReader); (void)(useCcsOnly);
+void CacheRequiredFieldsForMetric(BaseFile &baseFile, PulseFile &pulseFile,
+                                  HDFBasReader &hdfBasReader, HDFPlsReader &hdfPlsReader,
+                                  HDFCCSReader<SMRTSequence> &hdfCcsReader, const bool &useBaseFile,
+                                  const bool &usePulseFile, const bool &useCcsOnly,
+                                  std::vector<Field> &cachedFields, const std::string &curMetric)
+{
+    (void)(hdfCcsReader);
+    (void)(useCcsOnly);
 
     std::vector<Field> fieldsToBeUsed;
-    bool canBeComputed = CanThisMetricBeComputed(
-        curMetric, hdfBasReader, hdfPlsReader,
-        useBaseFile, usePulseFile, fieldsToBeUsed);
+    bool canBeComputed = CanThisMetricBeComputed(curMetric, hdfBasReader, hdfPlsReader, useBaseFile,
+                                                 usePulseFile, fieldsToBeUsed);
     assert(canBeComputed);
 
     // Cache all required fields
@@ -961,18 +930,16 @@ void CacheRequiredFieldsForMetric(
         if (isFieldCached) {
             continue;
         }
-        std::string    & curField = fieldsToBeUsed[i].name;
-        FieldType & fieldType= fieldsToBeUsed[i].type;
+        std::string &curField = fieldsToBeUsed[i].name;
+        FieldType &fieldType = fieldsToBeUsed[i].type;
 
-        if (fieldType == BasField and useBaseFile
-            and hdfBasReader.FieldIsIncluded(curField)
-            and hdfBasReader.includedFields[curField]) {
+        if (fieldType == BasField and useBaseFile and hdfBasReader.FieldIsIncluded(curField) and
+            hdfBasReader.includedFields[curField]) {
             hdfBasReader.ReadField(baseFile, curField);
             cachedFields.push_back(fieldsToBeUsed[i]);
-        } else
-        if (fieldType == PlsField and usePulseFile
-            and hdfPlsReader.FieldIsIncluded(curField)
-            and hdfPlsReader.includedFields[curField]) {
+        } else if (fieldType == PlsField and usePulseFile and
+                   hdfPlsReader.FieldIsIncluded(curField) and
+                   hdfPlsReader.includedFields[curField]) {
             hdfPlsReader.ReadField(pulseFile, curField);
             cachedFields.push_back(fieldsToBeUsed[i]);
         }
@@ -983,25 +950,20 @@ void CacheRequiredFieldsForMetric(
 // Clear cached fields unless they are also required for computing
 // the next metric.
 //
-void ClearCachedFields(
-        BaseFile                   & baseFile,
-        PulseFile                  & pulseFile,
-        HDFBasReader               & hdfBasReader,
-        HDFPlsReader               & hdfPlsReader,
-        HDFCCSReader<SMRTSequence> & hdfCcsReader,
-        const bool                 & useBaseFile,
-        const bool                 & usePulseFile,
-        const bool                 & useCcsOnly,
-        std::vector<Field>              & cachedFields,
-        const std::string               & curMetric,
-        const std::string               & nextMetric) {
-    (void)(hdfCcsReader); (void)(useCcsOnly); (void)(curMetric);
+void ClearCachedFields(BaseFile &baseFile, PulseFile &pulseFile, HDFBasReader &hdfBasReader,
+                       HDFPlsReader &hdfPlsReader, HDFCCSReader<SMRTSequence> &hdfCcsReader,
+                       const bool &useBaseFile, const bool &usePulseFile, const bool &useCcsOnly,
+                       std::vector<Field> &cachedFields, const std::string &curMetric,
+                       const std::string &nextMetric)
+{
+    (void)(hdfCcsReader);
+    (void)(useCcsOnly);
+    (void)(curMetric);
 
     std::vector<Field> nextRequiredFields;
     if (nextMetric != "") {
-        bool canBeComputed = CanThisMetricBeComputed(
-            nextMetric, hdfBasReader, hdfPlsReader,
-            useBaseFile, usePulseFile, nextRequiredFields);
+        bool canBeComputed = CanThisMetricBeComputed(nextMetric, hdfBasReader, hdfPlsReader,
+                                                     useBaseFile, usePulseFile, nextRequiredFields);
         assert(canBeComputed);
     }
     for (size_t i = 0; i < cachedFields.size(); i++) {
@@ -1015,27 +977,25 @@ void ClearCachedFields(
         if (isRequiredForNextMetric) {
             continue;
         }
-        std::string    & curField = cachedFields[i].name;
-        FieldType & fieldType= cachedFields[i].type;
+        std::string &curField = cachedFields[i].name;
+        FieldType &fieldType = cachedFields[i].type;
 
-        if (fieldType == BasField and useBaseFile  and
-            hdfBasReader.FieldIsIncluded(curField) and
+        if (fieldType == BasField and useBaseFile and hdfBasReader.FieldIsIncluded(curField) and
             hdfBasReader.includedFields[curField]) {
             hdfBasReader.ClearField(baseFile, curField);
             // Remove it from cachedFields
-            cachedFields.erase(cachedFields.begin()+i);
+            cachedFields.erase(cachedFields.begin() + i);
             i--;
-        } else
-        if (fieldType == PlsField and usePulseFile and
-            hdfPlsReader.FieldIsIncluded(curField) and
-            hdfPlsReader.includedFields[curField]) {
+        } else if (fieldType == PlsField and usePulseFile and
+                   hdfPlsReader.FieldIsIncluded(curField) and
+                   hdfPlsReader.includedFields[curField]) {
             if (curField == "NumEvent") {
                 // Always keep NumEvent
                 continue;
             }
             hdfPlsReader.ClearField(pulseFile, curField);
             // Remove it from cachedFields
-            cachedFields.erase(cachedFields.begin()+i);
+            cachedFields.erase(cachedFields.begin() + i);
             i--;
         }
     }
@@ -1043,25 +1003,23 @@ void ClearCachedFields(
 
 // Compute StartFrame from BaseCalls only.
 // Return true if succeed, false otherwise.
-bool ComputeStartFrameFromBase(
-        BaseFile           & baseFile,
-        HDFBasReader       & hdfBasReader,
-        const bool         & useBaseFile,
-        MovieAlnIndexLookupTable & lookupTable,
-        std::vector<UInt>       & newStartFrame) {
+bool ComputeStartFrameFromBase(BaseFile &baseFile, HDFBasReader &hdfBasReader,
+                               const bool &useBaseFile, MovieAlnIndexLookupTable &lookupTable,
+                               std::vector<UInt> &newStartFrame)
+{
     newStartFrame.resize(lookupTable.readLength);
-    if (useBaseFile and hdfBasReader.FieldIsIncluded("PreBaseFrames")
-        and hdfBasReader.includedFields["PreBaseFrames"]
-        and baseFile.preBaseFrames.size() > 0) {
+    if (useBaseFile and hdfBasReader.FieldIsIncluded("PreBaseFrames") and
+        hdfBasReader.includedFields["PreBaseFrames"] and baseFile.preBaseFrames.size() > 0) {
         // baseFile.preBaseFrame data type = uint16
         // startFrame data type = uint32
         for (int i = 0; i < lookupTable.readLength; i++) {
-            newStartFrame[i] = baseFile.preBaseFrames[lookupTable.readStart+i];
+            newStartFrame[i] = baseFile.preBaseFrames[lookupTable.readStart + i];
         }
-        for (int i = 0; i < lookupTable.readLength-1; i++) {
-            newStartFrame[i+1] += baseFile.basWidthInFrames[lookupTable.readStart+i];
+        for (int i = 0; i < lookupTable.readLength - 1; i++) {
+            newStartFrame[i + 1] += baseFile.basWidthInFrames[lookupTable.readStart + i];
         }
-        std::partial_sum(&newStartFrame[0], &newStartFrame[lookupTable.readLength], &newStartFrame[0]);
+        std::partial_sum(&newStartFrame[0], &newStartFrame[lookupTable.readLength],
+                         &newStartFrame[0]);
         return true;
     }
     return false;
@@ -1069,24 +1027,21 @@ bool ComputeStartFrameFromBase(
 
 // Compute StartFrame from PulseCalls only.
 // Return true if succeed, false otherwise.
-bool ComputeStartFrameFromPulse(
-        PulseFile          & pulseFile,
-        HDFPlsReader       & hdfPlsReader,
-        const bool         & usePulseFile,
-        MovieAlnIndexLookupTable & lookupTable,
-        std::vector<int>        & baseToPulseIndexMap,
-        std::vector<UInt>       & newStartFrame) {
+bool ComputeStartFrameFromPulse(PulseFile &pulseFile, HDFPlsReader &hdfPlsReader,
+                                const bool &usePulseFile, MovieAlnIndexLookupTable &lookupTable,
+                                std::vector<int> &baseToPulseIndexMap,
+                                std::vector<UInt> &newStartFrame)
+{
     newStartFrame.resize(lookupTable.readLength);
     if (usePulseFile) {
         assert(pulseFile.startFrame.size() > 0);
         hdfPlsReader.CopyFieldAt(pulseFile, "StartFrame", lookupTable.plsReadIndex,
-                &baseToPulseIndexMap[0], &newStartFrame[0],
-                lookupTable.readLength);
+                                 &baseToPulseIndexMap[0], &newStartFrame[0],
+                                 lookupTable.readLength);
         return true;
     }
     return false;
 }
-
 
 // Compute StartFrame from either (1) BaseCalls or (2) PulseCalls.
 //    (1) Uses baseFile.preBaseFrames and baseFile.basWidthInFrames
@@ -1096,22 +1051,18 @@ bool ComputeStartFrameFromPulse(
 // because PreBaseFrames is of data type uint_16, while its
 // value can exceed maximum uint_16 (65535).
 // When possible, always use PulseCalls.
-void ComputeStartFrame(
-        BaseFile           & baseFile,
-        PulseFile          & pulseFile,
-        HDFBasReader       & hdfBasReader,
-        HDFPlsReader       & hdfPlsReader,
-        bool                 useBaseFile,
-        bool                 usePulseFile,
-        MovieAlnIndexLookupTable & lookupTable,
-        std::vector<int>        & baseToPulseIndexMap,
-        std::vector<UInt>       & newStartFrame) {
+void ComputeStartFrame(BaseFile &baseFile, PulseFile &pulseFile, HDFBasReader &hdfBasReader,
+                       HDFPlsReader &hdfPlsReader, bool useBaseFile, bool usePulseFile,
+                       MovieAlnIndexLookupTable &lookupTable, std::vector<int> &baseToPulseIndexMap,
+                       std::vector<UInt> &newStartFrame)
+{
 
-    if (!ComputeStartFrameFromPulse(pulseFile, hdfPlsReader, usePulseFile,
-                lookupTable, baseToPulseIndexMap, newStartFrame)) {
-        if (!ComputeStartFrameFromBase(baseFile, hdfBasReader, useBaseFile,
-                lookupTable, newStartFrame)) {
-            std::cout << "ERROR! There is insufficient data to compute metric: StartFrame." << std::endl;
+    if (!ComputeStartFrameFromPulse(pulseFile, hdfPlsReader, usePulseFile, lookupTable,
+                                    baseToPulseIndexMap, newStartFrame)) {
+        if (!ComputeStartFrameFromBase(baseFile, hdfBasReader, useBaseFile, lookupTable,
+                                       newStartFrame)) {
+            std::cout << "ERROR! There is insufficient data to compute metric: StartFrame."
+                      << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
@@ -1121,32 +1072,29 @@ void ComputeStartFrame(
 // Compute and write an entire metric to cmp.h5.
 // Assume that all required fields have been loaded.
 //
-void WriteMetric(
-        CmpFile                          & cmpFile,
-        BaseFile                         & baseFile,
-        PulseFile                        & pulseFile,
-        HDFCmpFile<CmpAlignment>         & cmpReader,
-        HDFBasReader                     & hdfBasReader,
-        HDFPlsReader                     & hdfPlsReader,
-        HDFCCSReader<SMRTSequence>       & hdfCcsReader,
-        const bool                       & useBaseFile,
-        const bool                       & usePulseFile,
-        const bool                       & useCcsOnly,
-        std::vector<MovieAlnIndexLookupTable> & lookupTables,
-        std::vector<std::pair<UInt, UInt> >        & groupedLookupTablesIndexPairs,
-        const std::string                     & curMetric ) {
-    (void)(cmpFile); (void)(hdfCcsReader); (void)(useCcsOnly);
+void WriteMetric(CmpFile &cmpFile, BaseFile &baseFile, PulseFile &pulseFile,
+                 HDFCmpFile<CmpAlignment> &cmpReader, HDFBasReader &hdfBasReader,
+                 HDFPlsReader &hdfPlsReader, HDFCCSReader<SMRTSequence> &hdfCcsReader,
+                 const bool &useBaseFile, const bool &usePulseFile, const bool &useCcsOnly,
+                 std::vector<MovieAlnIndexLookupTable> &lookupTables,
+                 std::vector<std::pair<UInt, UInt> > &groupedLookupTablesIndexPairs,
+                 const std::string &curMetric)
+{
+    (void)(cmpFile);
+    (void)(hdfCcsReader);
+    (void)(useCcsOnly);
 
     for (size_t index = 0; index < groupedLookupTablesIndexPairs.size(); index++) {
         // Group[index] contains all items in lookupTables[firstIndex...lastIndex)
         UInt firstIndex = groupedLookupTablesIndexPairs[index].first;
-        UInt lastIndex  = groupedLookupTablesIndexPairs[index].second;
+        UInt lastIndex = groupedLookupTablesIndexPairs[index].second;
 
         assert(lookupTables.size() > firstIndex);
-        UInt refGroupIndex  = lookupTables[firstIndex].refGroupIndex;
+        UInt refGroupIndex = lookupTables[firstIndex].refGroupIndex;
         UInt readGroupIndex = lookupTables[firstIndex].readGroupIndex;
         // Obtain alignment array length from *.cmp.h5/refGroup/readGroup/AlnArray.
-        HDFCmpExperimentGroup* expGroup = cmpReader.refAlignGroups[refGroupIndex]->readGroups[readGroupIndex];
+        HDFCmpExperimentGroup *expGroup =
+            cmpReader.refAlignGroups[refGroupIndex]->readGroups[readGroupIndex];
         UInt alnArrayLength = expGroup->alignmentArray.size();
 
         //
@@ -1154,15 +1102,15 @@ void WriteMetric(
         // using differences of pulse indices, pulse widths, etc..
         // Missing fields are stored as 0's.
         //
-        std::vector<UInt>     startTimeOffsetMetric;
+        std::vector<UInt> startTimeOffsetMetric;
         // pulseIndex's data type is uint16 in ICD,
         // but I have seen it defined as uint32 in a bas file.
-        std::vector<UInt>     pulseMetric;
-        std::vector<UChar>    qvMetric;
+        std::vector<UInt> pulseMetric;
+        std::vector<UChar> qvMetric;
         std::vector<HalfWord> frameRateMetric;
-        std::vector<UInt>     timeMetric;
-        std::vector<char>     tagMetric;
-        std::vector<float>    floatMetric;
+        std::vector<UInt> timeMetric;
+        std::vector<char> tagMetric;
+        std::vector<float> floatMetric;
 
         /*
         if (curMetric == "StartTimeOffset") {
@@ -1179,79 +1127,77 @@ void WriteMetric(
 
         } else */
         if (curMetric == "QualityValue" || curMetric == "InsertionQV" ||
-            curMetric == "DeletionQV"   || curMetric == "MergeQV"     ||
-            curMetric == "SubstitutionQV") {
+            curMetric == "DeletionQV" || curMetric == "MergeQV" || curMetric == "SubstitutionQV") {
             qvMetric.resize(alnArrayLength);
-            HDFArray<UChar> * data = (HDFArray<UChar>*) expGroup->fields[curMetric];
+            HDFArray<UChar> *data = (HDFArray<UChar> *)expGroup->fields[curMetric];
             if (data->IsInitialized()) {
                 assert(data->size() == alnArrayLength);
                 data->UpdateH5Dataspace();
-                data->Read(0, alnArrayLength-1, &qvMetric[0]);
+                data->Read(0, alnArrayLength - 1, &qvMetric[0]);
             } else {
                 data->Initialize(expGroup->experimentGroup, curMetric);
                 //std::fill(qvMetric.begin(), qvMetric.end(), missingQualityValue);
             }
 
-        } else if (curMetric == "ClassifierQV" || curMetric == "pkmid" ) {
+        } else if (curMetric == "ClassifierQV" || curMetric == "pkmid") {
             // Note that data type of pkmid=midSignal, which is uint_8 in bas/pls files,
             // has been changed to float in cmp.h5. Why?
             floatMetric.resize(alnArrayLength);
-            HDFArray<float> * data = (HDFArray<float>*) expGroup->fields[curMetric];
+            HDFArray<float> *data = (HDFArray<float> *)expGroup->fields[curMetric];
             if (data->IsInitialized()) {
                 assert(data->size() == alnArrayLength);
                 data->UpdateH5Dataspace();
-                data->Read(0, alnArrayLength-1, &floatMetric[0]);
+                data->Read(0, alnArrayLength - 1, &floatMetric[0]);
             } else {
                 data->Initialize(expGroup->experimentGroup, curMetric);
                 //std::fill(floatMetric.begin(), floatMetric.end(), NaN);
             }
 
-        } else if (curMetric == "PulseIndex"     ) {
+        } else if (curMetric == "PulseIndex") {
             pulseMetric.resize(alnArrayLength);
-            HDFArray<UInt> * data = (HDFArray<UInt>*) expGroup->fields[curMetric];
+            HDFArray<UInt> *data = (HDFArray<UInt> *)expGroup->fields[curMetric];
             if (data->IsInitialized()) {
                 assert(data->size() == alnArrayLength);
                 data->UpdateH5Dataspace();
-                data->Read(0, alnArrayLength-1, &pulseMetric[0]);
+                data->Read(0, alnArrayLength - 1, &pulseMetric[0]);
             } else {
                 data->Initialize(expGroup->experimentGroup, curMetric);
                 //std::fill(pulseMetric.begin(), pulseMetric.end(), 0);
             }
 
-        } else if (curMetric == "DeletionTag"  || curMetric == "SubstitutionTag") {
+        } else if (curMetric == "DeletionTag" || curMetric == "SubstitutionTag") {
             tagMetric.resize(alnArrayLength);
-            HDFArray<char> * data = (HDFArray<char>*) expGroup->fields[curMetric];
+            HDFArray<char> *data = (HDFArray<char> *)expGroup->fields[curMetric];
             if (data->IsInitialized()) {
                 assert(data->size() == alnArrayLength);
                 data->UpdateH5Dataspace();
-                data->Read(0, alnArrayLength-1, &tagMetric[0]);
+                data->Read(0, alnArrayLength - 1, &tagMetric[0]);
             } else {
                 data->Initialize(expGroup->experimentGroup, curMetric);
                 //std::fill(tagMetric.begin(), tagMetric.end(), '-');
             }
 
-        } else if (curMetric == "StartFrame"   || curMetric == "StartFrameBase" ||
+        } else if (curMetric == "StartFrame" || curMetric == "StartFrameBase" ||
                    curMetric == "StartFramePulse") {
             timeMetric.resize(alnArrayLength);
-            HDFArray<UInt> * data = (HDFArray<UInt>*) expGroup->fields[curMetric];
+            HDFArray<UInt> *data = (HDFArray<UInt> *)expGroup->fields[curMetric];
             if (data->IsInitialized()) {
                 assert(data->size() == alnArrayLength);
                 data->UpdateH5Dataspace();
-                data->Read(0, alnArrayLength-1, &timeMetric[0]);
+                data->Read(0, alnArrayLength - 1, &timeMetric[0]);
             } else {
                 data->Initialize(expGroup->experimentGroup, curMetric);
                 //std::fill(timeMetric.begin(), timeMetric.end(), missingPulseIndex);
             }
 
-        } else if (curMetric == "PulseWidth"   || curMetric == "PreBaseFrames" ||
-                   curMetric == "WidthInFrames"|| curMetric == "IPD"           ||
-                   curMetric == "Light") {
+        } else if (curMetric == "PulseWidth" || curMetric == "PreBaseFrames" ||
+                   curMetric == "WidthInFrames" || curMetric == "IPD" || curMetric == "Light") {
             frameRateMetric.resize(alnArrayLength);
-            HDFArray<HalfWord> * data = (HDFArray<HalfWord>*) expGroup->fields[curMetric];
+            HDFArray<HalfWord> *data = (HDFArray<HalfWord> *)expGroup->fields[curMetric];
             if (data->IsInitialized()) {
                 assert(data->size() == alnArrayLength);
                 data->UpdateH5Dataspace();
-                data->Read(0, alnArrayLength-1, &frameRateMetric[0]);
+                data->Read(0, alnArrayLength - 1, &frameRateMetric[0]);
             } else {
                 data->Initialize(expGroup->experimentGroup, curMetric);
                 //std::fill(frameRateMetric.begin(), frameRateMetric.end(), missingFrameRateValue);
@@ -1261,20 +1207,22 @@ void WriteMetric(
             std::exit(EXIT_FAILURE);
         }
 
-        for (size_t movieAlignmentIndex = firstIndex; movieAlignmentIndex < lastIndex; movieAlignmentIndex++) {
-            MovieAlnIndexLookupTable & lookupTable   = lookupTables[movieAlignmentIndex];
+        for (size_t movieAlignmentIndex = firstIndex; movieAlignmentIndex < lastIndex;
+             movieAlignmentIndex++) {
+            MovieAlnIndexLookupTable &lookupTable = lookupTables[movieAlignmentIndex];
             if (lookupTable.skip) continue;
 
-            const UInt alignedSequenceLength         = lookupTable.offsetEnd - lookupTable.offsetBegin;
-            const UInt ungappedAlignedSequenceLength = lookupTable.queryEnd  - lookupTable.queryStart;
-            const UInt   & plsReadIndex              = lookupTable.plsReadIndex;
-            const UInt   & readStart                 = lookupTable.readStart;
-            const UInt   & readLength                = lookupTable.readLength;
-            const UInt   & queryStart                = lookupTable.queryStart;
-            const UInt   & offsetBegin               = lookupTable.offsetBegin;
-            const UInt   & offsetEnd                 = lookupTable.offsetEnd;
-            assert (offsetEnd <= alnArrayLength);
-            assert (offsetBegin+alignedSequenceLength <= alnArrayLength);
+            const UInt alignedSequenceLength = lookupTable.offsetEnd - lookupTable.offsetBegin;
+            const UInt ungappedAlignedSequenceLength =
+                lookupTable.queryEnd - lookupTable.queryStart;
+            const UInt &plsReadIndex = lookupTable.plsReadIndex;
+            const UInt &readStart = lookupTable.readStart;
+            const UInt &readLength = lookupTable.readLength;
+            const UInt &queryStart = lookupTable.queryStart;
+            const UInt &offsetBegin = lookupTable.offsetBegin;
+            const UInt &offsetEnd = lookupTable.offsetEnd;
+            assert(offsetEnd <= alnArrayLength);
+            assert(offsetBegin + alignedSequenceLength <= alnArrayLength);
 
             // Condense gaps and get ungapped aligned sequence.
             std::string ungappedAlignedSequence = lookupTable.alignedSequence;
@@ -1295,11 +1243,12 @@ void WriteMetric(
                 assert(baseFile.qualityValues.size() > 0 &&
                        baseFile.qualityValues.size() >= readStart + readLength);
                 std::fill(&qvMetric[offsetBegin], &qvMetric[offsetEnd], missingPulseIndex);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                     // cap quality value
-                    qvMetric[offsetBegin+baseToAlignmentMap[i]] = std::min(maxQualityValue, baseFile.qualityValues[readStart+queryStart+i]);
+                    qvMetric[offsetBegin + baseToAlignmentMap[i]] = std::min(
+                        maxQualityValue, baseFile.qualityValues[readStart + queryStart + i]);
                 }
-                qvMetric[offsetBegin+alignedSequenceLength] = 0;
+                qvMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "InsertionQV") {
                 assert(baseFile.insertionQV.size() > 0 &&
@@ -1307,19 +1256,21 @@ void WriteMetric(
                 std::fill(&qvMetric[offsetBegin], &qvMetric[offsetEnd], missingPulseIndex);
                 for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                     // cap quality value
-                    qvMetric[offsetBegin+baseToAlignmentMap[i]] = std::min(maxQualityValue, baseFile.insertionQV[readStart+queryStart+i]);
+                    qvMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        std::min(maxQualityValue, baseFile.insertionQV[readStart + queryStart + i]);
                 }
-                qvMetric[offsetBegin+alignedSequenceLength] = 0;
+                qvMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "MergeQV") {
                 assert(baseFile.mergeQV.size() > 0 &&
                        baseFile.mergeQV.size() >= readStart + readLength);
                 std::fill(&qvMetric[offsetBegin], &qvMetric[offsetEnd], missingPulseIndex);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                     // cap quality value
-                    qvMetric[offsetBegin+baseToAlignmentMap[i]] = std::min(maxQualityValue, baseFile.mergeQV[readStart+queryStart+i]);
+                    qvMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        std::min(maxQualityValue, baseFile.mergeQV[readStart + queryStart + i]);
                 }
-                qvMetric[offsetBegin+alignedSequenceLength] = 0;
+                qvMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "DeletionQV") {
                 assert(baseFile.deletionQV.size() > 0 &&
@@ -1327,46 +1278,51 @@ void WriteMetric(
                 std::fill(&qvMetric[offsetBegin], &qvMetric[offsetEnd], missingPulseIndex);
                 for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                     // cap quality value
-                    qvMetric[offsetBegin+baseToAlignmentMap[i]] = std::min(maxQualityValue, baseFile.deletionQV[readStart+queryStart+i]);
+                    qvMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        std::min(maxQualityValue, baseFile.deletionQV[readStart + queryStart + i]);
                 }
-                qvMetric[offsetBegin+alignedSequenceLength] = 0;
+                qvMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "DeletionTag") {
                 assert(baseFile.deletionTag.size() > 0 &&
                        baseFile.deletionTag.size() >= readStart + readLength);
                 std::fill(&tagMetric[offsetBegin], &tagMetric[offsetEnd], '-');
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    assert(offsetBegin+baseToAlignmentMap[i] < tagMetric.size());
-                    tagMetric[offsetBegin+baseToAlignmentMap[i]] = baseFile.deletionTag[readStart+queryStart+i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    assert(offsetBegin + baseToAlignmentMap[i] < tagMetric.size());
+                    tagMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        baseFile.deletionTag[readStart + queryStart + i];
                 }
-                tagMetric[offsetBegin+alignedSequenceLength] = 0;
+                tagMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "PulseIndex") {
                 assert(baseFile.pulseIndex.size() > 0 &&
                        baseFile.pulseIndex.size() >= readStart + readLength);
                 std::fill(&pulseMetric[offsetBegin], &pulseMetric[offsetEnd], 0);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    pulseMetric[offsetBegin+baseToAlignmentMap[i]] = baseFile.pulseIndex[readStart+queryStart+i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    pulseMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        baseFile.pulseIndex[readStart + queryStart + i];
                 }
-                pulseMetric[offsetBegin+alignedSequenceLength] = 0;
+                pulseMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "SubstitutionTag") {
                 assert(baseFile.substitutionTag.size() > 0 &&
                        baseFile.substitutionTag.size() >= readStart + readLength);
                 std::fill(&tagMetric[offsetBegin], &tagMetric[offsetEnd], '-');
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    tagMetric[offsetBegin+baseToAlignmentMap[i]] = baseFile.substitutionTag[readStart+queryStart+i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    tagMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        baseFile.substitutionTag[readStart + queryStart + i];
                 }
-                tagMetric[offsetBegin+alignedSequenceLength] = 0;
+                tagMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "SubstitutionQV") {
                 assert(baseFile.substitutionQV.size() > 0 &&
                        baseFile.substitutionQV.size() >= readStart + readLength);
                 std::fill(&qvMetric[offsetBegin], &qvMetric[offsetEnd], missingPulseIndex);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    qvMetric[offsetBegin+baseToAlignmentMap[i]] = std::min(maxQualityValue, baseFile.substitutionQV[readStart+queryStart+i]);
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    qvMetric[offsetBegin + baseToAlignmentMap[i]] = std::min(
+                        maxQualityValue, baseFile.substitutionQV[readStart + queryStart + i]);
                 }
-                qvMetric[offsetBegin+alignedSequenceLength] = 0;
+                qvMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "ClassifierQV") {
                 assert(pulseFile.classifierQV.size() > 0 &&
@@ -1377,16 +1333,16 @@ void WriteMetric(
                 // reference the data for the bas file,  but for the pls file,
                 // it is necessary to copy since there is a packing of data.
                 hdfPlsReader.CopyFieldAt(pulseFile, "ClassifierQV", plsReadIndex,
-                        &baseToPulseIndexMap[queryStart], &newClassifierQV[0],
-                        ungappedAlignedSequenceLength);
+                                         &baseToPulseIndexMap[queryStart], &newClassifierQV[0],
+                                         ungappedAlignedSequenceLength);
 
                 std::fill(&floatMetric[offsetBegin], &floatMetric[offsetEnd], NaN);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    floatMetric[offsetBegin+baseToAlignmentMap[i]] = newClassifierQV[i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    floatMetric[offsetBegin + baseToAlignmentMap[i]] = newClassifierQV[i];
                 }
-                floatMetric[offsetBegin+alignedSequenceLength] = 0;
+                floatMetric[offsetBegin + alignedSequenceLength] = 0;
 
-/*            } else if (curMetric == "StartTimeOffset") {
+                /*            } else if (curMetric == "StartTimeOffset") {
                 // StartTimeOffset is a subset of StartFrame.
                 std::vector<UInt> newStartFrame;
                 ComputeStartFrame(baseFile, pulseFile, hdfBasReader, hdfPlsReader,
@@ -1395,49 +1351,50 @@ void WriteMetric(
 
                 startTimeOffsetMetric[offsetBegin] = newStartFrame[queryStart];
 */
-           } else if (curMetric == "StartFrame") {
+            } else if (curMetric == "StartFrame") {
                 std::vector<UInt> newStartFrame;
-                ComputeStartFrame(baseFile, pulseFile, hdfBasReader, hdfPlsReader,
-                                  useBaseFile, usePulseFile, lookupTable,
-                                  baseToPulseIndexMap, newStartFrame);
+                ComputeStartFrame(baseFile, pulseFile, hdfBasReader, hdfPlsReader, useBaseFile,
+                                  usePulseFile, lookupTable, baseToPulseIndexMap, newStartFrame);
                 std::fill(&timeMetric[offsetBegin], &timeMetric[offsetEnd], missingPulseIndex);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    timeMetric[offsetBegin+baseToAlignmentMap[i]] = newStartFrame[queryStart+i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    timeMetric[offsetBegin + baseToAlignmentMap[i]] = newStartFrame[queryStart + i];
                 }
-                timeMetric[offsetBegin+alignedSequenceLength] = 0;
+                timeMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "StartFrameBase") {
                 // Sneaky metric, compute StartFrame from BaseCalls only.
                 std::vector<UInt> newStartFrame;
-                ComputeStartFrameFromBase(baseFile, hdfBasReader, useBaseFile,
-                                  lookupTable, newStartFrame);
+                ComputeStartFrameFromBase(baseFile, hdfBasReader, useBaseFile, lookupTable,
+                                          newStartFrame);
                 std::fill(&timeMetric[offsetBegin], &timeMetric[offsetEnd], missingPulseIndex);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    timeMetric[offsetBegin+baseToAlignmentMap[i]] = newStartFrame[queryStart+i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    timeMetric[offsetBegin + baseToAlignmentMap[i]] = newStartFrame[queryStart + i];
                 }
-                timeMetric[offsetBegin+alignedSequenceLength] = 0;
+                timeMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "StartFramePulse") {
                 // Sneaky metric, compute StartFrame from PulseCalls only.
                 std::vector<UInt> newStartFrame;
-                ComputeStartFrameFromPulse(pulseFile, hdfPlsReader, usePulseFile,
-                                  lookupTable, baseToPulseIndexMap, newStartFrame);
+                ComputeStartFrameFromPulse(pulseFile, hdfPlsReader, usePulseFile, lookupTable,
+                                           baseToPulseIndexMap, newStartFrame);
                 std::fill(&timeMetric[offsetBegin], &timeMetric[offsetEnd], missingPulseIndex);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    timeMetric[offsetBegin+baseToAlignmentMap[i]] = newStartFrame[queryStart+i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    timeMetric[offsetBegin + baseToAlignmentMap[i]] = newStartFrame[queryStart + i];
                 }
-                timeMetric[offsetBegin+alignedSequenceLength] = 0;
+                timeMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "PreBaseFrames") {
                 // Directly load baseFile.PreBaseFrames.
                 // DON'T compute it from PulseCalls even if you can.
                 assert(baseFile.preBaseFrames.size() > 0 &&
                        baseFile.preBaseFrames.size() >= readStart + readLength);
-                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd], missingFrameRateValue);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    frameRateMetric[offsetBegin+baseToAlignmentMap[i]] = baseFile.preBaseFrames[readStart+queryStart+i];
+                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd],
+                          missingFrameRateValue);
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    frameRateMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        baseFile.preBaseFrames[readStart + queryStart + i];
                 }
-                frameRateMetric[offsetBegin+alignedSequenceLength] = 0;
+                frameRateMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "WidthInFrames" || curMetric == "PulseWidth") {
                 // For legacy reasons, it's possible the width in frames is
@@ -1448,21 +1405,22 @@ void WriteMetric(
                 newWidthInFrames.resize(ungappedAlignedSequenceLength);
                 if (usePulseFile) {
                     hdfPlsReader.CopyFieldAt(pulseFile, "WidthInFrames", plsReadIndex,
-                            &baseToPulseIndexMap[queryStart], &newWidthInFrames[0],
-                            ungappedAlignedSequenceLength);
-                } else
-                if (useBaseFile) {
+                                             &baseToPulseIndexMap[queryStart], &newWidthInFrames[0],
+                                             ungappedAlignedSequenceLength);
+                } else if (useBaseFile) {
                     // basWidthInFrames data type uint16
-                    std::copy(&baseFile.basWidthInFrames[readStart+queryStart],
-                         &baseFile.basWidthInFrames[readStart+queryStart+ungappedAlignedSequenceLength],
-                         &newWidthInFrames[0]);
+                    std::copy(&baseFile.basWidthInFrames[readStart + queryStart],
+                              &baseFile.basWidthInFrames[readStart + queryStart +
+                                                         ungappedAlignedSequenceLength],
+                              &newWidthInFrames[0]);
                 }
 
-                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd], missingFrameRateValue);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    frameRateMetric[offsetBegin+baseToAlignmentMap[i]] = newWidthInFrames[i];
+                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd],
+                          missingFrameRateValue);
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    frameRateMetric[offsetBegin + baseToAlignmentMap[i]] = newWidthInFrames[i];
                 }
-                frameRateMetric[offsetBegin+alignedSequenceLength] = 0;
+                frameRateMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "pkmid") {
                 // pkmid in cmp.h5 is MidSignal in pls.h5, but
@@ -1472,17 +1430,18 @@ void WriteMetric(
                 std::vector<HalfWord> newMidSignal;
                 newMidSignal.resize(ungappedAlignedSequenceLength);
                 hdfPlsReader.CopyFieldAt(pulseFile, "MidSignal", plsReadIndex,
-                        &baseToPulseIndexMap[queryStart], &newMidSignal[0],
-                        ungappedAlignedSequenceLength, ungappedAlignedSequence);
+                                         &baseToPulseIndexMap[queryStart], &newMidSignal[0],
+                                         ungappedAlignedSequenceLength, ungappedAlignedSequence);
 
                 std::fill(&floatMetric[offsetBegin], &floatMetric[offsetEnd], NaN);
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    floatMetric[offsetBegin+baseToAlignmentMap[i]] = newMidSignal[i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    floatMetric[offsetBegin + baseToAlignmentMap[i]] = newMidSignal[i];
                 }
-                floatMetric[offsetBegin+alignedSequenceLength] = 0;
+                floatMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "IPD") {
-                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd], missingFrameRateValue);
+                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd],
+                          missingFrameRateValue);
 
                 // IPD can be either (1) copied from baseFile.preBaseFrames
                 // or (2) computed from pulseFile.StartFrame and pulseFile.WidthInFrames
@@ -1495,56 +1454,60 @@ void WriteMetric(
                     std::vector<UInt> newStartFrame;
                     newStartFrame.resize(readLength);
                     hdfPlsReader.CopyFieldAt(pulseFile, "StartFrame", plsReadIndex,
-                         &baseToPulseIndexMap[0], &newStartFrame[0], readLength);
+                                             &baseToPulseIndexMap[0], &newStartFrame[0],
+                                             readLength);
 
                     std::vector<uint16_t> newWidthInFrames;
                     newWidthInFrames.resize(readLength);
                     hdfPlsReader.CopyFieldAt(pulseFile, "WidthInFrames", plsReadIndex,
-                         &baseToPulseIndexMap[0], &newWidthInFrames[0], readLength);
+                                             &baseToPulseIndexMap[0], &newWidthInFrames[0],
+                                             readLength);
 
                     for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                         // The IPD is undefined for the first base in a read.
                         if (queryStart == 0 and i == 0) {
-                            frameRateMetric[offsetBegin+baseToAlignmentMap[i]] = 0;
+                            frameRateMetric[offsetBegin + baseToAlignmentMap[i]] = 0;
                         } else {
-                            frameRateMetric[offsetBegin+baseToAlignmentMap[i]] = newStartFrame[queryStart+i]
-                                - newStartFrame[i+queryStart-1] - newWidthInFrames[i+queryStart-1];
+                            frameRateMetric[offsetBegin + baseToAlignmentMap[i]] =
+                                newStartFrame[queryStart + i] - newStartFrame[i + queryStart - 1] -
+                                newWidthInFrames[i + queryStart - 1];
                         }
                     }
-                } else
-                if (useBaseFile) {
+                } else if (useBaseFile) {
                     assert(baseFile.preBaseFrames.size() > 0);
                     assert(baseFile.preBaseFrames.size() >= readStart + readLength);
 
                     for (i = 0; i < ungappedAlignedSequenceLength; i++) {
-                        frameRateMetric[offsetBegin+baseToAlignmentMap[i]] =
-                            baseFile.preBaseFrames[readStart+queryStart+i];
+                        frameRateMetric[offsetBegin + baseToAlignmentMap[i]] =
+                            baseFile.preBaseFrames[readStart + queryStart + i];
                     }
                 }
-                frameRateMetric[offsetBegin+alignedSequenceLength] = 0;
+                frameRateMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else if (curMetric == "Light") {
                 // Light can be computed from pulseFile.meanSignal and
                 // pulseFile.plsWidthInFrames. Might have been deprecated.
                 assert(usePulseFile);
-                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd], missingFrameRateValue);
+                std::fill(&frameRateMetric[offsetBegin], &frameRateMetric[offsetEnd],
+                          missingFrameRateValue);
 
                 std::vector<uint16_t> newMeanSignal;
                 newMeanSignal.resize(ungappedAlignedSequenceLength);
                 hdfPlsReader.CopyFieldAt(pulseFile, "MeanSignal", plsReadIndex,
-                        &baseToPulseIndexMap[queryStart], &newMeanSignal[0],
-                        ungappedAlignedSequenceLength, ungappedAlignedSequence);
+                                         &baseToPulseIndexMap[queryStart], &newMeanSignal[0],
+                                         ungappedAlignedSequenceLength, ungappedAlignedSequence);
 
                 std::vector<uint16_t> newWidthInFrames;
                 newWidthInFrames.resize(ungappedAlignedSequenceLength);
                 hdfPlsReader.CopyFieldAt(pulseFile, "WidthInFrames", plsReadIndex,
-                        &baseToPulseIndexMap[queryStart], &newWidthInFrames[0],
-                        ungappedAlignedSequenceLength);
+                                         &baseToPulseIndexMap[queryStart], &newWidthInFrames[0],
+                                         ungappedAlignedSequenceLength);
 
-                for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                    frameRateMetric[offsetBegin+baseToAlignmentMap[i]] =  newMeanSignal[i] * newWidthInFrames[i];
+                for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                    frameRateMetric[offsetBegin + baseToAlignmentMap[i]] =
+                        newMeanSignal[i] * newWidthInFrames[i];
                 }
-                frameRateMetric[offsetBegin+alignedSequenceLength] = 0;
+                frameRateMetric[offsetBegin + alignedSequenceLength] = 0;
 
             } else {
                 std::cout << "ERROR, unknown metric " << curMetric << std::endl;
@@ -1557,32 +1520,30 @@ void WriteMetric(
             expGroup->startTimeOffset.WriteToPos(&startTimeOffsetMetric[0], startTimeOffsetMetric.size(), 0);
         } else */
         if (curMetric == "QualityValue" || curMetric == "InsertionQV" ||
-                   curMetric == "DeletionQV"   || curMetric == "MergeQV"     ||
-                   curMetric == "SubstitutionQV") {
-            HDFArray<UChar> * data = (HDFArray<UChar> *) expGroup->fields[curMetric];
+            curMetric == "DeletionQV" || curMetric == "MergeQV" || curMetric == "SubstitutionQV") {
+            HDFArray<UChar> *data = (HDFArray<UChar> *)expGroup->fields[curMetric];
             data->WriteToPos(&qvMetric[0], qvMetric.size(), 0);
 
-        } else if (curMetric == "ClassifierQV" || curMetric == "pkmid" ) {
-            HDFArray<float> * data = (HDFArray<float> *) expGroup->fields[curMetric];
+        } else if (curMetric == "ClassifierQV" || curMetric == "pkmid") {
+            HDFArray<float> *data = (HDFArray<float> *)expGroup->fields[curMetric];
             data->WriteToPos(&floatMetric[0], floatMetric.size(), 0);
 
         } else if (curMetric == "PulseIndex") {
-            HDFArray<UInt> * data = (HDFArray<UInt> *) expGroup->fields[curMetric];
+            HDFArray<UInt> *data = (HDFArray<UInt> *)expGroup->fields[curMetric];
             data->WriteToPos(&pulseMetric[0], pulseMetric.size(), 0);
 
-        } else if (curMetric == "DeletionTag"  || curMetric == "SubstitutionTag") {
-            HDFArray<char> * data = (HDFArray<char> *) expGroup->fields[curMetric];
+        } else if (curMetric == "DeletionTag" || curMetric == "SubstitutionTag") {
+            HDFArray<char> *data = (HDFArray<char> *)expGroup->fields[curMetric];
             data->WriteToPos(&tagMetric[0], tagMetric.size(), 0);
 
-        } else if (curMetric == "StartFrame"   || curMetric == "StartFrameBase"||
+        } else if (curMetric == "StartFrame" || curMetric == "StartFrameBase" ||
                    curMetric == "StartFramePulse") {
-            HDFArray<UInt> * data = (HDFArray<UInt>*) expGroup->fields[curMetric];
+            HDFArray<UInt> *data = (HDFArray<UInt> *)expGroup->fields[curMetric];
             data->WriteToPos(&timeMetric[0], timeMetric.size(), 0);
 
-        } else if (curMetric == "PulseWidth"   || curMetric == "PreBaseFrames" ||
-                   curMetric == "WidthInFrames"|| curMetric == "IPD"           ||
-                   curMetric == "Light") {
-            HDFArray<HalfWord> * data = (HDFArray<HalfWord>*) expGroup->fields[curMetric];
+        } else if (curMetric == "PulseWidth" || curMetric == "PreBaseFrames" ||
+                   curMetric == "WidthInFrames" || curMetric == "IPD" || curMetric == "Light") {
+            HDFArray<HalfWord> *data = (HDFArray<HalfWord> *)expGroup->fields[curMetric];
             data->WriteToPos(&frameRateMetric[0], frameRateMetric.size(), 0);
 
         } else {
@@ -1595,22 +1556,21 @@ void WriteMetric(
 //
 // Write "WhenStarted" from pls.h5 and write to cmp.h5
 //
-void WriteMetricWhenStarted(
-        HDFCmpFile<CmpAlignment>         & cmpReader,
-        HDFPlsReader                     & hdfPlsReader,
-        const std::string                     & movieName) {
+void WriteMetricWhenStarted(HDFCmpFile<CmpAlignment> &cmpReader, HDFPlsReader &hdfPlsReader,
+                            const std::string &movieName)
+{
     std::string metric = "WhenStarted";
     std::string whenStarted;
     if (hdfPlsReader.scanDataReader.useWhenStarted == false) {
-        std::cout << "ERROR! Attempting to read WhenStarted from "
-             << movieName
-             << " but the attriubte does not exist." << std::endl;
+        std::cout << "ERROR! Attempting to read WhenStarted from " << movieName
+                  << " but the attriubte does not exist." << std::endl;
         std::exit(EXIT_FAILURE);
     }
     hdfPlsReader.scanDataReader.ReadWhenStarted(whenStarted);
 
     if (!cmpReader.movieInfoGroup.whenStartedArray.IsInitialized()) {
-        cmpReader.movieInfoGroup.whenStartedArray.Initialize(cmpReader.movieInfoGroup.movieInfoGroup, metric);
+        cmpReader.movieInfoGroup.whenStartedArray.Initialize(
+            cmpReader.movieInfoGroup.movieInfoGroup, metric);
     }
     cmpReader.movieInfoGroup.whenStartedArray.Write(&whenStarted, 1);
 }
@@ -1618,11 +1578,12 @@ void WriteMetricWhenStarted(
 //
 // Print metrics.
 //
-std::string MetricsToString(const std::vector<std::string> & metrics) {
+std::string MetricsToString(const std::vector<std::string> &metrics)
+{
     std::string ret = "";
     for (size_t i = 0; i < metrics.size(); i++) {
         ret += metrics[i];
-        if (i != metrics.size()-1) ret += ",";
+        if (i != metrics.size() - 1) ret += ",";
         if (i % 4 == 3) ret += "\n";
     }
     return ret;
@@ -1631,12 +1592,15 @@ std::string MetricsToString(const std::vector<std::string> & metrics) {
 //
 // Print usage.
 //
-void PrintUsage() {
-    std::cout << "  loadPulses - Load pulse information and quality values into a Compare file" << std::endl;
+void PrintUsage()
+{
+    std::cout << "  loadPulses - Load pulse information and quality values into a Compare file"
+              << std::endl;
     std::cout << "usage: loadPulses movieFile cmpFile [-metrics m1,m2,...] [-byread]" << std::endl;
     std::cout << "  movieFile may be a movie file or a fofn of movie file names." << std::endl;
-    std::cout << "  metrics m1,m2,... is a comma-separated list (without spaces) of metrics " << std::endl
-         << "  to print to the pulse file." << std::endl;
+    std::cout << "  metrics m1,m2,... is a comma-separated list (without spaces) of metrics "
+              << std::endl
+              << "  to print to the pulse file." << std::endl;
     std::cout << "  Valid metrics are: " << std::endl;
     std::cout << MetricsToString(GetAllSupportedMetrics(false)) << std::endl;
     //     << "    QualityValue, ClassifierQV, MergeQV," << std::endl
@@ -1644,7 +1608,8 @@ void PrintUsage() {
     //     << "    WhenStarted, StartTimeOffset, PreBaseFrames," << std::endl
     //     << "    InsertionQV, DeletionQV, DeletionTag, SubstitutionQV" << std::endl
     //     << "    SubstitutionTag, PulseIndex, WidthInFrames" << std::endl;
-    std::cout << "  By default, " << MetricsToString(GetDefaultMetrics()) << " are added" << std::endl;
+    std::cout << "  By default, " << MetricsToString(GetDefaultMetrics()) << " are added"
+              << std::endl;
     // Deprecate -useccs, an option for old data.
     // std::cout << "  -useccs  This option is for older cmp.h5 files that do not have the read type " << std::endl
     //      << "    stored.  Newer cmp.h5 files have a read type that indicates the cmp.h5 file " << std::endl
@@ -1653,26 +1618,31 @@ void PrintUsage() {
     //      << "    quality values from ccs instead of the raw sequence. "<<std::endl
     //      << "  The only metrics that are allowed for de novo ccs sequences are QualityValue, " << std::endl
     //      << "  InsertionQV, DeletionQV, and SubstitutionQV" << std::endl;
-    std::cout << "  -byread  Reads pulse/base fields by read, rather than reading an entire " << std::endl
-         << "    movie first.  This uses considerably less memory than the defualt mode" << std::endl
-         << "    but is slow." << std::endl;
-    std::cout << "  -byMetric  Loads every pls/base field for each movie entirely before loading " << std::endl
-         << "    another field. This uses more memory than -byread, but can be faster." << std::endl
-         << "    This opiton is experimental. " << std::endl;
-    std::cout << "  Using hdf version " << H5_VERS_MAJOR << "." << H5_VERS_MINOR << "." << H5_VERS_RELEASE << std::endl;
+    std::cout << "  -byread  Reads pulse/base fields by read, rather than reading an entire "
+              << std::endl
+              << "    movie first.  This uses considerably less memory than the defualt mode"
+              << std::endl
+              << "    but is slow." << std::endl;
+    std::cout << "  -byMetric  Loads every pls/base field for each movie entirely before loading "
+              << std::endl
+              << "    another field. This uses more memory than -byread, but can be faster."
+              << std::endl
+              << "    This opiton is experimental. " << std::endl;
+    std::cout << "  Using hdf version " << H5_VERS_MAJOR << "." << H5_VERS_MINOR << "."
+              << H5_VERS_RELEASE << std::endl;
 }
-
 
 //
 // The main function.
 //
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     std::string program = "loadPulses";
     std::string versionStr(VERSION);
     AppendPerforceChangelist(PERFORCE_VERSION_STRING, versionStr);
 
     std::string cmpFileName, movieFileName;
-    std::map<std::string,bool> metricOptions;
+    std::map<std::string, bool> metricOptions;
     int maxElements = 0;
     //Maximum Memory allowed for bymetric is 6 GB
     int maxMemory = 4;
@@ -1690,49 +1660,55 @@ int main(int argc, char* argv[]) {
     clp.SetProgramName(program);
     clp.SetVersion(versionStr);
 
-    clp.RegisterStringOption("basFileName", &movieFileName,
-            "The input {bas,pls}.h5 or input.fofn.", true);
+    clp.RegisterStringOption("basFileName", &movieFileName, "The input {bas,pls}.h5 or input.fofn.",
+                             true);
     clp.RegisterStringOption("cmpFileName", &cmpFileName,
-            "The cmp.h5 file to load pulse information into.", true);
+                             "The cmp.h5 file to load pulse information into.", true);
     clp.RegisterPreviousFlagsAsHidden();
 
-    std::string metricsDescription = "A comma separated list of metrics (with no spaces).\nValid options are:\n";
+    std::string metricsDescription =
+        "A comma separated list of metrics (with no spaces).\nValid options are:\n";
     metricsDescription += MetricsToString(GetAllSupportedMetrics(false));
     metricsDescription += "\nDefault options are:\n";
     metricsDescription += MetricsToString(GetDefaultMetrics());
 
     clp.RegisterStringOption("metrics", &metricList, metricsDescription);
     clp.RegisterFlagOption("failOnMissingData", &failOnMissingData,
-            "Exit if any data fields are missing from the bas.h5 or pls.h5 "
-            "input that are required to load a metric. Defualt is a warning.");
+                           "Exit if any data fields are missing from the bas.h5 or pls.h5 "
+                           "input that are required to load a metric. Defualt is a warning.");
     clp.RegisterFlagOption("byread", &byRead,
-            "Load pulse information by read rather than buffering metrics.");
-    clp.RegisterFlagOption("bymetric", & byMetric,
-            "Load pulse information by metric rather than by read. "
-            "This uses more memory than -byread, but can be faster.");
+                           "Load pulse information by read rather than buffering metrics.");
+    clp.RegisterFlagOption("bymetric", &byMetric,
+                           "Load pulse information by metric rather than by read. "
+                           "This uses more memory than -byread, but can be faster.");
     clp.RegisterIntOption("maxElements", &maxElements,
-            "Set a limit on the size of pls/bas file to buffer in with -bymetric "
-            "(default value: maximum int). Use -byread if the limit is exceeded.",
-            CommandLineParser::PositiveInteger);
-    clp.RegisterIntOption("maxMemory", & maxMemory,
-            "Set a limit (in GB) on the memory to buffer data with -bymetric "
-            "(default value: 4 GB). Use -byread if the limit is exceeded.",
-            CommandLineParser::PositiveInteger);
+                          "Set a limit on the size of pls/bas file to buffer in with -bymetric "
+                          "(default value: maximum int). Use -byread if the limit is exceeded.",
+                          CommandLineParser::PositiveInteger);
+    clp.RegisterIntOption("maxMemory", &maxMemory,
+                          "Set a limit (in GB) on the memory to buffer data with -bymetric "
+                          "(default value: 4 GB). Use -byread if the limit is exceeded.",
+                          CommandLineParser::PositiveInteger);
     int metaNElements, rawChunkSize, rawNElements;
-    metaNElements = 0; rawChunkSize = 0; metaNElements = 0;
-    clp.RegisterIntOption("metaNElements", & metaNElements,
-            "Set number of elements in meta data cache for reading bas/bax/pls.h5 file.",
-            CommandLineParser::PositiveInteger);
-    clp.RegisterIntOption("rawNElements", & rawNElements,
-            "Set number of elements in raw data cache for reading bas/bax/pls.h5 file.",
-            CommandLineParser::PositiveInteger);
-    clp.RegisterIntOption("rawChunkSize", & rawChunkSize,
-            "Set chunk size of raw data cache for reading bas/bax/pls.h5 file.",
-            CommandLineParser::PositiveInteger);
+    metaNElements = 0;
+    rawChunkSize = 0;
+    metaNElements = 0;
+    clp.RegisterIntOption(
+        "metaNElements", &metaNElements,
+        "Set number of elements in meta data cache for reading bas/bax/pls.h5 file.",
+        CommandLineParser::PositiveInteger);
+    clp.RegisterIntOption(
+        "rawNElements", &rawNElements,
+        "Set number of elements in raw data cache for reading bas/bax/pls.h5 file.",
+        CommandLineParser::PositiveInteger);
+    clp.RegisterIntOption("rawChunkSize", &rawChunkSize,
+                          "Set chunk size of raw data cache for reading bas/bax/pls.h5 file.",
+                          CommandLineParser::PositiveInteger);
 
-    std::string progSummary = ("Loads pulse information such as inter pulse "
-            "distance, or quality information into the cmp.h5 file. This allows "
-            "one to analyze kinetic and quality information by alignment column.");
+    std::string progSummary =
+        ("Loads pulse information such as inter pulse "
+         "distance, or quality information into the cmp.h5 file. This allows "
+         "one to analyze kinetic and quality information by alignment column.");
     clp.SetProgramSummary(progSummary);
     clp.ParseCommandLine(argc, argv);
 
@@ -1745,8 +1721,7 @@ int main(int argc, char* argv[]) {
 
     if (metricList == "") {
         SetDefaultMetricOptions(metricOptions);
-    }
-    else {
+    } else {
         ParseMetricsList(metricList, metricOptions);
     }
 
@@ -1765,7 +1740,6 @@ int main(int argc, char* argv[]) {
     RequirementMap fieldRequirements;
     BuildRequirementMap(fieldRequirements);
     StoreDatasetFieldsFromPulseFields(metricOptions, fieldRequirements, datasetFields);
-
 
     //e.g. /PATH_TO_FILE/m120321_032600_42142_c100310572550000001523013208061210_s1_p0.bas.h5
     //     /PATH_TO_FILE/m120321_032600_42142_c100310572550000001523013208061210_s2_p0.bas.h5
@@ -1842,16 +1816,15 @@ int main(int argc, char* argv[]) {
     //
     H5::FileAccPropList fileAccPropList = H5::FileAccPropList::DEFAULT;
     // h5: number of items in meta data cache
-    int    mdc_nelmts  = (metaNElements==0)?(4096):(metaNElements);
+    int mdc_nelmts = (metaNElements == 0) ? (4096) : (metaNElements);
     // h5: number of items in raw data chunk cache
-    size_t rdcc_nelmts = (rawNElements==0)?(4096):(rawNElements);
+    size_t rdcc_nelmts = (rawNElements == 0) ? (4096) : (rawNElements);
     // h5: raw data chunk cache size (in bytes) per dataset
-    size_t rdcc_nbytes = (rawChunkSize==0)?(9192):(rawChunkSize);
-    double rdcc_w0     = 0.75;    // h5: preemption policy
+    size_t rdcc_nbytes = (rawChunkSize == 0) ? (9192) : (rawChunkSize);
+    double rdcc_w0 = 0.75;  // h5: preemption policy
     // fileAccPropList.getCache(mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
     fileAccPropList.setCache(mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0);
     // fileAccPropList.setCache(4096, 4096, 8388608, rdcc_w0);
-
 
     // If one of the h5 in the fofn is a ccs.h5 file, then only load pulse
     // information from group /PulseData/ConsensusBaseCalls.
@@ -1869,11 +1842,10 @@ int main(int argc, char* argv[]) {
             hdfBasReader.SetReadBasesFromCCS();
         }
         if (!hdfBasReader.Initialize(movieFileNames[movieIndex], fileAccPropList)) {
-            std::cout << "ERROR, could not initialize HDF file "
-                << movieFileNames[movieIndex] << " for reading bases." << std::endl;
+            std::cout << "ERROR, could not initialize HDF file " << movieFileNames[movieIndex]
+                      << " for reading bases." << std::endl;
             std::exit(EXIT_FAILURE);
-        }
-        else {
+        } else {
             fofnMovieNames.push_back(hdfBasReader.GetMovieName());
             movieNameMap[hdfBasReader.GetMovieName()] = movieIndex;
             hdfBasReader.Close();
@@ -1887,7 +1859,7 @@ int main(int argc, char* argv[]) {
                 usePulseFile = false;
             }
         }
-   }
+    }
 
     CmpFile cmpFile;
 
@@ -1920,13 +1892,14 @@ int main(int argc, char* argv[]) {
     // cmp.h5 file's readType is not CCS, something is wrong.
     if (cmpFile.readType != ReadType::CCS and useCcsOnly) {
         std::cout << "ERROR, there is a ccs.h5 file in the fofn, while read type of"
-             << " the cmp.h5 file is not CCS." << std::endl;
+                  << " the cmp.h5 file is not CCS." << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
     std::string commandLine;
     clp.CommandLineToString(argc, argv, commandLine);
-    cmpReader.fileLogGroup.AddEntry(commandLine, "Loading pulse metrics", program, GetTimestamp(), versionStr);
+    cmpReader.fileLogGroup.AddEntry(commandLine, "Loading pulse metrics", program, GetTimestamp(),
+                                    versionStr);
 
     //
     // Group alignment indices by movie so that they may be processed one movie at a time
@@ -1942,7 +1915,8 @@ int main(int argc, char* argv[]) {
     std::map<int, std::vector<int> > movieIndexSets;
 
     for (alignmentIndex = 0; alignmentIndex < cmpFile.alnInfo.alignments.size(); alignmentIndex++) {
-        movieIndexSets[cmpFile.alnInfo.alignments[alignmentIndex].GetMovieId()].push_back(alignmentIndex);
+        movieIndexSets[cmpFile.alnInfo.alignments[alignmentIndex].GetMovieId()].push_back(
+            alignmentIndex);
     }
 
     //
@@ -1958,7 +1932,7 @@ int main(int argc, char* argv[]) {
         }
         hdfBasReader.Initialize(movieFileNames[fofnMovieIndex], fileAccPropList);
 
-        BaseFile  baseFile;
+        BaseFile baseFile;
         PulseFile pulseFile;
 
         //
@@ -1970,7 +1944,8 @@ int main(int argc, char* argv[]) {
         hdfBasReader.ReadBaseFileInit(baseFile);
 
         std::set<uint32_t> moviePartHoleNumbers;
-        copy(baseFile.holeNumbers.begin(), baseFile.holeNumbers.end(), inserter(moviePartHoleNumbers, moviePartHoleNumbers.begin()));
+        copy(baseFile.holeNumbers.begin(), baseFile.holeNumbers.end(),
+             inserter(moviePartHoleNumbers, moviePartHoleNumbers.begin()));
 
         if (usePulseFile) {
             hdfPlsReader.Initialize(movieFileNames[fofnMovieIndex], fileAccPropList);
@@ -2006,7 +1981,8 @@ int main(int argc, char* argv[]) {
         // reference.  That shouldn't happen.
         //
         if (m == static_cast<int>(cmpFile.movieInfo.name.size())) {
-            std::cout << "WARNING: Could not find any alignments for file " << movieFileNames[fofnMovieIndex] << std::endl;
+            std::cout << "WARNING: Could not find any alignments for file "
+                      << movieFileNames[fofnMovieIndex] << std::endl;
             continue;
         }
 
@@ -2029,8 +2005,8 @@ int main(int argc, char* argv[]) {
         }
 
         // Check whether all metrics are computable or not.
-        CanMetricsBeComputed(metricOptions, hdfBasReader, hdfPlsReader, useBaseFile,
-            usePulseFile, failOnMissingData, movieFileNames[fofnMovieIndex]);
+        CanMetricsBeComputed(metricOptions, hdfBasReader, hdfPlsReader, useBaseFile, usePulseFile,
+                             failOnMissingData, movieFileNames[fofnMovieIndex]);
 
         // Get all metrics that are (1) supported, (2) required and (3) can be loaded.
         std::vector<std::string> metricsToLoad = GetMetricsToLoad(metricOptions);
@@ -2043,13 +2019,15 @@ int main(int argc, char* argv[]) {
         // Movie index sets should be sorted by alignment index. Build a lookup table for this.
         //
 
-        std::vector<std::pair<int,int> > toFrom;
+        std::vector<std::pair<int, int> > toFrom;
         UInt totalAlnLength = 0;
-        for (movieAlignmentIndex = 0; movieAlignmentIndex < movieIndexSets[movieIndex].size(); movieAlignmentIndex++) {
+        for (movieAlignmentIndex = 0; movieAlignmentIndex < movieIndexSets[movieIndex].size();
+             movieAlignmentIndex++) {
             alignmentIndex = movieIndexSets[movieIndex][movieAlignmentIndex];
-            totalAlnLength += cmpFile.alnInfo.alignments[alignmentIndex].GetOffsetEnd() - \
+            totalAlnLength += cmpFile.alnInfo.alignments[alignmentIndex].GetOffsetEnd() -
                               cmpFile.alnInfo.alignments[alignmentIndex].GetOffsetBegin();
-            toFrom.push_back(std::pair<int,int>(cmpFile.alnInfo.alignments[alignmentIndex].GetAlignmentId(), movieAlignmentIndex));
+            toFrom.push_back(std::pair<int, int>(
+                cmpFile.alnInfo.alignments[alignmentIndex].GetAlignmentId(), movieAlignmentIndex));
         }
 
         // orders by first by default.
@@ -2059,31 +2037,34 @@ int main(int argc, char* argv[]) {
         // Check metric dataset size in this movie and the required memory
         // consumption, if either limit is exceeded, switch to byread.
         //
-        if (byMetricForThisMovie)
-        {
-            UInt requiredMem = ComputeRequiredMemory(metricsToLoad, hdfBasReader,
-                    hdfPlsReader, useBaseFile, usePulseFile, cmpReader, totalAlnLength);
-            if (hdfBasReader.baseArray.arrayLength > static_cast<DSLength>(hdfBasReader.maxAllocNElements) or
+        if (byMetricForThisMovie) {
+            UInt requiredMem =
+                ComputeRequiredMemory(metricsToLoad, hdfBasReader, hdfPlsReader, useBaseFile,
+                                      usePulseFile, cmpReader, totalAlnLength);
+            if (hdfBasReader.baseArray.arrayLength >
+                    static_cast<DSLength>(hdfBasReader.maxAllocNElements) or
                 (usePulseFile and
                  hdfPlsReader.GetStartFrameSize() > hdfPlsReader.maxAllocNElements) or
                 ((float)requiredMem / 1024 / 1024) > maxMemory) {
                 std::cout << "Either the number of elements exceeds maxElement ("
-                     << hdfPlsReader.maxAllocNElements << "). Or the estimated memory " << std::endl
-                     << "consumption exceeds maxMemory ("  << maxMemory << " GB)." << std::endl
-                     << "Loading pulses from " << movieFileNames[fofnMovieIndex]
-                     << " by read." << std::endl;
+                          << hdfPlsReader.maxAllocNElements << "). Or the estimated memory "
+                          << std::endl
+                          << "consumption exceeds maxMemory (" << maxMemory << " GB)." << std::endl
+                          << "Loading pulses from " << movieFileNames[fofnMovieIndex] << " by read."
+                          << std::endl;
                 byMetricForThisMovie = false;
             }
         }
 
         if (((metricOptions.find("StartFrameBase") != metricOptions.end() and
               metricOptions["StartFrameBase"]) or
-             (metricOptions.find("StartFramePulse")!= metricOptions.end() and
-              metricOptions["StartFramePulse"])) and !byMetricForThisMovie) {
+             (metricOptions.find("StartFramePulse") != metricOptions.end() and
+              metricOptions["StartFramePulse"])) and
+            !byMetricForThisMovie) {
             // Sneaky metrics StartFrameBase and StartFramePulse can used
             // with -bymetric only
             std::cout << "ERROR: Internal metrics StartFrameBase and StartFramePulse "
-                 << "can only be loaded with -bymetric." << std::endl;
+                      << "can only be loaded with -bymetric." << std::endl;
             std::exit(EXIT_FAILURE);
         }
 
@@ -2097,15 +2078,15 @@ int main(int argc, char* argv[]) {
         // Load frame rate anyway to ensure that cmp.h5 files are consistent.
         if (useBaseFile) {
             cmpReader.movieInfoGroup.StoreFrameRate(m, baseFile.GetFrameRate());
-        } else
-        if (usePulseFile) {
+        } else if (usePulseFile) {
             cmpReader.movieInfoGroup.StoreFrameRate(m, pulseFile.GetFrameRate());
         }
 
         //
         // Load metrics for alignments from movie 'movieIndex'.
         //
-        std::cout << "loading " <<  movieIndexSets[movieIndex].size() << " alignments for movie " << movieIndex << std::endl;
+        std::cout << "loading " << movieIndexSets[movieIndex].size() << " alignments for movie "
+                  << movieIndex << std::endl;
 
         if (byMetricForThisMovie) {
             //
@@ -2115,25 +2096,15 @@ int main(int argc, char* argv[]) {
             //
             std::vector<MovieAlnIndexLookupTable> lookupTables;
 
-            BuildLookupTablesAndMakeSane(cmpFile,
-                baseFile,
-                pulseFile,
-                cmpReader,
-                hdfBasReader,
-                hdfPlsReader,
-                hdfCcsReader,
-                useBaseFile,
-                usePulseFile,
-                useCcsOnly,
-                movieIndexSets[movieIndex],
-                toFrom,
-                moviePartHoleNumbers,
-                lookupTables);
+            BuildLookupTablesAndMakeSane(cmpFile, baseFile, pulseFile, cmpReader, hdfBasReader,
+                                         hdfPlsReader, hdfCcsReader, useBaseFile, usePulseFile,
+                                         useCcsOnly, movieIndexSets[movieIndex], toFrom,
+                                         moviePartHoleNumbers, lookupTables);
 
             //
             // Group lookup tables by refGroupIndex and readGroupIndex.
             //
-            std::vector<std::pair<UInt, UInt> >  groupedLookupTablesIndexPairs;
+            std::vector<std::pair<UInt, UInt> > groupedLookupTablesIndexPairs;
             GroupLookupTables(lookupTables, groupedLookupTablesIndexPairs);
 
             if (cmpFile.readType == ReadType::CCS or useCcsOnly) {
@@ -2144,7 +2115,8 @@ int main(int argc, char* argv[]) {
                     if (lookupTables[index].skip) {
                         continue;
                     }
-                    numPassesMetric[index] = hdfCcsReader.GetNumPasses(lookupTables[index].readIndex);
+                    numPassesMetric[index] =
+                        hdfCcsReader.GetNumPasses(lookupTables[index].readIndex);
                 }
                 if (!cmpReader.alnInfoGroup.numPasses.IsInitialized()) {
                     cmpReader.alnInfoGroup.InitializeNumPasses();
@@ -2153,10 +2125,8 @@ int main(int argc, char* argv[]) {
                 }
                 // Append numPasses of this movie to the end of /AlnInfo/NumPasses.
                 UInt numPassesSize = cmpReader.alnInfoGroup.numPasses.size();
-                cmpReader.alnInfoGroup.numPasses.WriteToPos(
-                        &numPassesMetric[0],
-                        numPassesMetric.size(),
-                        numPassesSize);
+                cmpReader.alnInfoGroup.numPasses.WriteToPos(&numPassesMetric[0],
+                                                            numPassesMetric.size(), numPassesSize);
             }
 
             // Keep a list of currently cached fields.
@@ -2166,7 +2136,8 @@ int main(int argc, char* argv[]) {
                 cachedFields.push_back(Field("NumEvent", PlsField));
             }
 
-            for (size_t metricsToLoadIndex = 0; metricsToLoadIndex < metricsToLoad.size(); metricsToLoadIndex++) {
+            for (size_t metricsToLoadIndex = 0; metricsToLoadIndex < metricsToLoad.size();
+                 metricsToLoadIndex++) {
                 std::string curMetric = metricsToLoad[metricsToLoadIndex];
                 // Metric "WhenStarted" should have been loaded before getting here.
                 if (curMetric == "WhenStarted") {
@@ -2174,49 +2145,24 @@ int main(int argc, char* argv[]) {
                 }
                 // Get the next metric to load.
                 std::string nextMetric = "";
-                if (metricsToLoadIndex+1 < metricsToLoad.size()) {
-                    nextMetric = metricsToLoad[metricsToLoadIndex+1];
+                if (metricsToLoadIndex + 1 < metricsToLoad.size()) {
+                    nextMetric = metricsToLoad[metricsToLoadIndex + 1];
                 }
 
                 // Cache all required data for computing this metric.
-                CacheRequiredFieldsForMetric(baseFile,
-                    pulseFile,
-                    hdfBasReader,
-                    hdfPlsReader,
-                    hdfCcsReader,
-                    useBaseFile,
-                    usePulseFile,
-                    useCcsOnly,
-                    cachedFields,
-                    curMetric);
+                CacheRequiredFieldsForMetric(baseFile, pulseFile, hdfBasReader, hdfPlsReader,
+                                             hdfCcsReader, useBaseFile, usePulseFile, useCcsOnly,
+                                             cachedFields, curMetric);
 
                 // Compute the metric and write it to cmp.h5.
-                WriteMetric(cmpFile,
-                    baseFile,
-                    pulseFile,
-                    cmpReader,
-                    hdfBasReader,
-                    hdfPlsReader,
-                    hdfCcsReader,
-                    useBaseFile,
-                    usePulseFile,
-                    useCcsOnly,
-                    lookupTables,
-                    groupedLookupTablesIndexPairs,
-                    curMetric);
+                WriteMetric(cmpFile, baseFile, pulseFile, cmpReader, hdfBasReader, hdfPlsReader,
+                            hdfCcsReader, useBaseFile, usePulseFile, useCcsOnly, lookupTables,
+                            groupedLookupTablesIndexPairs, curMetric);
 
                 // Clear cached fields unless they are required by the next metric.
-                ClearCachedFields(baseFile,
-                    pulseFile,
-                    hdfBasReader,
-                    hdfPlsReader,
-                    hdfCcsReader,
-                    useBaseFile,
-                    usePulseFile,
-                    useCcsOnly,
-                    cachedFields,
-                    curMetric,
-                    nextMetric);
+                ClearCachedFields(baseFile, pulseFile, hdfBasReader, hdfPlsReader, hdfCcsReader,
+                                  useBaseFile, usePulseFile, useCcsOnly, cachedFields, curMetric,
+                                  nextMetric);
             }
 
             // Clear the default field "NumEvent"
@@ -2224,34 +2170,28 @@ int main(int argc, char* argv[]) {
                 hdfPlsReader.ClearField(pulseFile, "NumEvent");
             }
 
-        } else { // byRead for this movie
-            for (movieAlignmentIndex = 0; movieAlignmentIndex < movieIndexSets[movieIndex].size(); movieAlignmentIndex++) {
+        } else {  // byRead for this movie
+            for (movieAlignmentIndex = 0; movieAlignmentIndex < movieIndexSets[movieIndex].size();
+                 movieAlignmentIndex++) {
                 MovieAlnIndexLookupTable lookupTable;
-                BuildLookupTable(movieAlignmentIndex,
-                    cmpFile,
-                    baseFile,
-                    usePulseFile,
-                    pulseFile,
-                    cmpReader,
-                    movieIndexSets[movieIndex],
-                    toFrom,
-                    moviePartHoleNumbers,
-                    lookupTable);
+                BuildLookupTable(movieAlignmentIndex, cmpFile, baseFile, usePulseFile, pulseFile,
+                                 cmpReader, movieIndexSets[movieIndex], toFrom,
+                                 moviePartHoleNumbers, lookupTable);
 
                 // Skip this alignment if it is not generated by this movie
                 if (lookupTable.skip) {
                     continue;
                 }
 
-                UInt & alignmentIndex = lookupTable.alignmentIndex;
-                size_t  & refGroupIndex  = lookupTable.refGroupIndex;
-                size_t  & readGroupIndex = lookupTable.readGroupIndex;
-                UInt & holeNumber     = lookupTable.holeNumber;
-                size_t  & readIndex   = lookupTable.readIndex;
-                UInt & queryStart     = lookupTable.queryStart;
-                UInt & queryEnd       = lookupTable.queryEnd;
-                UInt & offsetBegin    = lookupTable.offsetBegin;
-                UInt & offsetEnd      = lookupTable.offsetEnd;
+                UInt &alignmentIndex = lookupTable.alignmentIndex;
+                size_t &refGroupIndex = lookupTable.refGroupIndex;
+                size_t &readGroupIndex = lookupTable.readGroupIndex;
+                UInt &holeNumber = lookupTable.holeNumber;
+                size_t &readIndex = lookupTable.readIndex;
+                UInt &queryStart = lookupTable.queryStart;
+                UInt &queryEnd = lookupTable.queryEnd;
+                UInt &offsetBegin = lookupTable.offsetBegin;
+                UInt &offsetEnd = lookupTable.offsetEnd;
 
                 std::string alignedSequence = GetAlignedSequenceFromCmpFile(cmpReader, lookupTable);
 
@@ -2259,39 +2199,32 @@ int main(int argc, char* argv[]) {
                 std::vector<int> baseToAlignmentMap;
                 CreateSequenceToAlignmentMap(alignedSequence, baseToAlignmentMap);
 
-			    // Condense gaps in the alignment for easy comparison.
+                // Condense gaps in the alignment for easy comparison.
                 RemoveGaps(alignedSequence, alignedSequence);
 
                 // Get source read.
                 unsigned int numPasses;
                 SMRTSequence sourceRead;
-                GetSourceRead(cmpFile,
-                    baseFile    ,
-                    pulseFile   ,
-                    hdfBasReader,
-                    hdfPlsReader,
-                    hdfCcsReader,
-                    useBaseFile ,
-                    usePulseFile,
-                    useCcsOnly  ,
-                    //byRead      ,
-                    lookupTable ,
-                    alignedSequence,
-                    sourceRead  ,
-                    numPasses);
+                GetSourceRead(cmpFile, baseFile, pulseFile, hdfBasReader, hdfPlsReader,
+                              hdfCcsReader, useBaseFile, usePulseFile, useCcsOnly,
+                              //byRead      ,
+                              lookupTable, alignedSequence, sourceRead, numPasses);
 
                 std::string readSequence;
                 readSequence.resize(queryEnd - queryStart);
-                copy((char*) (sourceRead.seq + queryStart),
-                     (char*) (sourceRead.seq + queryEnd),
+                copy((char *)(sourceRead.seq + queryStart), (char *)(sourceRead.seq + queryEnd),
                      readSequence.begin());
 
-                if (alignedSequence.size() != readSequence.size() or alignedSequence != readSequence) {
-                    std::cout << "ERROR, the query sequence does not match the aligned query sequence." << std::endl;
-                    std::cout << "HoleNumber: "<< holeNumber << ", MovieName: " << cmpFileMovieName;
-                    std::cout << ", ReadIndex: " << (int) readIndex;
-                    std::cout << ", qStart: "<< queryStart << ", qEnd: " << queryEnd << std::endl;
-                    std::cout << "Aligned sequence: "<< std::endl;
+                if (alignedSequence.size() != readSequence.size() or
+                    alignedSequence != readSequence) {
+                    std::cout
+                        << "ERROR, the query sequence does not match the aligned query sequence."
+                        << std::endl;
+                    std::cout << "HoleNumber: " << holeNumber
+                              << ", MovieName: " << cmpFileMovieName;
+                    std::cout << ", ReadIndex: " << (int)readIndex;
+                    std::cout << ", qStart: " << queryStart << ", qEnd: " << queryEnd << std::endl;
+                    std::cout << "Aligned sequence: " << std::endl;
                     std::cout << alignedSequence << std::endl;
                     std::cout << "Original sequence: " << std::endl;
                     std::cout << readSequence << std::endl;
@@ -2313,14 +2246,15 @@ int main(int argc, char* argv[]) {
                 assert(ungappedAlignedSequenceLength == queryEnd - queryStart);
 
                 UInt alignedSequenceLength = offsetEnd - offsetBegin;
-                readPulseMetric.resize(alignedSequenceLength+1);
-                qvMetric.resize(alignedSequenceLength+1);
-                frameRateMetric.resize(alignedSequenceLength+1);
-                timeMetric.resize(alignedSequenceLength+1);
+                readPulseMetric.resize(alignedSequenceLength + 1);
+                qvMetric.resize(alignedSequenceLength + 1);
+                frameRateMetric.resize(alignedSequenceLength + 1);
+                timeMetric.resize(alignedSequenceLength + 1);
 
                 UInt i;
 
-                HDFCmpExperimentGroup* expGroup = cmpReader.refAlignGroups[refGroupIndex]->readGroups[readGroupIndex];
+                HDFCmpExperimentGroup *expGroup =
+                    cmpReader.refAlignGroups[refGroupIndex]->readGroups[readGroupIndex];
                 UInt alnArrayLength = expGroup->alignmentArray.size();
 
                 if (cmpFile.readType == ReadType::CCS or useCcsOnly) {
@@ -2332,7 +2266,8 @@ int main(int argc, char* argv[]) {
 
                 if (metricOptions["StartTimeOffset"] == true) {
                     if (!expGroup->startTimeOffset.IsInitialized()) {
-                        expGroup->startTimeOffset.Initialize(expGroup->experimentGroup, "StartTimeOffset");
+                        expGroup->startTimeOffset.Initialize(expGroup->experimentGroup,
+                                                             "StartTimeOffset");
                     }
                     unsigned int readStartTimeOffset = sourceRead.startFrame[queryStart];
                     expGroup->startTimeOffset.WriteToPos(&readStartTimeOffset, 1, alignmentIndex);
@@ -2340,143 +2275,164 @@ int main(int argc, char* argv[]) {
 
                 if (metricOptions["QualityValue"] == true) {
                     if (!expGroup->qualityValue.IsInitialized()) {
-                        expGroup->qualityValue.Initialize(expGroup->experimentGroup, "QualityValue", true, alnArrayLength);
+                        expGroup->qualityValue.Initialize(expGroup->experimentGroup, "QualityValue",
+                                                          true, alnArrayLength);
                     }
                     // Store QualityValue.
                     std::fill(qvMetric.begin(), qvMetric.end(), missingQualityValue);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                         qvMetric[baseToAlignmentMap[i]] = sourceRead.qual[queryStart + i];
                     }
-                    qvMetric[qvMetric.size()-1] = 0;
+                    qvMetric[qvMetric.size() - 1] = 0;
                     expGroup->qualityValue.WriteToPos(&qvMetric[0], qvMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["InsertionQV"] == true) {
                     if (!expGroup->insertionQV.IsInitialized()) {
-                        expGroup->insertionQV.Initialize(expGroup->experimentGroup, "InsertionQV", true, alnArrayLength);
+                        expGroup->insertionQV.Initialize(expGroup->experimentGroup, "InsertionQV",
+                                                         true, alnArrayLength);
                     }
                     // Store InsertionQV.
                     std::fill(qvMetric.begin(), qvMetric.end(), missingQualityValue);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        qvMetric[baseToAlignmentMap[i]] = sourceRead.insertionQV[queryStart+ i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        qvMetric[baseToAlignmentMap[i]] = sourceRead.insertionQV[queryStart + i];
                     }
-                    qvMetric[qvMetric.size()-1] = 0;
+                    qvMetric[qvMetric.size() - 1] = 0;
                     expGroup->insertionQV.WriteToPos(&qvMetric[0], qvMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["MergeQV"] == true) {
                     if (!expGroup->mergeQV.IsInitialized()) {
-                        expGroup->mergeQV.Initialize(expGroup->experimentGroup, "MergeQV", true, alnArrayLength);
+                        expGroup->mergeQV.Initialize(expGroup->experimentGroup, "MergeQV", true,
+                                                     alnArrayLength);
                     }
                     // Store MergeQV.
                     std::fill(qvMetric.begin(), qvMetric.end(), missingQualityValue);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        qvMetric[baseToAlignmentMap[i]] = sourceRead.mergeQV[queryStart+ i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        qvMetric[baseToAlignmentMap[i]] = sourceRead.mergeQV[queryStart + i];
                     }
-                    qvMetric[qvMetric.size()-1] = 0;
+                    qvMetric[qvMetric.size() - 1] = 0;
                     expGroup->mergeQV.WriteToPos(&qvMetric[0], qvMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["DeletionQV"] == true) {
                     if (!expGroup->deletionQV.IsInitialized()) {
-                        expGroup->deletionQV.Initialize(expGroup->experimentGroup, "DeletionQV", true, alnArrayLength);
+                        expGroup->deletionQV.Initialize(expGroup->experimentGroup, "DeletionQV",
+                                                        true, alnArrayLength);
                     }
                     // Store DeletionQV.
                     std::fill(qvMetric.begin(), qvMetric.end(), missingQualityValue);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        qvMetric[baseToAlignmentMap[i]] = sourceRead.deletionQV[queryStart+i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        qvMetric[baseToAlignmentMap[i]] = sourceRead.deletionQV[queryStart + i];
                     }
-                    qvMetric[qvMetric.size()-1] = 0;
+                    qvMetric[qvMetric.size() - 1] = 0;
                     expGroup->deletionQV.WriteToPos(&qvMetric[0], qvMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["DeletionTag"] == true) {
                     if (!expGroup->deletionTag.IsInitialized()) {
-                        expGroup->deletionTag.Initialize(expGroup->experimentGroup, "DeletionTag", true, alnArrayLength);
+                        expGroup->deletionTag.Initialize(expGroup->experimentGroup, "DeletionTag",
+                                                         true, alnArrayLength);
                     }
                     std::vector<char> readDeletionTagMetric;
                     readDeletionTagMetric.resize(readPulseMetric.size());
                     // Store DeletionTag.
-                    for (i = 0; i < readDeletionTagMetric.size()-1; i++ ) {
+                    for (i = 0; i < readDeletionTagMetric.size() - 1; i++) {
                         readDeletionTagMetric[i] = '-';
                     }
                     readDeletionTagMetric[i] = '\0';
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        assert(baseToAlignmentMap[i] < static_cast<int>(readDeletionTagMetric.size()));
-                        readDeletionTagMetric[baseToAlignmentMap[i]] = sourceRead.deletionTag[queryStart+i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        assert(baseToAlignmentMap[i] <
+                               static_cast<int>(readDeletionTagMetric.size()));
+                        readDeletionTagMetric[baseToAlignmentMap[i]] =
+                            sourceRead.deletionTag[queryStart + i];
                     }
-                    readDeletionTagMetric[readDeletionTagMetric.size()-1] = 0;
-                    expGroup->deletionTag.WriteToPos(&readDeletionTagMetric[0], readDeletionTagMetric.size(), offsetBegin);
+                    readDeletionTagMetric[readDeletionTagMetric.size() - 1] = 0;
+                    expGroup->deletionTag.WriteToPos(&readDeletionTagMetric[0],
+                                                     readDeletionTagMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["PulseIndex"] == true) {
                     if (!expGroup->pulseIndex.IsInitialized()) {
-                        expGroup->pulseIndex.Initialize(expGroup->experimentGroup, "PulseIndex", true, alnArrayLength);
+                        expGroup->pulseIndex.Initialize(expGroup->experimentGroup, "PulseIndex",
+                                                        true, alnArrayLength);
                     }
                     std::vector<uint32_t> readPulseIndexMetric;
-                    std::fill(readPulseIndexMetric.begin(), readPulseIndexMetric.end(), missingPulseIndex);
+                    std::fill(readPulseIndexMetric.begin(), readPulseIndexMetric.end(),
+                              missingPulseIndex);
                     readPulseIndexMetric.resize(readPulseMetric.size());
                     // Store Pulse Index.
                     assert(readPulseIndexMetric.size() > 0);
-                    for (i = 0; i < readPulseIndexMetric.size(); i++ ) {
+                    for (i = 0; i < readPulseIndexMetric.size(); i++) {
                         readPulseIndexMetric[i] = 0;
                     }
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        readPulseIndexMetric[baseToAlignmentMap[i]] = sourceRead.pulseIndex[queryStart+i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        readPulseIndexMetric[baseToAlignmentMap[i]] =
+                            sourceRead.pulseIndex[queryStart + i];
                     }
-                    readPulseIndexMetric[readPulseIndexMetric.size()-1] = 0;
-                    expGroup->pulseIndex.WriteToPos(&readPulseIndexMetric[0], readPulseIndexMetric.size(), offsetBegin);
+                    readPulseIndexMetric[readPulseIndexMetric.size() - 1] = 0;
+                    expGroup->pulseIndex.WriteToPos(&readPulseIndexMetric[0],
+                                                    readPulseIndexMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["SubstitutionTag"] == true) {
                     if (!expGroup->substitutionTag.IsInitialized()) {
-                        expGroup->substitutionTag.Initialize(expGroup->experimentGroup, "SubstitutionTag", true, alnArrayLength);
+                        expGroup->substitutionTag.Initialize(
+                            expGroup->experimentGroup, "SubstitutionTag", true, alnArrayLength);
                     }
                     std::vector<char> readSubstitutionTagMetric;
                     readSubstitutionTagMetric.resize(readPulseMetric.size());
                     // Store substitutionTag
-                    for (i = 0; i < readSubstitutionTagMetric.size()-1; i++ ) {
+                    for (i = 0; i < readSubstitutionTagMetric.size() - 1; i++) {
                         readSubstitutionTagMetric[i] = '-';
                     }
                     readSubstitutionTagMetric[i] = '\0';
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        readSubstitutionTagMetric[baseToAlignmentMap[i]] = sourceRead.substitutionTag[queryStart+i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        readSubstitutionTagMetric[baseToAlignmentMap[i]] =
+                            sourceRead.substitutionTag[queryStart + i];
                     }
-                    readSubstitutionTagMetric[readSubstitutionTagMetric.size()-1] = 0;
-                    expGroup->substitutionTag.WriteToPos(&readSubstitutionTagMetric[0], readSubstitutionTagMetric.size(), offsetBegin);
+                    readSubstitutionTagMetric[readSubstitutionTagMetric.size() - 1] = 0;
+                    expGroup->substitutionTag.WriteToPos(&readSubstitutionTagMetric[0],
+                                                         readSubstitutionTagMetric.size(),
+                                                         offsetBegin);
                 }
 
                 if (metricOptions["SubstitutionQV"] == true) {
                     if (!expGroup->substitutionQV.IsInitialized()) {
-                        expGroup->substitutionQV.Initialize(expGroup->experimentGroup, "SubstitutionQV", true, alnArrayLength);
+                        expGroup->substitutionQV.Initialize(expGroup->experimentGroup,
+                                                            "SubstitutionQV", true, alnArrayLength);
                     }
 
                     // Store start time normalized to frame rate.
                     std::fill(qvMetric.begin(), qvMetric.end(), missingQualityValue);
 
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        qvMetric[baseToAlignmentMap[i]] = sourceRead.substitutionQV[queryStart+i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        qvMetric[baseToAlignmentMap[i]] = sourceRead.substitutionQV[queryStart + i];
                     }
-                    qvMetric[qvMetric.size()-1] = 0;
+                    qvMetric[qvMetric.size() - 1] = 0;
                     expGroup->substitutionQV.WriteToPos(&qvMetric[0], qvMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["ClassifierQV"] == true) {
                     if (!expGroup->classifierQV.IsInitialized()) {
-                        expGroup->classifierQV.Initialize(expGroup->experimentGroup, "ClassifierQV", true, alnArrayLength);
+                        expGroup->classifierQV.Initialize(expGroup->experimentGroup, "ClassifierQV",
+                                                          true, alnArrayLength);
                     }
                     std::fill(floatMetric.begin(), floatMetric.end(), NaN);
 
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        floatMetric[baseToAlignmentMap[i]] = sourceRead.classifierQV[i+queryStart];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        floatMetric[baseToAlignmentMap[i]] =
+                            sourceRead.classifierQV[i + queryStart];
                     }
-                    qvMetric[qvMetric.size()-1] = 0;
-                    expGroup->classifierQV.WriteToPos(&floatMetric[0], floatMetric.size(), offsetBegin);
+                    qvMetric[qvMetric.size() - 1] = 0;
+                    expGroup->classifierQV.WriteToPos(&floatMetric[0], floatMetric.size(),
+                                                      offsetBegin);
                 }
 
                 if (metricOptions["StartFrame"] == true) {
                     if (!expGroup->startTime.IsInitialized()) {
-                        expGroup->startTime.Initialize(expGroup->experimentGroup, "StartFrame", true, alnArrayLength);
+                        expGroup->startTime.Initialize(expGroup->experimentGroup, "StartFrame",
+                                                       true, alnArrayLength);
                     }
 
                     // StartFrame used to be computed from baseFile.preBaseFrame and
@@ -2490,120 +2446,147 @@ int main(int argc, char* argv[]) {
                             Free(sourceRead.startFrame);
                         }
                         sourceRead.startFrame = new unsigned int[sourceRead.length];
-                        std::copy(sourceRead.preBaseFrames, &sourceRead.preBaseFrames[sourceRead.length], sourceRead.startFrame);
-                        for (i = 0; i < sourceRead.length-1; i++) {
-                            sourceRead.startFrame[i+1] += sourceRead.widthInFrames[i];
+                        std::copy(sourceRead.preBaseFrames,
+                                  &sourceRead.preBaseFrames[sourceRead.length],
+                                  sourceRead.startFrame);
+                        for (i = 0; i < sourceRead.length - 1; i++) {
+                            sourceRead.startFrame[i + 1] += sourceRead.widthInFrames[i];
                         }
-                        std::partial_sum(sourceRead.startFrame, &sourceRead.startFrame[sourceRead.length],  sourceRead.startFrame);
+                        std::partial_sum(sourceRead.startFrame,
+                                         &sourceRead.startFrame[sourceRead.length],
+                                         sourceRead.startFrame);
                     }
 
                     std::fill(timeMetric.begin(), timeMetric.end(), missingPulseIndex);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        timeMetric[baseToAlignmentMap[i]] = sourceRead.startFrame[i+queryStart];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        timeMetric[baseToAlignmentMap[i]] = sourceRead.startFrame[i + queryStart];
                     }
-                    timeMetric[timeMetric.size()-1] = 0;
+                    timeMetric[timeMetric.size() - 1] = 0;
                     expGroup->startTime.WriteToPos(&timeMetric[0], timeMetric.size(), offsetBegin);
                 }
 
                 if (metricOptions["PulseWidth"] == true) {
                     if (!expGroup->pulseWidth.IsInitialized()) {
-                        expGroup->pulseWidth.Initialize(expGroup->experimentGroup, "PulseWidth", true, alnArrayLength);
+                        expGroup->pulseWidth.Initialize(expGroup->experimentGroup, "PulseWidth",
+                                                        true, alnArrayLength);
                     }
-                    std::fill(frameRateMetric.begin(), frameRateMetric.end(), missingFrameRateValue);
+                    std::fill(frameRateMetric.begin(), frameRateMetric.end(),
+                              missingFrameRateValue);
 
                     // For legacy reasons, it's possible the width in frames is
                     // stored in the bas file. If this is the case, use the width
                     // in frames there.  Otherwise, use the width in frames stored
                     // in the pls file.
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        frameRateMetric[baseToAlignmentMap[i]] = sourceRead.widthInFrames[queryStart + i];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        frameRateMetric[baseToAlignmentMap[i]] =
+                            sourceRead.widthInFrames[queryStart + i];
                     }
-                    frameRateMetric[frameRateMetric.size()-1] = 0;
-                    expGroup->pulseWidth.WriteToPos(&frameRateMetric[0], frameRateMetric.size(), offsetBegin);
+                    frameRateMetric[frameRateMetric.size() - 1] = 0;
+                    expGroup->pulseWidth.WriteToPos(&frameRateMetric[0], frameRateMetric.size(),
+                                                    offsetBegin);
                 }
 
                 if (metricOptions["PreBaseFrames"] == true) {
                     if (!expGroup->preBaseFrames.IsInitialized()) {
-                        expGroup->preBaseFrames.Initialize(expGroup->experimentGroup, "PreBaseFrames", true, alnArrayLength);
+                        expGroup->preBaseFrames.Initialize(expGroup->experimentGroup,
+                                                           "PreBaseFrames", true, alnArrayLength);
                     }
-                    std::fill(frameRateMetric.begin(), frameRateMetric.end(), missingFrameRateValue);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        frameRateMetric[baseToAlignmentMap[i]] = sourceRead.preBaseFrames[i+queryStart];
+                    std::fill(frameRateMetric.begin(), frameRateMetric.end(),
+                              missingFrameRateValue);
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        frameRateMetric[baseToAlignmentMap[i]] =
+                            sourceRead.preBaseFrames[i + queryStart];
                     }
-                    frameRateMetric[frameRateMetric.size()-1] = 0;
-                    expGroup->preBaseFrames.WriteToPos(&frameRateMetric[0], frameRateMetric.size(), offsetBegin);
+                    frameRateMetric[frameRateMetric.size() - 1] = 0;
+                    expGroup->preBaseFrames.WriteToPos(&frameRateMetric[0], frameRateMetric.size(),
+                                                       offsetBegin);
                 }
 
                 if (metricOptions["WidthInFrames"] == true) {
                     if (!expGroup->widthInFrames.IsInitialized()) {
-                        expGroup->widthInFrames.Initialize(expGroup->experimentGroup, "WidthInFrames", true, alnArrayLength);
+                        expGroup->widthInFrames.Initialize(expGroup->experimentGroup,
+                                                           "WidthInFrames", true, alnArrayLength);
                     }
                     // Compute width in frames.
-                    std::fill(frameRateMetric.begin(), frameRateMetric.end(), missingFrameRateValue);
+                    std::fill(frameRateMetric.begin(), frameRateMetric.end(),
+                              missingFrameRateValue);
 
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        frameRateMetric[baseToAlignmentMap[i]] = sourceRead.widthInFrames[i+queryStart];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        frameRateMetric[baseToAlignmentMap[i]] =
+                            sourceRead.widthInFrames[i + queryStart];
                     }
-                    frameRateMetric[frameRateMetric.size()-1] = 0;
-                    expGroup->widthInFrames.WriteToPos(&frameRateMetric[0], frameRateMetric.size(), offsetBegin);
+                    frameRateMetric[frameRateMetric.size() - 1] = 0;
+                    expGroup->widthInFrames.WriteToPos(&frameRateMetric[0], frameRateMetric.size(),
+                                                       offsetBegin);
                 }
 
                 if (metricOptions["pkmid"] == true) {
                     if (!expGroup->pkmid.IsInitialized()) {
-                        expGroup->pkmid.Initialize(expGroup->experimentGroup, "pkmid", true, alnArrayLength);
+                        expGroup->pkmid.Initialize(expGroup->experimentGroup, "pkmid", true,
+                                                   alnArrayLength);
                     }
 
-                    for (i = 0; i < readPulseMetric.size(); i++ ) {
+                    for (i = 0; i < readPulseMetric.size(); i++) {
                         readPulseMetric[i] = NaN;
                     }
 
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        readPulseMetric[baseToAlignmentMap[i]] = sourceRead.midSignal[i+queryStart];
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        readPulseMetric[baseToAlignmentMap[i]] =
+                            sourceRead.midSignal[i + queryStart];
                     }
-                    readPulseMetric[readPulseMetric.size()-1] = 0;
-                    expGroup->pkmid.WriteToPos(&readPulseMetric[0], readPulseMetric.size(), offsetBegin);
+                    readPulseMetric[readPulseMetric.size() - 1] = 0;
+                    expGroup->pkmid.WriteToPos(&readPulseMetric[0], readPulseMetric.size(),
+                                               offsetBegin);
                 }
 
                 if (metricOptions["IPD"] == true) {
                     if (!expGroup->ipd.IsInitialized()) {
-                        expGroup->ipd.Initialize(expGroup->experimentGroup, "IPD", true, alnArrayLength);
+                        expGroup->ipd.Initialize(expGroup->experimentGroup, "IPD", true,
+                                                 alnArrayLength);
                     }
-                    std::fill(frameRateMetric.begin(), frameRateMetric.end(), missingFrameRateValue);
+                    std::fill(frameRateMetric.begin(), frameRateMetric.end(),
+                              missingFrameRateValue);
 
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
                         //
                         // The IPD is undefined for the first base in a read.
                         //
-                        if (usePulseFile ) {
+                        if (usePulseFile) {
                             if (queryStart == 0 and i == 0) {
                                 frameRateMetric[baseToAlignmentMap[i]] = 0;
+                            } else {
+                                frameRateMetric[baseToAlignmentMap[i]] =
+                                    (sourceRead.startFrame[i + queryStart] -
+                                     sourceRead.startFrame[i + queryStart - 1] -
+                                     sourceRead.widthInFrames[i + queryStart - 1]);
                             }
-                            else {
-                                frameRateMetric[baseToAlignmentMap[i]] = (sourceRead.startFrame[i+queryStart]
-                                        - sourceRead.startFrame[i+queryStart-1]
-                                        - sourceRead.widthInFrames[i+queryStart-1]);
-                            }
-                        }
-                        else if (useBaseFile) {
-                            frameRateMetric[baseToAlignmentMap[i]] = sourceRead.preBaseFrames[i + queryStart];
+                        } else if (useBaseFile) {
+                            frameRateMetric[baseToAlignmentMap[i]] =
+                                sourceRead.preBaseFrames[i + queryStart];
                         }
                     }
-                    frameRateMetric[frameRateMetric.size()-1] = 0;
-                    expGroup->ipd.WriteToPos(&frameRateMetric[0], frameRateMetric.size(), offsetBegin);
+                    frameRateMetric[frameRateMetric.size() - 1] = 0;
+                    expGroup->ipd.WriteToPos(&frameRateMetric[0], frameRateMetric.size(),
+                                             offsetBegin);
                 }
 
                 if (metricOptions["Light"] == true) {
                     if (!expGroup->light.IsInitialized()) {
-                        expGroup->light.Initialize(expGroup->experimentGroup, "Light", true, alnArrayLength);
+                        expGroup->light.Initialize(expGroup->experimentGroup, "Light", true,
+                                                   alnArrayLength);
                     }
-                    std::fill(frameRateMetric.begin(), frameRateMetric.end(), missingFrameRateValue);
-                    for (i = 0; i < ungappedAlignedSequenceLength; i++ ) {
-                        frameRateMetric[baseToAlignmentMap[i]] = sourceRead.meanSignal[i+queryStart];
-                        frameRateMetric[baseToAlignmentMap[i]] = (frameRateMetric[baseToAlignmentMap[i]] *
-                                sourceRead.widthInFrames[i+queryStart]);
+                    std::fill(frameRateMetric.begin(), frameRateMetric.end(),
+                              missingFrameRateValue);
+                    for (i = 0; i < ungappedAlignedSequenceLength; i++) {
+                        frameRateMetric[baseToAlignmentMap[i]] =
+                            sourceRead.meanSignal[i + queryStart];
+                        frameRateMetric[baseToAlignmentMap[i]] =
+                            (frameRateMetric[baseToAlignmentMap[i]] *
+                             sourceRead.widthInFrames[i + queryStart]);
                     }
-                    frameRateMetric[frameRateMetric.size()-1] = 0;
-                    expGroup->light.WriteToPos(&frameRateMetric[0], frameRateMetric.size(), offsetBegin);
+                    frameRateMetric[frameRateMetric.size() - 1] = 0;
+                    expGroup->light.WriteToPos(&frameRateMetric[0], frameRateMetric.size(),
+                                               offsetBegin);
                 }
 
                 sourceRead.Free();
@@ -2625,7 +2608,7 @@ int main(int argc, char* argv[]) {
         if (usePulseFile) {
             hdfPlsReader.Close();
         }
-    } // Done loading movies.
+    }  // Done loading movies.
 
     cmpReader.Close();
     std::cerr << "[INFO] " << GetTimestamp() << " [" << program << "] ended." << std::endl;

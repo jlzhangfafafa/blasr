@@ -24,28 +24,28 @@
  *
  * =====================================================================================
  */
-#include <climits>
 
+#include <climits>
 #include <iostream>
 
-#include <FASTASequence.hpp>
-#include <FASTAReader.hpp>
-#include <CommandLineParser.hpp>
-#include <ChangeListID.hpp>
-#include <utils/TimeUtils.hpp>
-#include <utils/RangeUtils.hpp>
-#include <utils/SMRTReadUtils.hpp>
-#include <algorithms/alignment/DistanceMatrixScoreFunction.hpp>
-#include <algorithms/alignment/AlignmentUtils.hpp>
-#include <algorithms/alignment/StringToScoreMatrix.hpp>
-#include <sam/SAMReader.hpp>
-#include <format/SAMPrinter.hpp>
-#include <datastructures/alignment/AlignmentCandidate.hpp>
-#include <datastructures/alignment/FilterCriteria.hpp>
-#include <metagenome/TitleTable.hpp>
-#include <datastructures/alignment/SAMToAlignmentCandidateAdapter.hpp>
-#include <GFFFile.hpp>
-#include <defs.h>
+#include <pbdata/defs.h>
+#include <alignment/algorithms/alignment/AlignmentUtils.hpp>
+#include <alignment/algorithms/alignment/DistanceMatrixScoreFunction.hpp>
+#include <alignment/algorithms/alignment/StringToScoreMatrix.hpp>
+#include <alignment/datastructures/alignment/AlignmentCandidate.hpp>
+#include <alignment/datastructures/alignment/FilterCriteria.hpp>
+#include <alignment/datastructures/alignment/SAMToAlignmentCandidateAdapter.hpp>
+#include <alignment/format/SAMPrinter.hpp>
+#include <alignment/utils/RangeUtils.hpp>
+#include <pbdata/ChangeListID.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/GFFFile.hpp>
+#include <pbdata/metagenome/TitleTable.hpp>
+#include <pbdata/sam/SAMReader.hpp>
+#include <pbdata/utils/SMRTReadUtils.hpp>
+#include <pbdata/utils/TimeUtils.hpp>
 #include "../iblasr/RegisterFilterOptions.h"
 
 //#define USE_GOOGLE_PROFILER
@@ -60,19 +60,18 @@ ScoreSign scoreSign = ScoreSign::NEGATIVE;
 
 // Compare SAMAlignment objects by qName, score and
 // target positions.
-bool byQNameScoreTStart(const SAMAlignment & a,
-                        const SAMAlignment & b) {
+bool byQNameScoreTStart(const SAMAlignment &a, const SAMAlignment &b)
+{
     if (a.qName == b.qName) {
-        if (a.score == b.score)
-            return a.pos < b.pos;
+        if (a.score == b.score) return a.pos < b.pos;
         return Score(a.score, scoreSign).WorseThan(Score(b.score, scoreSign));
     }
     return (a.qName < b.qName);
 }
 
 // Compare SAMAlignment objects by rName and qName
-bool byRNameQName(const SAMAlignment & a,
-                  const SAMAlignment & b) {
+bool byRNameQName(const SAMAlignment &a, const SAMAlignment &b)
+{
     if (a.rName == b.rName) {
         return a.qName < b.qName;
     }
@@ -82,16 +81,17 @@ bool byRNameQName(const SAMAlignment & a,
 // Get the next group of SAM alignments that have the same qName from
 // allSAMAlignments[groupBegin ... groupEnd)
 // Note that allSAMAlignments is already sorted by qName, score and tPos.
-void GetNextSAMAlignmentGroup(std::vector<SAMAlignment> & allSAMAlignments,
-                              unsigned int groupBegin,
-                              unsigned int & groupEnd) {
+void GetNextSAMAlignmentGroup(std::vector<SAMAlignment> &allSAMAlignments, unsigned int groupBegin,
+                              unsigned int &groupEnd)
+{
     assert(groupBegin < allSAMAlignments.size());
     groupEnd = groupBegin + 1;
     std::string queryName = allSAMAlignments[groupBegin].qName;
-    while(groupEnd < allSAMAlignments.size()) {
+    while (groupEnd < allSAMAlignments.size()) {
         if (allSAMAlignments[groupEnd].qName == queryName)
-            groupEnd ++;
-        else break;
+            groupEnd++;
+        else
+            break;
     }
 }
 
@@ -99,13 +99,11 @@ void GetNextSAMAlignmentGroup(std::vector<SAMAlignment> & allSAMAlignments,
 // Assume that alignments in allSAMAlignments[groupBegin, groupEnd)
 // all have the same queryName and are sorted by score and tPos
 // asscendingly: worst, ...., best
-void GetBestSAMAlignmentsInGroup(std::vector<SAMAlignment> & allSAMAlignments,
-                                 const unsigned int & groupBegin,
-                                 const unsigned int & groupEnd,
-                                 unsigned int & bestBegin,
-                                 unsigned int & bestEnd) {
-    assert(groupEnd  <= allSAMAlignments.size() and
-           groupBegin < groupEnd);
+void GetBestSAMAlignmentsInGroup(std::vector<SAMAlignment> &allSAMAlignments,
+                                 const unsigned int &groupBegin, const unsigned int &groupEnd,
+                                 unsigned int &bestBegin, unsigned int &bestEnd)
+{
+    assert(groupEnd <= allSAMAlignments.size() and groupBegin < groupEnd);
 
     bestEnd = groupEnd;
     bestBegin = groupEnd - 1;
@@ -115,35 +113,35 @@ void GetBestSAMAlignmentsInGroup(std::vector<SAMAlignment> & allSAMAlignments,
         assert(allSAMAlignments[bestBegin].qName == queryName);
         if (allSAMAlignments[bestBegin].score == groupBestScore)
             bestBegin -= 1;
-        else break;
+        else
+            break;
     }
     bestBegin += 1;
 }
 
-
 // Apply hit policy to a group of SAM alignments and return indices
 // of the selected alignments.
-std::vector<unsigned int> ApplyHitPolicy(HitPolicy & hitPolicy,
-                                    std::vector<SAMAlignment> & allSAMAlignments,
-                                    const unsigned int & groupBegin,
-                                    const unsigned int & groupEnd) {
+std::vector<unsigned int> ApplyHitPolicy(HitPolicy &hitPolicy,
+                                         std::vector<SAMAlignment> &allSAMAlignments,
+                                         const unsigned int &groupBegin,
+                                         const unsigned int &groupEnd)
+{
     std::vector<unsigned int> hitIndices;
     if (hitPolicy.IsAll()) {
-        for(unsigned int i = groupBegin; i < groupEnd; i++){
+        for (unsigned int i = groupBegin; i < groupEnd; i++) {
             hitIndices.push_back(i);
         }
     } else if (hitPolicy.IsRandom()) {
-        hitIndices.push_back(rand()%(groupEnd - groupBegin) + groupBegin);
+        hitIndices.push_back(rand() % (groupEnd - groupBegin) + groupBegin);
     } else {
         unsigned int bestBegin, bestEnd;
-        GetBestSAMAlignmentsInGroup(allSAMAlignments, groupBegin, groupEnd,
-                                    bestBegin, bestEnd);
+        GetBestSAMAlignmentsInGroup(allSAMAlignments, groupBegin, groupEnd, bestBegin, bestEnd);
         if (hitPolicy.IsAllbest()) {
-            for(unsigned int i = bestBegin; i < bestEnd; i++){
+            for (unsigned int i = bestBegin; i < bestEnd; i++) {
                 hitIndices.push_back(i);
             }
         } else if (hitPolicy.IsRandombest()) {
-            hitIndices.push_back(rand()%(bestEnd-bestBegin) + bestBegin);
+            hitIndices.push_back(rand() % (bestEnd - bestBegin) + bestBegin);
         } else if (hitPolicy.IsLeftmost()) {
             hitIndices.push_back(bestBegin);
         } else {
@@ -155,11 +153,12 @@ std::vector<unsigned int> ApplyHitPolicy(HitPolicy & hitPolicy,
 
 // Convert references[...].title in reference.fasta to their corresponding
 // indices in the title table.
-void ConvertTitlesToTitleTableIndices(std::vector<FASTASequence> & references,
-        std::string & titleTableName) {
+void ConvertTitlesToTitleTableIndices(std::vector<FASTASequence> &references,
+                                      std::string &titleTableName)
+{
     TitleTable tt;
     tt.Read(titleTableName);
-    for(size_t i = 0; i < references.size(); i++) {
+    for (size_t i = 0; i < references.size(); i++) {
         std::string title = references[i].GetTitle();
         int idx = -1;
         if (tt.Lookup(title, idx)) {
@@ -168,9 +167,8 @@ void ConvertTitlesToTitleTableIndices(std::vector<FASTASequence> & references,
             references[i].CopyTitle(ss.str());
         } else {
             std::cout << "ERROR, reference " << title << " does not exist "
-                 << " in the title table " << titleTableName << ". The "
-                 << "reference fasta and the title table do not match."
-                 << std::endl;
+                      << " in the title table " << titleTableName << ". The "
+                      << "reference fasta and the title table do not match." << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
@@ -185,30 +183,29 @@ void ConvertTitlesToTitleTableIndices(std::vector<FASTASequence> & references,
 // Note that the first field (e.g., 'ref000001') is id of sequence
 // in a reference repository, not sequence name, so we need to
 // reconstruct the mapping between sequence id and sequence name.
-bool CheckAdapterOnly(GFFFile & adapterGffFile, //Adapter gff file
-    AlignmentCandidate<> & alignment, // An alignment
-    std::map<std::string, int> & refNameToIndex) {
+bool CheckAdapterOnly(GFFFile &adapterGffFile,          //Adapter gff file
+                      AlignmentCandidate<> &alignment,  // An alignment
+                      std::map<std::string, int> &refNameToIndex)
+{
     // Map target sequence name to its index in reference repository.
     if (refNameToIndex.find(alignment.tName) == refNameToIndex.end()) {
         // This should not happen ...
-        std::cout << "ERROR, could not find alignment target name "
-             << alignment.tName << " in the reference file." << std::endl;
+        std::cout << "ERROR, could not find alignment target name " << alignment.tName
+                  << " in the reference file." << std::endl;
         std::exit(EXIT_FAILURE);
     }
     int refNameIndex = refNameToIndex[alignment.tName];
-    char buf [16];
+    char buf[16];
     sprintf(buf, "ref%06d", refNameIndex + 1);
     // Reconstruct ref id in the format "ref00000?".
     std::string refNameId(buf);
     int FUZZY_OVERLAP = 20;
-    for(size_t eindex = 0; eindex < adapterGffFile.entries.size();
-            eindex++) {
-        GFFEntry & entry = adapterGffFile.entries[eindex];
+    for (size_t eindex = 0; eindex < adapterGffFile.entries.size(); eindex++) {
+        GFFEntry &entry = adapterGffFile.entries[eindex];
         // Convert each GFF record from 1-based inclusive to
         // 0-based exclusive.
         if (entry.type == "adapter" and
-            (entry.name == alignment.tName or
-             entry.name == refNameId)) {
+            (entry.name == alignment.tName or entry.name == refNameId)) {
             UInt estart = entry.start - 1;
             UInt eend = entry.end;
             if (entry.strand == '-') {
@@ -216,10 +213,9 @@ bool CheckAdapterOnly(GFFFile & adapterGffFile, //Adapter gff file
                 estart = alignment.tLength - 1 - eend;
                 eend = alignment.tLength - 1 - tmp;
             }
-            if (not (eend < alignment.GenomicTBegin() or
-                 estart > alignment.GenomicTEnd())) {
+            if (not(eend < alignment.GenomicTBegin() or estart > alignment.GenomicTEnd())) {
                 UInt lengthUnion = std::max(eend, alignment.GenomicTEnd()) -
-                                  std::min(estart, alignment.GenomicTBegin());
+                                   std::min(estart, alignment.GenomicTBegin());
                 if (lengthUnion < eend - estart + FUZZY_OVERLAP) {
                     return true;
                 }
@@ -229,14 +225,14 @@ bool CheckAdapterOnly(GFFFile & adapterGffFile, //Adapter gff file
     return false;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 #ifdef USE_GOOGLE_PROFILER
     char *profileFileName = getenv("CPUPROFILE");
     if (profileFileName != NULL) {
-      ProfilerStart(profileFileName);
-    }
-    else {
-      ProfilerStart("google_profile.txt");
+        ProfilerStart(profileFileName);
+    } else {
+        ProfilerStart("google_profile.txt");
     }
 #endif
 
@@ -244,12 +240,9 @@ int main(int argc, char* argv[]) {
     std::string samFileName, refFileName, outFileName;
 
     CommandLineParser clp;
-    clp.RegisterStringOption("file.sam", &samFileName,
-                             "Input SAM file.");
-    clp.RegisterStringOption("reference.fasta", &refFileName,
-                             "Reference used to generate reads.");
-    clp.RegisterStringOption("out.sam", &outFileName,
-                             "Output SAM file.");
+    clp.RegisterStringOption("file.sam", &samFileName, "Input SAM file.");
+    clp.RegisterStringOption("reference.fasta", &refFileName, "Reference used to generate reads.");
+    clp.RegisterStringOption("out.sam", &outFileName, "Output SAM file.");
     clp.RegisterPreviousFlagsAsHidden();
 
     // Register filter criteria options.
@@ -257,33 +250,32 @@ int main(int argc, char* argv[]) {
     float minPctSimilarity = 70, minPctAccuracy = 70;
     std::string hitPolicyStr = "randombest";
     bool useScoreCutoff = false;
-    int  scoreCutoff = INF_INT;
-    int  scoreSignInt = -1;
-    RegisterFilterOptions(clp, minAlnLength, minPctSimilarity,
-                          minPctAccuracy, hitPolicyStr, useScoreCutoff,
-                          scoreSignInt, scoreCutoff);
+    int scoreCutoff = INF_INT;
+    int scoreSignInt = -1;
+    RegisterFilterOptions(clp, minAlnLength, minPctSimilarity, minPctAccuracy, hitPolicyStr,
+                          useScoreCutoff, scoreSignInt, scoreCutoff);
 
     int seed = 1;
     clp.RegisterIntOption("seed", &seed,
-            "(1)  Seed for random number generator.\n"
-            "If seed is 0, then use current time as seed.",
-            CommandLineParser::Integer);
+                          "(1)  Seed for random number generator.\n"
+                          "If seed is 0, then use current time as seed.",
+                          CommandLineParser::Integer);
 
     std::string holeNumberStr;
     Ranges holeNumberRanges;
     clp.RegisterStringOption("-holeNumbers", &holeNumberStr,
-            "A string of comma-delimited hole number ranges to output hits, "
-            "such as '1,2,10-12'. "
-            "This requires hit titles to be in SMRT read title format.");
+                             "A string of comma-delimited hole number ranges to output hits, "
+                             "such as '1,2,10-12'. "
+                             "This requires hit titles to be in SMRT read title format.");
 
     bool parseSmrtTitle = false;
     clp.RegisterFlagOption("smrtTitle", &parseSmrtTitle,
-            "Use this option when filtering alignments generated by "
-            "programs other than blasr, e.g. bwa-sw or gmap. "
-            "  Parse read coordinates from the SMRT read title. "
-            "The title is in the format /name/hole/coordinates, where"
-            " coordinates are in the format \\d+_\\d+, and represent "
-            "the interval of the read that was aligned.");
+                           "Use this option when filtering alignments generated by "
+                           "programs other than blasr, e.g. bwa-sw or gmap. "
+                           "  Parse read coordinates from the SMRT read title. "
+                           "The title is in the format /name/hole/coordinates, where"
+                           " coordinates are in the format \\d+_\\d+, and represent "
+                           "the interval of the read that was aligned.");
     /* This experimental option can be useful for metagenomics, in which case
      * there are hundreds of sequences in the target, of which many titles are
      * long and may contain white spaces (e.g., ' ', '\t').
@@ -294,29 +286,29 @@ int main(int argc, char* argv[]) {
 
     std::string titleTableName = "";
     clp.RegisterStringOption("titleTable", &titleTableName,
-            "Use this experimental option when filtering alignments generated by "
-            "blasr with -titleTable titleTableName, in which case "
-            "reference titles in SAM are represented by their "
-            "indices (e.g., 0, 1, 2, ...) in the title table.");
+                             "Use this experimental option when filtering alignments generated by "
+                             "blasr with -titleTable titleTableName, in which case "
+                             "reference titles in SAM are represented by their "
+                             "indices (e.g., 0, 1, 2, ...) in the title table.");
 
     std::string adapterGffFileName = "";
     clp.RegisterStringOption("filterAdapterOnly", &adapterGffFileName,
-            "Use this option to remove reads which can only map to adapters "
-            "specified in the GFF file.");
+                             "Use this option to remove reads which can only map to adapters "
+                             "specified in the GFF file.");
 
     bool verbose = false;
     clp.RegisterFlagOption("v", &verbose, "Be verbose.");
 
     clp.SetExamples(
-            "Because SAM has optional tags that have different meanings"
-            " in different programs, careful usage is required in order "
-            "to have proper output.  The \"xs\" tag in bwa-sw is used to "
-            "show the suboptimal score, but in PacBio SAM (blasr) it is "
-            "defined as the start in the query sequence of the alignment.\n"
-            "When \"-smrtTitle\" is specified, the xs tag is ignored, but "
-            "when it is not specified, the coordinates given by the xs and "
-            "xe tags are used to define the interval of a read that is "
-            "aligned.  The CIGAR string is relative to this interval.");
+        "Because SAM has optional tags that have different meanings"
+        " in different programs, careful usage is required in order "
+        "to have proper output.  The \"xs\" tag in bwa-sw is used to "
+        "show the suboptimal score, but in PacBio SAM (blasr) it is "
+        "defined as the start in the query sequence of the alignment.\n"
+        "When \"-smrtTitle\" is specified, the xs tag is ignored, but "
+        "when it is not specified, the coordinates given by the xs and "
+        "xe tags are used to define the interval of a read that is "
+        "aligned.  The CIGAR string is relative to this interval.");
 
     clp.ParseCommandLine(argc, argv);
 
@@ -327,10 +319,9 @@ int main(int argc, char* argv[]) {
         srand(seed);
     }
 
-    scoreSign = (scoreSignInt == -1)?ScoreSign::NEGATIVE:ScoreSign::POSITIVE;
+    scoreSign = (scoreSignInt == -1) ? ScoreSign::NEGATIVE : ScoreSign::POSITIVE;
     Score s(static_cast<float>(scoreCutoff), scoreSign);
-    FilterCriteria filterCriteria(minAlnLength, minPctSimilarity,
-                                  minPctAccuracy, true, s);
+    FilterCriteria filterCriteria(minAlnLength, minPctSimilarity, minPctAccuracy, true, s);
     filterCriteria.Verbose(verbose);
     HitPolicy hitPolicy(hitPolicyStr, scoreSign);
 
@@ -343,21 +334,20 @@ int main(int argc, char* argv[]) {
     // Parse hole number ranges.
     if (holeNumberStr.size() != 0) {
         if (not holeNumberRanges.setRanges(holeNumberStr)) {
-            std::cout << "Could not parse hole number ranges: "
-                 << holeNumberStr << "." << std::endl;
+            std::cout << "Could not parse hole number ranges: " << holeNumberStr << "."
+                      << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
 
     // Open output file.
-	std::ofstream outFileStrm;
-	if (outFileName != "") {
-		CrucialOpen(outFileName, outFileStrm, std::ios::out);
-	}
+    std::ofstream outFileStrm;
+    if (outFileName != "") {
+        CrucialOpen(outFileName, outFileStrm, std::ios::out);
+    }
 
     GFFFile adapterGffFile;
-    if (adapterGffFileName != "")
-        adapterGffFile.ReadAll(adapterGffFileName);
+    if (adapterGffFileName != "") adapterGffFile.ReadAll(adapterGffFileName);
 
     SAMReader<SAMFullReferenceSequence, SAMReadGroup, SAMAlignment> samReader;
     FASTAReader fastaReader;
@@ -401,8 +391,8 @@ int main(int argc, char* argv[]) {
     // Process SAM Header.
     std::string commandLineString;
     clp.CommandLineToString(argc, argv, commandLineString);
-    allHeaders.push_back("@PG\tID:SAMFILTER\tVN:" + versionString + \
-                         "\tCL:" + program + " " + commandLineString);
+    allHeaders.push_back("@PG\tID:SAMFILTER\tVN:" + versionString + "\tCL:" + program + " " +
+                         commandLineString);
     for (size_t i = 0; i < allHeaders.size(); i++) {
         outFileStrm << allHeaders[i] << std::endl;
     }
@@ -444,30 +434,26 @@ int main(int argc, char* argv[]) {
         if (parseSmrtTitle and holeNumberStr.size() != 0) {
             std::string movieName;
             int thisHoleNumber;
-            if (not ParsePBIReadName(samAlignment.qName,
-                                     movieName,
-                                     thisHoleNumber)) {
-                std::cout << "ERROR, could not parse SMRT title: "
-                     << samAlignment.qName << "." << std::endl;
+            if (not ParsePBIReadName(samAlignment.qName, movieName, thisHoleNumber)) {
+                std::cout << "ERROR, could not parse SMRT title: " << samAlignment.qName << "."
+                          << std::endl;
                 std::exit(EXIT_FAILURE);
             }
             if (not holeNumberRanges.contains(UInt(thisHoleNumber))) {
-                if (verbose)
-                    std::cout << thisHoleNumber << " is not in range." << std::endl;
+                if (verbose) std::cout << thisHoleNumber << " is not in range." << std::endl;
                 continue;
             }
         }
 
         if (samAlignment.cigar.find('P') != std::string::npos) {
             std::cout << "WARNING. Could not process SAM record with 'P' in "
-                 << "its cigar string." << std::endl;
+                      << "its cigar string." << std::endl;
             continue;
         }
 
         std::vector<AlignmentCandidate<> > convertedAlignments;
-        SAMAlignmentsToCandidates(samAlignment,
-                references, refNameToIndex,
-                convertedAlignments, parseSmrtTitle, false);
+        SAMAlignmentsToCandidates(samAlignment, references, refNameToIndex, convertedAlignments,
+                                  parseSmrtTitle, false);
 
         if (convertedAlignments.size() > 1) {
             std::cout << "WARNING. Ignore multiple segments." << std::endl;
@@ -475,20 +461,18 @@ int main(int argc, char* argv[]) {
         }
 
         for (int i = 0; i < 1; i++) {
-            AlignmentCandidate<> & alignment = convertedAlignments[i];
+            AlignmentCandidate<> &alignment = convertedAlignments[i];
 
             //score func does not matter
             DistanceMatrixScoreFunction<DNASequence, DNASequence> distFunc;
-            ComputeAlignmentStats(alignment, alignment.qAlignedSeq.seq,
-                                  alignment.tAlignedSeq.seq, distFunc);
+            ComputeAlignmentStats(alignment, alignment.qAlignedSeq.seq, alignment.tAlignedSeq.seq,
+                                  distFunc);
 
             // Check whether this alignment can only map to adapters in
             // the adapter GFF file.
             if (adapterGffFileName != "" and
                 CheckAdapterOnly(adapterGffFile, alignment, refNameToIndex)) {
-                if (verbose)
-                    std::cout << alignment.qName << " filter adapter only."
-                         << std::endl;
+                if (verbose) std::cout << alignment.qName << " filter adapter only." << std::endl;
                 continue;
             }
 
@@ -498,7 +482,7 @@ int main(int argc, char* argv[]) {
             if (not filterCriteria.Satisfy(static_cast<AlignmentCandidate<> *>(&alignment))) {
                 continue;
             }
-            allSAMAlignments.push_back( samAlignment );
+            allSAMAlignments.push_back(samAlignment);
 
             alignment.FreeSubsequences();
         }
@@ -506,37 +490,35 @@ int main(int argc, char* argv[]) {
     }
 
     // Sort all SAM alignments by qName, score and target position.
-    sort(allSAMAlignments.begin(), allSAMAlignments.end(),
-         byQNameScoreTStart);
+    sort(allSAMAlignments.begin(), allSAMAlignments.end(), byQNameScoreTStart);
 
     unsigned int groupBegin = 0;
     unsigned int groupEnd = -1;
     std::vector<SAMAlignment> filteredSAMAlignments;
-    while(groupBegin < allSAMAlignments.size()) {
+    while (groupBegin < allSAMAlignments.size()) {
         // Get the next group of SAM alignments which have the same qName
         // from allSAMAlignments[groupBegin ... groupEnd)
         GetNextSAMAlignmentGroup(allSAMAlignments, groupBegin, groupEnd);
-        std::vector<unsigned int> hitIndices = ApplyHitPolicy(
-                hitPolicy, allSAMAlignments, groupBegin, groupEnd);
-        for(unsigned int i = 0; i < hitIndices.size(); i++) {
+        std::vector<unsigned int> hitIndices =
+            ApplyHitPolicy(hitPolicy, allSAMAlignments, groupBegin, groupEnd);
+        for (unsigned int i = 0; i < hitIndices.size(); i++) {
             filteredSAMAlignments.push_back(allSAMAlignments[hitIndices[i]]);
         }
         groupBegin = groupEnd;
     }
 
     // Sort all SAM alignments by reference name and query name
-    sort(filteredSAMAlignments.begin(), filteredSAMAlignments.end(),
-         byRNameQName);
+    sort(filteredSAMAlignments.begin(), filteredSAMAlignments.end(), byRNameQName);
 
-    for(unsigned int i = 0; i < filteredSAMAlignments.size(); i++) {
+    for (unsigned int i = 0; i < filteredSAMAlignments.size(); i++) {
         filteredSAMAlignments[i].PrintSAMAlignment(outFileStrm);
     }
 
-	if (outFileName != "") {
-		outFileStrm.close();
-	}
+    if (outFileName != "") {
+        outFileStrm.close();
+    }
 #ifdef USE_GOOGLE_PROFILER
-  ProfilerStop();
+    ProfilerStop();
 #endif
     return 0;
 }

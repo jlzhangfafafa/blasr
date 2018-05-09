@@ -4,14 +4,14 @@ alignment are different in qPos and qAlignedSeqPos. It is used
 to test if MakeQueryForward() has reset all positions correctly.
 
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
   $ Q=$DATDIR/test-pgc/pgc-query-1.fasta 
   $ T=$DATDIR/test-pgc/hxb2.fasta
 
 Test m4 output
   $ O=$OUTDIR/pgc-1.m4
-  $ $EXEC $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -20,7 +20,7 @@ Test m4 output
 
 Test m5 output
   $ O=$OUTDIR/pgc-1.m5
-  $ $EXEC $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -29,7 +29,7 @@ Test m5 output
 
 Test sam output
   $ O=$OUTDIR/pgc-1.sam
-  $ $EXEC $Q $T --sam --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T --sam --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0

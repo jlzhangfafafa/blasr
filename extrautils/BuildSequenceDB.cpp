@@ -1,10 +1,10 @@
 #include <string>
 
-#include "CommandLineParser.hpp"
-#include "FASTAReader.hpp"
-#include "metagenome/SequenceIndexDatabase.hpp"
-#include "utils.hpp"
-#include "utils/FileOfFileNames.hpp"
+#include <alignment/utils/FileOfFileNames.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/metagenome/SequenceIndexDatabase.hpp>
+#include <pbdata/utils.hpp>
 
 int main(int argc, char* argv[])
 {

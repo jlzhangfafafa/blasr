@@ -6,4 +6,4 @@ PLATFORM=$(uname)
 TOOLSPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 CLANGFORMAT="${TOOLSPATH}/${PLATFORM}/clang-format -style=file"
 
-find ctest iblasr extrautils \( -name \*.cpp -or -name \*.h -or -name \*.hpp \) -print0 | xargs -n1 -0 ${CLANGFORMAT} -i
+find . ctest iblasr extrautils \( -name \*.cpp -or -name \*.h -or -name \*.hpp \) -print0 | xargs -n1 -0 ${CLANGFORMAT} -i

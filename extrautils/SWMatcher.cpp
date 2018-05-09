@@ -3,13 +3,13 @@
 #include <string>
 #include <vector>
 
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-#include "algorithms/alignment/AlignmentUtils.hpp"
-#include "algorithms/alignment/DistanceMatrixScoreFunction.hpp"
-#include "algorithms/alignment/IDSScoreFunction.hpp"
-#include "algorithms/alignment/SWAlign.hpp"
-#include "format/StickAlignmentPrinter.hpp"
+#include <alignment/algorithms/alignment/AlignmentUtils.hpp>
+#include <alignment/algorithms/alignment/DistanceMatrixScoreFunction.hpp>
+#include <alignment/algorithms/alignment/IDSScoreFunction.hpp>
+#include <alignment/algorithms/alignment/SWAlign.hpp>
+#include <alignment/format/StickAlignmentPrinter.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
 
 int main(int argc, char* argv[])
 {

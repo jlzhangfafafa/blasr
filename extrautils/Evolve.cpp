@@ -1,10 +1,11 @@
 #include <sstream>
 #include <vector>
-#include "CommandLineParser.hpp"
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-#include "statistics/StatUtils.hpp"
-#include "utils.hpp"
+
+#include <alignment/statistics/StatUtils.hpp>
+#include <pbdata/CommandLineParser.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/utils.hpp>
 
 /*
 ref000001	.	SNV	9454	9454	0.00	.	.	reference=C;confidence=0;Name=9454C>A;coverage=0;variantseq=A

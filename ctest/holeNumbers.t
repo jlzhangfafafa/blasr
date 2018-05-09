@@ -1,9 +1,9 @@
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
 Test --holeNumbers
   $ rm -f $OUTDIR/holeNumbers.m4
-  $ $EXEC $DATDIR/lambda_bax.fofn $DATDIR/lambda_ref.fasta -m 4 --out $OUTDIR/holeNumbers.m4 --holeNumbers 14798,55000--55100 --nproc 8
+  $ $BLASR_EXE $DATDIR/lambda_bax.fofn $DATDIR/lambda_ref.fasta -m 4 --out $OUTDIR/holeNumbers.m4 --holeNumbers 14798,55000--55100 --nproc 8
   [INFO]* (glob)
   [INFO]* (glob)
   $ sort $OUTDIR/holeNumbers.m4 > $TMP1

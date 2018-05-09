@@ -1,7 +1,7 @@
 Test --placeGapConsistently using a naive artificial test case.
 
 Set up
-  $ . $TESTDIR/setup.sh
+  $ mkdir -p $OUTDIR
 
   $ Q=$DATDIR/test-pgc/query.fasta 
   $ T=$DATDIR/test-pgc/target.fasta 
@@ -20,7 +20,7 @@ Set up
 
 Test m4 output
   $ O=$OUTDIR/pgc-naive.m4
-  $ $EXEC $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T -m 4 --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -30,7 +30,7 @@ Test m4 output
 
 Test m5 output
   $ O=$OUTDIR/pgc-naive.m5
-  $ $EXEC $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T -m 5 --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -40,7 +40,7 @@ Test m5 output
 
 Test sam output
   $ O=$OUTDIR/pgc-naive.sam
-  $ $EXEC $Q $T --sam --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T --sam --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
@@ -51,32 +51,32 @@ Test sam output
 
 Test bam output
   $ O=$OUTDIR/pgc-naive.bam
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
-  $ samtools view $O
+  $ $SAMTOOLS_EXE view $O
   m54006_151021_185942/0/0_163\t0\ttarget\t1\t254\t61=2D52=50S\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tRG:Z:b6de17a9\tnp:i:1\tqe:i:163\tqs:i:0\tzm:i:0\tAS:i:-555\tNM:i:2 (esc)
   m54006_151021_185942/0/200_363\t16\ttarget\t1\t254\t61=2D52=50S\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tRG:Z:b6de17a9\tnp:i:1\tqe:i:163\tqs:i:0\tzm:i:0\tAS:i:-555\tNM:i:2 (esc)
 
 Test bam input
   $ Q=$DATDIR/test-pgc/query.bam 
   $ O=$OUTDIR/pgc-naive-bamin-bamout.bam
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --placeGapConsistently && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
   [INFO]* (glob)
   0
-  $ samtools view $O
+  $ $SAMTOOLS_EXE view $O
   m54006_151021_185942/0/0_163\t0\ttarget\t1\t254\t61=2D52=50S\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tcx:i:2\tnp:i:1\tqe:i:163\tqs:i:0\tzm:i:0\trq:f:0.7\tRG:Z:a3e2f6e1\tAS:i:-555\tNM:i:2 (esc)
   m54006_151021_185942/0/200_363\t16\ttarget\t1\t254\t61=2D52=50S\t*\t0\t0\tCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCTGTAAGCAGTTAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\t*\tcx:i:2\tnp:i:1\tqe:i:363\tqs:i:200\tzm:i:0\trq:f:0.7\tRG:Z:a3e2f6e1\tAS:i:-555\tNM:i:2 (esc)
 
 
 Test conflicting options
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --rbao --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --rbao --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
   [1]
 
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --extend --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --extend --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
   [1]
 
-  $ $EXEC $Q $T --bam --out $O --bestn 1 --affine --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
+  $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --affine --placeGapConsistently 1>/dev/null 2>/dev/null && echo $?
   [1]

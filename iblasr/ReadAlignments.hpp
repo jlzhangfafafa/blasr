@@ -1,8 +1,9 @@
 // Author: Mark Chaisson
 #pragma once
 
-#include <SMRTSequence.hpp>
-#include <datastructures/alignment/AlignmentCandidate.hpp>
+#include <alignment/datastructures/alignment/AlignmentCandidate.hpp>
+#include <pbdata/SMRTSequence.hpp>
+
 #include <iostream>
 #include <string>
 #include <vector>

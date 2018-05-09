@@ -1,7 +1,7 @@
 // Author: Mark Chaisson
 #pragma once
 
-#include <utils/SMRTTitle.hpp>
+#include <pbdata/utils/SMRTTitle.hpp>
 
 template <typename T_Sequence>
 bool GetNextReadThroughSemaphore(ReaderAgglomerate &reader, MappingParameters &params,

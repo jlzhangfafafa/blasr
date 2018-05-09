@@ -1,7 +1,8 @@
 #include <sstream>
-#include "FASTAReader.hpp"
-#include "FASTASequence.hpp"
-#include "utils.hpp"
+
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
+#include <pbdata/utils.hpp>
 
 int main(int argc, char* argv[])
 {

@@ -1,19 +1,19 @@
-#include <string>
-#include <iostream>
 #include <cassert>
 #include <cmath>
+#include <iostream>
+#include <string>
 
-#include <defs.h>
-#include <FASTAReader.hpp>
-#include <FASTASequence.hpp>
-#include <tuples/DNATuple.hpp>
-#include <tuples/TupleMetrics.hpp>
-#include <datastructures/alignment/Path.h>
-#include <datastructures/alignment/Alignment.hpp>
-#include <algorithms/alignment/AlignmentUtils.hpp>
-#include <format/StickAlignmentPrinter.hpp>
-#include <algorithms/alignment/SWAlign.hpp>
-#include <algorithms/alignment/SDPAlign.hpp>
+#include <alignment/datastructures/alignment/Path.h>
+#include <pbdata/defs.h>
+#include <alignment/algorithms/alignment/AlignmentUtils.hpp>
+#include <alignment/algorithms/alignment/SDPAlign.hpp>
+#include <alignment/algorithms/alignment/SWAlign.hpp>
+#include <alignment/datastructures/alignment/Alignment.hpp>
+#include <alignment/format/StickAlignmentPrinter.hpp>
+#include <alignment/tuples/DNATuple.hpp>
+#include <alignment/tuples/TupleMetrics.hpp>
+#include <pbdata/FASTAReader.hpp>
+#include <pbdata/FASTASequence.hpp>
 
 /*
  * Performs sparse dynamic programming (SDP) between pairs of sequences as they
@@ -21,13 +21,16 @@
  * target. k is the size of the k-mer used for the SDP algorithm.
  */
 
-void PrintUsage() {
-        std::cout << "usage: sdpMatcher query target k [-indelRate delta] "
-                "[-showalign] [-printsw] [-noRefine] [-indel i] [ -local ] "
-                "[-match m] [-sdpIndel i]" << std::endl;
+void PrintUsage()
+{
+    std::cout << "usage: sdpMatcher query target k [-indelRate delta] "
+                 "[-showalign] [-printsw] [-noRefine] [-indel i] [ -local ] "
+                 "[-match m] [-sdpIndel i]"
+              << std::endl;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     if (argc < 4) {
         PrintUsage();
         std::exit(EXIT_FAILURE);
@@ -50,47 +53,37 @@ int main(int argc, char* argv[]) {
     int sdpIndel = indel;
     int sdpIns = 5;
     int sdpDel = 5;
-    (void)(sdpIndel); (void)(sdpIns); (void)(sdpDel); // not yet used.
+    (void)(sdpIndel);
+    (void)(sdpIns);
+    (void)(sdpDel);  // not yet used.
     AlignmentType alignType = Global;
     while (argi < argc) {
         if (strcmp(argv[argi], "-indelRate") == 0) {
             ++argi;
             indelRate = atof(argv[argi]);
-        }
-        else if (strcmp(argv[argi], "-printsw") == 0) {
+        } else if (strcmp(argv[argi], "-printsw") == 0) {
             printSW = 1;
-        }
-        else if (strcmp(argv[argi], "-noRefine") == 0) {
+        } else if (strcmp(argv[argi], "-noRefine") == 0) {
             refineAlignments = 0;
-        }
-        else if (strcmp(argv[argi], "-indel") == 0) {
+        } else if (strcmp(argv[argi], "-indel") == 0) {
             indel = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-sdpIndel") == 0) {
+        } else if (strcmp(argv[argi], "-sdpIndel") == 0) {
             sdpIndel = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-sdpIns") == 0) {
-            sdpIns  = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-sdpDel") == 0) {
-            sdpDel  = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-showalign") == 0) {
+        } else if (strcmp(argv[argi], "-sdpIns") == 0) {
+            sdpIns = atoi(argv[++argi]);
+        } else if (strcmp(argv[argi], "-sdpDel") == 0) {
+            sdpDel = atoi(argv[++argi]);
+        } else if (strcmp(argv[argi], "-showalign") == 0) {
             showalign = 1;
-        }
-        else if (strcmp(argv[argi], "-local") == 0) {
+        } else if (strcmp(argv[argi], "-local") == 0) {
             alignType = Local;
-        }
-        else if (strcmp(argv[argi], "-match") == 0) {
+        } else if (strcmp(argv[argi], "-match") == 0) {
             match = atoi(argv[++argi]);
-        }
-        else if (strcmp(argv[argi], "-fixedtarget") == 0) {
+        } else if (strcmp(argv[argi], "-fixedtarget") == 0) {
             fixedTarget = 1;
-        }
-        else if (strcmp(argv[argi], "-printSimilarity") == 0) {
+        } else if (strcmp(argv[argi], "-printSimilarity") == 0) {
             printSimilarity = 1;
-        }
-        else {
+        } else {
             PrintUsage();
             std::cout << "Bad option: " << argv[argi] << std::endl;
             std::exit(EXIT_FAILURE);
@@ -106,7 +99,7 @@ int main(int argc, char* argv[]) {
 
     if (match != 0) {
         int i;
-        for (i = 0; i < 4; i++ ){
+        for (i = 0; i < 4; i++) {
             LocalAlignLowMutationMatrix[i][i] = match;
         }
     }
@@ -128,27 +121,19 @@ int main(int argc, char* argv[]) {
     if (printSimilarity) std::cout << ",pctSimilarity";
     std::cout << std::endl;
 
-    while (queryReader.GetNext(query) and
-           (fixedTarget or targetReader.GetNext(target))) {
+    while (queryReader.GetNext(query) and (fixedTarget or targetReader.GetNext(target))) {
 
-        if (query.length == 0 or target.length == 0)
-            continue;
+        if (query.length == 0 or target.length == 0) continue;
         alignment.blocks.clear();
 
         int alignScore;
-        alignScore = SDPAlign(query, target,
-                              distScoreFn, tm.tupleSize,
-                              sdpIndel, sdpIndel, indelRate,
-                              alignment,
-                              alignType,
-                              refineAlignments,
-                              false,
-                              0);
+        alignScore = SDPAlign(query, target, distScoreFn, tm.tupleSize, sdpIndel, sdpIndel,
+                              indelRate, alignment, alignType, refineAlignments, false, 0);
 
         ComputeAlignmentStats(alignment, query.seq, target.seq, distScoreFn);
 
-        if (alignScore > 0){ // in rare cases the SDP returns positive.
-            alignScore = 0;  // this makes it more like a true local alignment
+        if (alignScore > 0) {  // in rare cases the SDP returns positive.
+            alignScore = 0;    // this makes it more like a true local alignment
         }
 
         if (showalign) {
@@ -163,13 +148,10 @@ int main(int argc, char* argv[]) {
             StickPrintAlignment(swAlignment, query, target, std::cout);
         }
 
-        std::cout << query.GetName()  << "," << target.GetName() << ","
-             << alignment.qPos << "," << alignment.QEnd()   << ","
-             << query.length  << "," << alignment.tPos << ","
-             << alignment.TEnd()   << "," << target.length << ","
-             << alignScore;
-        if (printSimilarity)
-             std::cout << "," << alignment.pctSimilarity;
+        std::cout << query.GetName() << "," << target.GetName() << "," << alignment.qPos << ","
+                  << alignment.QEnd() << "," << query.length << "," << alignment.tPos << ","
+                  << alignment.TEnd() << "," << target.length << "," << alignScore;
+        if (printSimilarity) std::cout << "," << alignment.pctSimilarity;
         std::cout << std::endl;
 
         ++seqIndex;
