@@ -122,7 +122,7 @@ blasr_utils_sawriter = executable(
 blasr_utils_toAfg = executable(
   'toAfg', files([
     'utils/ToAfg.cpp']),
-  install : true,
+  install : false,
   dependencies : blasr_deps,
   link_with : blasr_static_impl,
   cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1', '-DCMAKE_BUILD=1'])
