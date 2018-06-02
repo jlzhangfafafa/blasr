@@ -5,22 +5,24 @@
 <p align="center">The PacBio® long read aligner</p>
 
 ***
-## Documentation
+## Availability
+The latest release binary can be installed via [bioconda](https://bioconda.github.io/):
 
- - [Wiki: all you need to know](https://github.com/PacificBiosciences/blasr/wiki)
- - Compile from source
-    - [BLASR + utils (cmake)](doc/INSTALL_CMAKE.md)
-    - [BLASR + utils (pitchfork)](https://github.com/PacificBiosciences/pitchfork/wiki/Installing-blasr-with-pitchfork)
-    - [BLASR + utils (make)](doc/INSTALL_MAKE.md)
- - [Running BLASR](doc/EXAMPLES.md)
- - [Developer environment](doc/DEVELOPER.md)
-
-## Help
+    conda install -c bioconda blasr
 
 Official support is only provided for official and stable
 [SMRT Analysis builds](http://www.pacb.com/products-and-services/analytical-software/)
 provided by PacBio and not for source builds.
-Unofficial support for source builds is provided via github issues.
+
+Unofficial support for binary releases is provided via github issues,
+not via mail to developers.
+**No** support for source builds; issues will be closed without comment.
+
+## Documentation
+
+ - [Wiki: all you need to know](https://github.com/PacificBiosciences/blasr/wiki)
+ - [Running BLASR](doc/EXAMPLES.md)
+ - [Developer environment](doc/DEVELOPER.md)
 
 DISCLAIMER
 ----------
