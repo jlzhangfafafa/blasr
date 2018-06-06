@@ -1,7 +1,7 @@
 project(
   'blasr',
   'cpp',
-  version : '5.3.0',
+  version : '5.3.1',
   default_options : [
     'buildtype=release',
     'warning_level=3',
