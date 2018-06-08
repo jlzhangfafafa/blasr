@@ -41,9 +41,18 @@
 
 namespace PacBio {
 namespace {
-constexpr char BlasrGitSha1Int[] = "@BLASR_GIT_SHA1@";
+static constexpr const char BlasrGitSha1Int[] = "@BLASR_GIT_SHA1@";
 }
 
-std::string BlasrGitSha1() { return BlasrGitSha1Int; }
+inline std::string BlasrGitSha1()
+{
+    if (sizeof(BlasrGitSha1Int) == 1) {
+        // corresponds to a release
+        return std::string();
+    } else {
+        // we have a git SHA1
+        return std::string("-") + BlasrGitSha1Int;
+    }
+}
 
 }  // ::PacBio
