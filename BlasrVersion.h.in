@@ -44,13 +44,16 @@
 
 namespace PacBio {
 namespace {
-constexpr char BlasrVersionInt[] = "@BLASR_VERSION@";
-constexpr char BlasrChangelogInt[] = "${BLASR_CHANGELOG}";
-constexpr size_t BlasrVersionMajorInt = @BLASR_VERSION_MAJOR@;
-constexpr size_t BlasrVersionMinorInt = @BLASR_VERSION_MINOR@;
-constexpr size_t BlasrVersionPatchInt = @BLASR_VERSION_PATCH@;
+static constexpr const char BlasrVersionInt[] = "@BLASR_VERSION@";
+static constexpr const char BlasrMajorVersionInt[] = "@BLASR_VERSION_MAJOR@.@BLASR_VERSION_MINOR@";
+static constexpr const char BlasrChangelogInt[] = "${BLASR_CHANGELOG}";
+static constexpr const size_t BlasrVersionMajorInt = @BLASR_VERSION_MAJOR@;
+static constexpr const size_t BlasrVersionMinorInt = @BLASR_VERSION_MINOR@;
+static constexpr const size_t BlasrVersionPatchInt = @BLASR_VERSION_PATCH@;
 }
 
-std::string BlasrVersion() { return BlasrVersionInt; }
+inline std::string BlasrVersion() { return BlasrVersionInt; }
+
+inline std::string BlasrMajorVersion() { return BlasrMajorVersionInt; }
 
 }  // ::PacBio

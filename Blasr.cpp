@@ -33,23 +33,11 @@ ReaderAgglomerate *reader = NULL;
 // 5.2 - --sam no longer supported
 // 5.3 - --sam supported via pbbam/IRecordWriter
 //
-const std::string GetMajorVersion() { return "5.3"; }
+const std::string GetMajorVersion() { return PacBio::BlasrMajorVersion(); }
 
-// version format is 3 numbers sparated by dots : Version.Subversion.SHA1
-const std::string GetVersion(void)
-{
-#if CMAKE_BUILD
-    return PacBio::BlasrVersion() + "." + PacBio::BlasrGitSha1();
-#else
-    std::string gitVersionString(SHA1_7);  // gitVersionString is first 7 characters of SHA1
-    std::string version = GetMajorVersion();
-    // if (gitVersionString.size() == 7) {
-    version.append(".");
-    version.append(gitVersionString);
-    // }
-    return version;
-#endif
-}
+// version format is 3 numbers separated by dots, with an optional
+// SHA1 separated by a dash: Version.Subversion.Patchversion[-SHA1]
+const std::string GetVersion(void) { return PacBio::BlasrVersion() + PacBio::BlasrGitSha1(); }
 
 /// Checks whether a smrtRead meets the following criteria
 /// (1) is within the search holeNumber range specified by params.holeNumberRanges.

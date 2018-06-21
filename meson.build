@@ -1,7 +1,7 @@
 project(
   'blasr',
   'cpp',
-  version : '5.3.1',
+  version : '5.3.2',
   default_options : [
     'buildtype=release',
     'warning_level=3',
@@ -87,6 +87,7 @@ blasr_git_commit_id = vcs_tag(
   input : 'BlasrGitHash.h.in',
   output : 'BlasrGitHash.h',
   command : ['git', 'describe', '--always', '--dirty=*'],
+  fallback : '',
   replace_string : '@BLASR_GIT_SHA1@')
 
 blasr_sources = []

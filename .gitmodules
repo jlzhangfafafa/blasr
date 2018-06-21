@@ -1,8 +1,0 @@
-[submodule "libcpp"]
-	path = libcpp
-	url = ../blasr_libcpp.git
-    branch = master
-[submodule "pbbam"]
-	path = pbbam
-	url = ../pbbam.git
-	branch = master
