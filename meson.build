@@ -77,13 +77,13 @@ blasr_config.set('BLASR_VERSION_MAJOR', blasr_major_version)
 blasr_config.set('BLASR_VERSION_MINOR', blasr_minor_version)
 blasr_config.set('BLASR_VERSION_PATCH', blasr_patch_version)
 
-configure_file(
+blasr_BlasrVersion_h = configure_file(
   input : 'BlasrVersion.h.in',
   output : 'BlasrVersion.h',
   configuration : blasr_config)
 
 # replace git commit id
-blasr_git_commit_id = vcs_tag(
+blasr_BlasrGitHash_h = vcs_tag(
   input : 'BlasrGitHash.h.in',
   output : 'BlasrGitHash.h',
   command : ['git', 'describe', '--always', '--dirty=*'],
@@ -97,16 +97,17 @@ subdir('extrautils')
 subdir('utils')
 
 blasr_static_impl = static_library(
-  'blasr_impl', [
-    blasr_sources,
-    blasr_git_commit_id],
+  'blasr_impl',
+  blasr_sources,
   install : false,
   dependencies : blasr_deps,
   cpp_args : [blasr_warning_flags, '-DUSE_PBBAM=1'])
 
 blasr_main = executable(
-  'blasr', files([
-    'Blasr.cpp']),
+  'blasr', [
+    blasr_BlasrGitHash_h,
+    blasr_BlasrVersion_h,
+    files('Blasr.cpp')],
   install : true,
   dependencies : blasr_deps,
   link_with : blasr_static_impl,
