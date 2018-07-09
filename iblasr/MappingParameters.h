@@ -666,7 +666,7 @@ public:
                 // Only support two clipping methods: soft or subread.
                 clipping = SAMOutput::subread;
             }
-            // Turn on fa fa -> bam pipe
+            // Turn on fa fa -> sam pipe
             /*
             if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and not enableHiddenPaths) {
                 // bax|fasta|fastq -> bam paths are turned off by default
@@ -674,6 +674,7 @@ public:
                 std::exit(EXIT_FAILURE);
             }
             */
+
             if (outFileName == "") {
                 std::cout << "ERROR, SAM output file must be specified." << std::endl;
                 std::exit(EXIT_FAILURE);
@@ -701,14 +702,14 @@ public:
                 // Only support two clipping methods: soft or subread.
                 clipping = SAMOutput::subread;
             }
-            // Turn on fa fa -> bam pipe
-            /*
-            if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and not enableHiddenPaths) {
-                // bax|fasta|fastq -> bam paths are turned off by default
-                std::cout << "ERROR, could not output alignments in BAM unless input reads are in PacBio BAM or DATASET files." << std::endl;
-                std::exit(EXIT_FAILURE);
+            if (queryFileType != FileType::PBBAM and queryFileType != FileType::PBDATASET and
+                queryFileType != FileType::HDFCCS and queryFileType != FileType::HDFBase and
+                queryFileType != FileType::HDFPulse) {
+                // fasta|fastq -> bam paths are turned off by default
+                std::cout << "WARNING, BAM output without PacBio BAM or DATASET input is not "
+                             "supported by PacBio."
+                          << std::endl;
             }
-            */
             if (outFileName == "") {
                 std::cout << "ERROR, BAM output file must be specified." << std::endl;
                 std::exit(EXIT_FAILURE);
