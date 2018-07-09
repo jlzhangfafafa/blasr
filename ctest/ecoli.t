@@ -10,6 +10,7 @@ Test blasr with --bam
   $ rm -rf $OUTDIR/ecoli_subset.sam
   $ $BLASR_EXE $DATDIR/ecoli_subset.fasta $DATDIR/ecoli_reference.fasta --bam --out $OUTDIR/ecoli_subset.bam --nproc 15
   [INFO]* (glob)
+  WARNING, BAM output without PacBio BAM or DATASET input is not supported by PacBio.
   [INFO]* (glob)
 
   $ $SAMTOOLS_EXE view -h $OUTDIR/ecoli_subset.bam > $OUTDIR/ecoli_subset.sam
