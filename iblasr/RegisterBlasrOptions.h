@@ -225,7 +225,7 @@ void RegisterBlasrOptions(CommandLineParser& clp, MappingParameters& params)
 
 const std::string BlasrHelp(MappingParameters& params)
 {
-    std::stringstream helpStream;
+    std::ostringstream helpStream;
     helpStream
         << "   Options for blasr " << std::endl
         << "   Basic usage: 'blasr reads.{bam|fasta|bax.h5|fofn} genome.fasta [-options] "
@@ -687,7 +687,7 @@ const std::string BlasrHelp(MappingParameters& params)
 
 const std::string BlasrConciseHelp(void)
 {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "blasr - a program to map reads to a genome" << std::endl
        << " usage: blasr reads genome " << std::endl
        << " Run with -h for a list of commands " << std::endl
@@ -704,7 +704,7 @@ const std::string BlasrConciseHelp(void)
 
 const std::string BlasrSummaryHelp(void)
 {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "   Basic usage: 'blasr reads.{bam|fasta|bax.h5|fofn} genome.fasta [-options] "
        << std::endl
        << " [option]\tDescription (default_value)." << std::endl
