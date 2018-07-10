@@ -831,10 +831,6 @@ int main(int argc, char *argv[])
         std::cout << BlasrHelp(params) << std::endl;
         std::exit(EXIT_SUCCESS);  // Not a failure.
     }
-    if (params.printDiscussion) {
-        std::cout << BlasrDiscussion();
-        std::exit(EXIT_SUCCESS);  // Not a failure.
-    }
     if (argc < 3) {
         std::cout << BlasrConciseHelp();
         std::exit(EXIT_FAILURE);  // A failure.

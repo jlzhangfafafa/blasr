@@ -168,7 +168,6 @@ public:
     bool useQVScore;
     int scoreType;
     bool printVerboseHelp;
-    bool printDiscussion;
     float sdpBypassThreshold;
     bool computeAlignProbability;
     float qvMatchWeight;
@@ -346,7 +345,6 @@ public:
         guidedAlignBandSize = 10;
         useQVScore = false;
         printVerboseHelp = false;
-        printDiscussion = false;
         sdpBypassThreshold = 1000000.0;
         scoreType = 0;
         byAdapter = false;
