@@ -53,6 +53,7 @@ Test bam output
   $ O=$OUTDIR/pgc-naive.bam
   $ $BLASR_EXE $Q $T --bam --out $O --bestn 1 --placeGapConsistently && echo $?
   [INFO]* (glob)
+  WARNING, BAM output without PacBio BAM or DATASET input is not supported by PacBio.
   [INFO]* (glob)
   0
   $ $SAMTOOLS_EXE view $O
